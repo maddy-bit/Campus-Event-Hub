@@ -48,7 +48,9 @@ const signup = async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
-    const login = async (req, res) => {
+};
+
+const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
@@ -90,8 +92,6 @@ const signup = async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
-};
-
 };
 
 module.exports = { signup ,login};
