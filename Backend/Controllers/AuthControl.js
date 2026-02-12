@@ -52,7 +52,7 @@ const signup = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Explicitly select password
+        
         const user = await UserModel.findOne({ email }).select('+password');
 
         if (!user) {

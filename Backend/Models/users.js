@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
 
-    collegeId: {
+    collegeName: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'College',
       required: true,
