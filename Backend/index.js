@@ -7,6 +7,7 @@ const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const authroutes = require('./Routes/AuthRoutes');
+
 // Middleware
 app.use(cors({
     origin: process.env.CLIENT_URL || '*',
@@ -14,6 +15,7 @@ app.use(cors({
 }));
 app.use(bodyParser.json());
 app.use(cookieParser());
+
 // Routes
 app.use('/auth', authroutes);
 
