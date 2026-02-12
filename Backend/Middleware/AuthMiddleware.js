@@ -13,33 +13,34 @@ const signupvad = (req, res, next) => {
         role: joi.string().valid('admin', 'clubauthority', 'student').optional()
     });
 
-    const { error } = signupschema.validate(req.body);
+    const { value, error } = signupschema.validate(req.body, { stripUnknown: true });
     if (error) {
-        // Use NODE_ENV to decide if detailed error should be sent (optional, but good practice)
         return res.status(400).json({
             message: 'Validation Error',
             error: process.env.NODE_ENV === 'development' ? error.details : 'Invalid input'
         });
     }
+    req.body = value;
     next();
+
 };
-const loginvad=(req,res,next)=>{
-    const loginschema=joi.object({
-        email:joi.string().email().required(),
-        password:joi.string().min(6).required()
+const loginvad = (req, res, next) => {
+    const loginschema = joi.object({
+        email: joi.string().email().required(),
+        password: joi.string().min(6).required()
 
     });
-    const {value,error}=loginschema.validate(req.body,{stripUnknown: true});
-    if(error){
+    const { value, error } = loginschema.validate(req.body, { stripUnknown: true });
+    if (error) {
         return res.status(400).json({
-            message:'Validation Error',
-            error:process.env.NODE_ENV ==='development'?error.details:'Invalid input'
+            message: 'Validation Error',
+            error: process.env.NODE_ENV === 'development' ? error.details : 'Invalid input'
         });
     }
-    req.body=value;
+    req.body = value;
     next();
 }
 
 module.exports = {
-    signupvad,loginvad
+    signupvad, loginvad
 };
