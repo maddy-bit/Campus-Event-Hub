@@ -13,7 +13,6 @@ const signup = async (req, res) => {
       department,
       yearOfStudy,
       password,
-      role,
     } = req.body;
 
     const existuser = await UserModel.findOne({ email });
@@ -21,9 +20,12 @@ const signup = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
+    // generate email verification OTP
+    const emailOtp = Math.floor(100000 + Math.random() * 900000).toString();
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = await UserModel.create({
+    await UserModel.create({
       fullName,
       email,
       phoneNumber,
@@ -31,29 +33,46 @@ const signup = async (req, res) => {
       department,
       yearOfStudy,
       password: hashedPassword,
-      role: role || "student",
+      emailVerificationToken: emailOtp,
+      emailVerificationExpiry: Date.now() + 10 * 60 * 1000, // 10 minutes
     });
 
-    const token = jwt.sign(
-      { email: newUser.email, _id: newUser._id, role: newUser.role },
-      process.env.JWT_SECRET_KEY,
-      { expiresIn: "24h" },
-    );
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    });
+    // pending: sending email otp
+    console.log("Email Verification OTP:", emailOtp);
 
     res.status(201).json({
-      message: "User created successfully",
-      user: {
-        fullName: newUser.fullName,
-        email: newUser.email,
-        role: newUser.role,
-      },
+      message: "Signup successful. Please verify your email.",
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+//email verification controller
+const verifyEmail = async (req, res) => {
+  try {
+    const { otp } = req.body;
+
+    const user = await UserModel.findOne({
+      emailVerificationToken: otp,
+      emailVerificationExpiry: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid or expired OTP",
+      });
+    }
+
+    user.isEmailVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpiry = undefined;
+
+    await user.save();
+
+    res.status(200).json({
+      message: "Email verified successfully.",
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -104,8 +123,21 @@ const login = async (req, res) => {
 };
 
 //logout controller
+const logout = async (req, res) => {
+  try {
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
+    })
 
-//email verification controller
+    res.status(200).json({
+      message: 'Logout successful',
+    })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+}
 
 //password reset controllers
 //Requesting pswd reset otp
@@ -192,4 +224,4 @@ const resetPassword = async (req, res) => {
   }
 };
 
-module.exports = { signup, login, forgotPassword, verifyResetOtp, resetPassword };
+module.exports = { signup, login, forgotPassword, verifyResetOtp, resetPassword, logout, verifyEmail };
