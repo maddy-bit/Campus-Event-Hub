@@ -36,7 +36,7 @@ const loginvad=(req,res,next)=>{
             error:process.env.NODE_ENV ==='development'?error.details:'Invalid input'
         });
     }
-    req.bodu=value;
+    req.body=value;
     next();
 }
 

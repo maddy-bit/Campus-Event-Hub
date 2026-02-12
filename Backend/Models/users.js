@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
@@ -22,9 +22,9 @@ const userSchema = new mongoose.Schema(
     },
 
     collegeName: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'College',
+      type: String,
       required: true,
+      trim: true,
     },
 
     department: {
@@ -35,19 +35,19 @@ const userSchema = new mongoose.Schema(
     yearOfStudy: {
       type: String,
       required: true,
-      match: [/^\d{4}$/, 'Year of study must be a 4-digit number'],
+      match: [/^\d{4}$/, "Year of study must be a 4-digit number"],
     },
 
     password: {
       type: String,
       required: true,
-      select: false, 
+      select: false,
     },
 
     role: {
       type: String,
-      enum: ['admin', 'clubauthority', 'student'],
-      default: 'student',
+      enum: ["admin", "clubauthority", "student"],
+      default: "student",
     },
 
     isEmailVerified: {
@@ -72,9 +72,9 @@ const userSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true, 
-  }
-)
+    timestamps: true,
+  },
+);
 
-const UserModel = mongoose.model('User', userSchema)
-module.exports = { UserModel }
+const UserModel = mongoose.model("User", userSchema);
+module.exports = { UserModel };
