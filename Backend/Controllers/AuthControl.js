@@ -107,7 +107,8 @@ const login = async (req, res) => {
 
 //email verification controller
 
-//password reset controller
+//password reset controllers
+//Requesting pswd reset otp
 const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -135,4 +136,60 @@ const forgotPassword = async (req, res) => {
   }
 };
 
-module.exports = { signup, login, forgotPassword };
+//verifying otp
+const verifyResetOtp = async (req, res) => {
+  try {
+    const { otp } = req.body;
+
+    const user = await UserModel.findOne({
+      passwordResetToken: otp,
+      passwordResetExpiry: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid or expired OTP",
+      });
+    }
+
+    res.status(200).json({
+      message: "OTP verified successfully",
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+//resetting pswd
+const resetPassword = async (req, res) => {
+  try {
+    const { otp, newPassword } = req.body;
+
+    const user = await UserModel.findOne({
+      passwordResetToken: otp,
+      passwordResetExpiry: { $gt: Date.now() },
+    }).select("+password");
+
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid or expired OTP",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpiry = undefined;
+
+    await user.save();
+
+    res.status(200).json({
+      message: "Password reset successful",
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+module.exports = { signup, login, forgotPassword, verifyResetOtp, resetPassword };
