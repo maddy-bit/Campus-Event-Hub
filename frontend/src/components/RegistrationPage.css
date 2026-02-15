@@ -1,0 +1,146 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+/* Reset and Global Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    /* Vibrant Blue-Purple Gradient matching the image */
+    background: linear-gradient(135deg, #3a68ff 0%, #a259ff 100%);
+    background-attachment: fixed;
+    /* Ensures background stays fixed during scroll */
+    margin: 0;
+    min-height: 100vh;
+}
+
+/* Container for the registration page */
+.registration-container {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* White Card - Reverting to solid white to match the image */
+.registration-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 40px;
+    width: 100%;
+    max-width: 450px;
+    /* Slightly narrower for a clean look */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* Header */
+.registration-card h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.registration-card p {
+    font-size: 0.9rem;
+    color: #888;
+    margin-bottom: 30px;
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #555;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    color: #333;
+    outline: none;
+    transition: border-color 0.3s;
+    background-color: #fff;
+}
+
+.form-group input::placeholder {
+    color: #aaa;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #3b82f6;
+    /* Focus color */
+}
+
+/* Select styling */
+.form-group select {
+    appearance: none;
+    /* Remove default arrow */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 15px;
+    color: #333;
+}
+
+.form-group select:invalid {
+    color: #aaa;
+}
+
+
+/* Submit Button */
+.submit-btn {
+    width: 100%;
+    padding: 14px;
+    background-color: #2563eb;
+    /* Royal Blue */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 10px;
+}
+
+.submit-btn:hover {
+    background-color: #1d4ed8;
+}
+
+/* Footer Link */
+.footer-text {
+    margin-top: 25px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.footer-text a {
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: none;
+    margin-left: 5px;
+}
+
+.footer-text a:hover {
+    text-decoration: underline;
+}
