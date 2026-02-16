@@ -1,6 +1,8 @@
 const { UserModel } = require("../Models/users");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const nodemailer = require("nodemailer");
+
 
 //signup controller
 const signup = async (req, res) => {
@@ -16,9 +18,16 @@ const signup = async (req, res) => {
     } = req.body;
 
     const existuser = await UserModel.findOne({ email });
-    if (existuser) {
-      return res.status(400).json({ message: "User already exists" });
+
+    if (existuser && existuser.isEmailVerified) {
+    return res.status(400).json({ message: "User already exists" });
     }
+
+  // If exists but not verified → delete old and allow new signup
+    if (existuser && !existuser.isEmailVerified) {
+      await UserModel.deleteOne({ email });
+    }
+
 
     // generate email verification OTP
     const emailOtp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -38,7 +47,23 @@ const signup = async (req, res) => {
     });
 
     // pending: sending email otp
-    console.log("Email Verification OTP:", emailOtp);
+    // Create transporter
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+// Send verification OTP email
+await transporter.sendMail({
+  from: `"Campus Event Hub" <${process.env.EMAIL_USER}>`,
+  to: email,
+  subject: "Email Verification OTP",
+  text: `Your email verification OTP is: ${emailOtp}. It will expire in 10 minutes.`,
+});
+
 
     res.status(201).json({
       message: "Signup successful. Please verify your email.",
@@ -151,22 +176,40 @@ const forgotPassword = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
     user.passwordResetToken = otp;
-    user.passwordResetExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes
+    user.passwordResetExpiry = Date.now() + 10 * 60 * 1000;
     await user.save();
 
-    //Pending: sending otp to user 
+    // Create transporter
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    // Send mail
+    await transporter.sendMail({
+      from: `"Campus Event Hub" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Password Reset OTP",
+      text: `Your OTP for password reset is: ${otp}. It will expire in 10 minutes.`,
+    });
 
     res.status(200).json({
       message: "Password reset OTP sent to email",
     });
 
   } catch (err) {
-    console.log("error in reset pswd : ", err);
-    res.status(500).json({ error: err.message });
+    console.log("Error in forgot password:", err);
+    res.status(500).json({ error: "Failed to send OTP email" });
   }
 };
+
 
 //verifying otp
 const verifyResetOtp = async (req, res) => {

@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
-import './RegistrationPage.css';
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
+import '../styles/registrationPage.css';
 
 const RegistrationPage = () => {
+    const navigate = useNavigate();
+
     const [formData, setFormData] = useState({
         name: '',
         collegeName: '',
@@ -21,11 +26,45 @@ const RegistrationPage = () => {
         });
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        console.log('Form Submitted:', formData);
-        // Add submission logic here
-    };
+    const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (formData.password !== formData.confirmPassword) {
+    alert("Passwords do not match");
+    return;
+  }
+
+  const yearMap = {
+    "1": "2023",
+    "2": "2024",
+    "3": "2025",
+    "4": "2026",
+  };
+
+  const mappedYear = yearMap[formData.yearOfStudy];
+
+  try {
+    const res = await axios.post("http://localhost:3000/auth/signup", {
+      fullName: formData.name,
+      email: formData.email,
+      phoneNumber: formData.phoneNumber,
+      collegeName: formData.collegeName,
+      department: formData.department,
+      yearOfStudy: mappedYear,
+      password: formData.password,
+      confirmPassword: formData.confirmPassword,
+    });
+
+    alert(res.data.message);
+navigate("/verify-email");
+
+
+  } catch (err) {
+    console.log(err);
+    alert(err.response?.data?.message || "Registration failed");
+  }
+};
+
 
     return (
         <div className="registration-container">
@@ -103,10 +142,11 @@ const RegistrationPage = () => {
                             required
                         >
                             <option value="" disabled>Select year</option>
-                            <option value="1st Year">1st Year</option>
-                            <option value="2nd Year">2nd Year</option>
-                            <option value="3rd Year">3rd Year</option>
-                            <option value="4th Year">4th Year</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+
                         </select>
                     </div>
 

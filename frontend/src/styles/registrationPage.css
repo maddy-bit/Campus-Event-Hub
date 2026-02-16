@@ -32,7 +32,7 @@ body {
 .registration-card {
     background: #ffffff;
     border-radius: 12px;
-    padding: 40px;
+    padding: 22px 26px;
     width: 100%;
     max-width: 450px;
     /* Slightly narrower for a clean look */
