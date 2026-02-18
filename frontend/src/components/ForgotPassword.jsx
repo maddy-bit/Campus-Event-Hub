@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import "../styles/auth.css";
 import api from "../api";
@@ -15,10 +16,10 @@ function ForgotPassword() {
         email,
       });
 
-      alert("OTP sent to your email");
+      toast.success("OTP sent to your email");
       navigate("/verify-otp");
     } catch {
-      alert("User not found");
+      toast.error("User not found");
     }
   };
 

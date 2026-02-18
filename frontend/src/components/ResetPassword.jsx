@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import "../styles/auth.css";
 import api from "../api";
@@ -14,7 +15,7 @@ function ResetPassword() {
     e.preventDefault();
 
     if (password !== confirm) {
-      alert("Passwords do not match");
+      toast.error("Passwords do not match");
       return;
     }
 
@@ -24,10 +25,10 @@ function ResetPassword() {
         newPassword: password,
       });
 
-      alert("Password updated");
+      toast.success("Password updated");
       navigate("/");
     } catch {
-      alert("Reset failed");
+      toast.error("Reset failed");
     }
   };
 

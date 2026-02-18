@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import "../styles/registrationPage.css"; // reuse same CSS
 import api from "../api";
@@ -28,7 +29,7 @@ const LoginPage = () => {
         password: formData.password,
       });
 
-      alert(res.data.message);
+      toast.success(res.data.message);
 
       if (res.data.token) {
         localStorage.setItem("token", res.data.token);
@@ -37,8 +38,8 @@ const LoginPage = () => {
       // No dashboard route yet, go back to landing page
       navigate("/");
     } catch (err) {
-      console.log(err);
-      alert(err.response?.data?.message || "Login failed");
+      console.error(err);
+      toast.error(err.response?.data?.message || "Login failed");
     }
   };
 

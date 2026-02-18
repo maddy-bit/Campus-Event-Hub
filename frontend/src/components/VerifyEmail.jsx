@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../styles/auth.css";
 import api from "../api";
@@ -12,7 +13,7 @@ function VerifyEmail() {
 
   useEffect(() => {
     if (!email) {
-      alert("Email not found. Please register first.");
+      toast.error("Email not found. Please register first.");
       navigate("/register");
     }
   }, [email, navigate]);
@@ -28,12 +29,12 @@ function VerifyEmail() {
         otp,
       });
 
-      alert(res.data.message);
+      toast.success(res.data.message);
       // After successful verification → go to login
       navigate("/login");
     } catch (err) {
       console.log(err);
-      alert(err.response?.data?.message || "Invalid or expired OTP");
+      toast.error(err.response?.data?.message || "Invalid or expired OTP");
     }
   };
 
@@ -43,10 +44,10 @@ function VerifyEmail() {
     try {
       setIsResending(true);
       const res = await api.post("/auth/resend-verification-otp", { email });
-      alert(res.data.message || "OTP resent to your email");
+      toast.success(res.data.message || "OTP resent to your email");
     } catch (err) {
       console.log(err);
-      alert(err.response?.data?.message || "Failed to resend OTP");
+      toast.error(err.response?.data?.message || "Failed to resend OTP");
     } finally {
       setIsResending(false);
     }

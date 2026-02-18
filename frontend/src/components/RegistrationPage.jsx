@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import "../styles/registrationPage.css";
 import api from "../api";
@@ -26,7 +27,7 @@ const RegistrationPage = () => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
+      toast.error("Passwords do not match");
       return;
     }
 
@@ -49,10 +50,10 @@ const RegistrationPage = () => {
         confirmPassword: formData.confirmPassword,
       });
 
-      alert(res.data.message);
+      toast.success(res.data.message);
       navigate("/verify-email", { state: { email: formData.email } });
     } catch (err) {
-      alert(err.response?.data?.message || "Registration failed");
+      toast.error(err.response?.data?.message || "Registration failed");
     }
   };
 
