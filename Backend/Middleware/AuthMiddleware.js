@@ -16,7 +16,7 @@ const signupvad = (req, res, next) => {
     const { value, error } = signupschema.validate(req.body, { stripUnknown: true });
     if (error) {
         return res.status(400).json({
-            message: 'Validation Error',
+            message: 'Validation Error ',
             error: process.env.NODE_ENV === 'development' ? error.details : 'Invalid input'
         });
     }

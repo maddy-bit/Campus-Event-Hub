@@ -1,23 +1,43 @@
-const nodemailer = require("nodemailer");
-
-const transporter = nodemailer.createTransport({
-  host: process.env.ZEPTO_SMTP_HOST,
-  port: process.env.ZEPTO_SMTP_PORT,
-  secure: false,
-  auth: {
-    user: process.env.ZEPTO_SMTP_USER,
-    pass: process.env.ZEPTO_SMTP_PASS,
-  },
-});
+const { SendMailClient } = require("zeptomail");
 
 const sendEmail = async ({ to, subject, text, html }) => {
-  await transporter.sendMail({
-    from: `"Campus Event Hub" <${process.env.ZEPTO_FROM_EMAIL}>`,
-    to,
-    subject,
-    text,
-    html,
+  if (!process.env.ZEPTO_MAIL_TOKEN) {
+    throw new Error("ZEPTO_MAIL_TOKEN missing");
+  }
+
+  if (!process.env.ZEPTO_MAIL_FROM) {
+    throw new Error("ZEPTO_MAIL_FROM missing");
+  }
+
+  const client = new SendMailClient({
+    url: "https://api.zeptomail.in/v1.1/email",
+    token: process.env.ZEPTO_MAIL_TOKEN,
   });
+
+  try {
+    await client.sendMail({
+      from: {
+        address: process.env.ZEPTO_MAIL_FROM,
+        name: "Campus Event Hub",
+      },
+      to: [
+        {
+          email_address: {
+            address: to,
+            name: to.split("@")[0],
+          },
+        },
+      ],
+      subject,
+      htmlbody: html,
+      textbody: text,
+    });
+
+    return true;
+  } catch (error) {
+    console.error("ZeptoMail SDK Error:", error);
+    throw new Error("Failed to send email");
+  }
 };
 
 module.exports = sendEmail;

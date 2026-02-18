@@ -16,23 +16,23 @@ const signup = async (req, res) => {
       password,
     } = req.body;
 
-    const existuser = await UserModel.findOne({ email });
-
-    if (existuser && existuser.isEmailVerified) {
-      return res.status(400).json({ message: "User already exists" });
+    if (!fullName || !email || !phoneNumber || !collegeName || !department || !yearOfStudy || !password) {
+      return res.status(400).json({ message: "All fields are required" });
     }
 
-    // If exists but not verified → delete old and allow new signup
-    if (existuser && !existuser.isEmailVerified) {
+    const existingUser = await UserModel.findOne({ email });
+
+    if (existingUser) {
+      if (existingUser.isEmailVerified) {
+        return res.status(400).json({ message: "An account with this email already exists." });
+      }
       await UserModel.deleteOne({ email });
     }
 
-    // generate email verification OTP
     const emailOtp = Math.floor(100000 + Math.random() * 900000).toString();
-
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await UserModel.create({
+    const newUser = await UserModel.create({
       fullName,
       email,
       phoneNumber,
@@ -41,26 +41,44 @@ const signup = async (req, res) => {
       yearOfStudy,
       password: hashedPassword,
       emailVerificationToken: emailOtp,
-      emailVerificationExpiry: Date.now() + 10 * 60 * 1000, // 10 minutes
+      emailVerificationExpiry: Date.now() + 10 * 60 * 1000, // 10 mins
     });
 
-    // Send verification OTP email
-    await sendEmail({
-      to: email,
-      subject: "Email Verification OTP",
-      text: `Your email verification OTP is ${emailOtp}. It will expire in 10 minutes.`,
-      html: `
-    <h2>Email Verification</h2>
-    <p>Your OTP is <b>${emailOtp}</b></p>
-    <p>Valid for 10 minutes.</p>
-  `,
-    });
+    // send email
+    try {
+      await sendEmail({
+        to: email,
+        subject: "Verify Your Campus Event Hub Account",
+        text: `Your verification code is ${emailOtp}.`,
+        html: `
+          <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee;">
+            <h2>Email Verification</h2>
+            <p>Thank you for registering. Use the following OTP to verify your email:</p>
+            <h1 style="color: #4A90E2;">${emailOtp}</h1>
+            <p>This code expires in 10 minutes.</p>
+          </div>
+        `,
+      });
 
-    res.status(201).json({
-      message: "Signup successful. Please verify your email.",
-    });
+      return res.status(201).json({
+        success: true,
+        message: "Signup successful. Verification OTP sent to email.",
+      });
+
+    } catch (emailError) {
+      // If email fails, delete the user we jst created so they can try again
+      // Otherwise, they'll be stuck in "email already exists" hellllll
+      await UserModel.findByIdAndDelete(newUser._id);
+      
+      console.error("Email Dispatch Error:", emailError);
+      return res.status(500).json({ 
+        message: "Could not send verification email. Please try again later." 
+      });
+    }
+
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("General Signup Error:", err);
+    return res.status(500).json({ message: "Internal server error during registration" });
   }
 };
 
