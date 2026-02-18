@@ -8,13 +8,14 @@ import ForgotPassword from "./components/ForgotPassword";
 import VerifyOtp from "./components/VerifyOtp";
 import ResetPassword from "./components/ResetPassword";
 import VerifyEmail from "./components/VerifyEmail";
+import LandingPage from "./components/LandingPage";
 
 function App() {
   return (
     <Router>
       <Routes>
-
-        <Route path="/" element={<Login />} />      
+        <Route path="/" element={<LandingPage />} /> 
+        <Route path="/login" element={<Login />} />      
         <Route path="/register" element={<RegistrationPage />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />

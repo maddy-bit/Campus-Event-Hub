@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import '../styles/registrationPage.css';
 
 const RegistrationPage = () => {
+    const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({
@@ -44,7 +46,7 @@ const RegistrationPage = () => {
   const mappedYear = yearMap[formData.yearOfStudy];
 
   try {
-    const res = await axios.post("http://localhost:3000/auth/signup", {
+    const res = await axios.post(`${BASE_URL}/auth/signup`, {
       fullName: formData.name,
       email: formData.email,
       phoneNumber: formData.phoneNumber,

@@ -1,8 +1,7 @@
 const { UserModel } = require("../Models/users");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const nodemailer = require("nodemailer");
-
+const sendEmail = require("../utils/sendEmail");
 
 //signup controller
 const signup = async (req, res) => {
@@ -20,14 +19,13 @@ const signup = async (req, res) => {
     const existuser = await UserModel.findOne({ email });
 
     if (existuser && existuser.isEmailVerified) {
-    return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({ message: "User already exists" });
     }
 
-  // If exists but not verified → delete old and allow new signup
+    // If exists but not verified → delete old and allow new signup
     if (existuser && !existuser.isEmailVerified) {
       await UserModel.deleteOne({ email });
     }
-
 
     // generate email verification OTP
     const emailOtp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -46,29 +44,21 @@ const signup = async (req, res) => {
       emailVerificationExpiry: Date.now() + 10 * 60 * 1000, // 10 minutes
     });
 
-    // pending: sending email otp
-    // Create transporter
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-
-// Send verification OTP email
-await transporter.sendMail({
-  from: `"Campus Event Hub" <${process.env.EMAIL_USER}>`,
-  to: email,
-  subject: "Email Verification OTP",
-  text: `Your email verification OTP is: ${emailOtp}. It will expire in 10 minutes.`,
-});
-
+    // Send verification OTP email
+    await sendEmail({
+      to: email,
+      subject: "Email Verification OTP",
+      text: `Your email verification OTP is ${emailOtp}. It will expire in 10 minutes.`,
+      html: `
+    <h2>Email Verification</h2>
+    <p>Your OTP is <b>${emailOtp}</b></p>
+    <p>Valid for 10 minutes.</p>
+  `,
+    });
 
     res.status(201).json({
       message: "Signup successful. Please verify your email.",
     });
-
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -150,19 +140,19 @@ const login = async (req, res) => {
 //logout controller
 const logout = async (req, res) => {
   try {
-    res.clearCookie('token', {
+    res.clearCookie("token", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict',
-    })
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+    });
 
     res.status(200).json({
-      message: 'Logout successful',
-    })
+      message: "Logout successful",
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: err.message });
   }
-}
+};
 
 //password reset controllers
 //Requesting pswd reset otp
@@ -183,33 +173,26 @@ const forgotPassword = async (req, res) => {
     user.passwordResetExpiry = Date.now() + 10 * 60 * 1000;
     await user.save();
 
-    // Create transporter
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    // Send mail
-    await transporter.sendMail({
-      from: `"Campus Event Hub" <${process.env.EMAIL_USER}>`,
+    // Send OTP email
+    await sendEmail({
       to: email,
       subject: "Password Reset OTP",
-      text: `Your OTP for password reset is: ${otp}. It will expire in 10 minutes.`,
+      text: `Your OTP for password reset is ${otp}. It will expire in 10 minutes.`,
+      html: `
+    <h2>Password Reset</h2>
+    <p>Your OTP is <b>${otp}</b></p>
+    <p>Valid for 10 minutes.</p>
+  `,
     });
 
     res.status(200).json({
       message: "Password reset OTP sent to email",
     });
-
   } catch (err) {
     console.log("Error in forgot password:", err);
     res.status(500).json({ error: "Failed to send OTP email" });
   }
 };
-
 
 //verifying otp
 const verifyResetOtp = async (req, res) => {
@@ -267,4 +250,12 @@ const resetPassword = async (req, res) => {
   }
 };
 
-module.exports = { signup, login, forgotPassword, verifyResetOtp, resetPassword, logout, verifyEmail };
+module.exports = {
+  signup,
+  login,
+  forgotPassword,
+  verifyResetOtp,
+  resetPassword,
+  logout,
+  verifyEmail,
+};
