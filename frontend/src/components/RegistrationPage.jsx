@@ -1,10 +1,9 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../styles/registrationPage.css";
+import api from "../api";
 
 const RegistrationPage = () => {
-  const BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -37,8 +36,9 @@ const RegistrationPage = () => {
       3: "2025",
       4: "2026",
     };
+
     try {
-      const res = await axios.post(`${BASE_URL}/auth/signup`, {
+      const res = await api.post("/auth/signup", {
         fullName: formData.name,
         email: formData.email,
         phoneNumber: formData.phoneNumber,
@@ -46,6 +46,7 @@ const RegistrationPage = () => {
         department: formData.department,
         yearOfStudy: yearMap[formData.yearOfStudy],
         password: formData.password,
+        confirmPassword: formData.confirmPassword,
       });
 
       alert(res.data.message);

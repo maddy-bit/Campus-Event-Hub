@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../styles/auth.css";
+import api from "../api";
 
 function VerifyOtp() {
   const [otp, setOtp] = useState("");
@@ -11,13 +11,12 @@ function VerifyOtp() {
     e.preventDefault();
 
     try {
-      await axios.post("http://localhost:3000/auth/verify-reset-otp", {
+      await api.post("/auth/verify-reset-otp", {
         otp,
       });
 
       alert("OTP verified");
       navigate("/reset-password");
-
     } catch {
       alert("Invalid OTP");
     }
@@ -26,14 +25,10 @@ function VerifyOtp() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-
         <h2>Verify OTP</h2>
-        <p className="auth-subtitle">
-          Enter OTP sent to email
-        </p>
+        <p className="auth-subtitle">Enter OTP sent to email</p>
 
         <form onSubmit={handleSubmit}>
-
           <input
             type="text"
             placeholder="Enter OTP"
@@ -43,16 +38,12 @@ function VerifyOtp() {
             required
           />
 
-          <button className="auth-btn">
-            Verify OTP
-          </button>
-
+          <button className="auth-btn">Verify OTP</button>
         </form>
 
         <div className="auth-link">
           Didn't receive? <span>Resend</span>
         </div>
-
       </div>
     </div>
   );
