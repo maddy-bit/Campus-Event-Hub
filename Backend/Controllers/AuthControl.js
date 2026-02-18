@@ -2,6 +2,8 @@ const { UserModel } = require("../Models/users");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const sendEmail = require("../utils/sendEmail");
+const verifyEmailTemplate = require("../helpers/emailTemplates/verifyEmailTemplate");
+const forgotPasswordTemplate = require("../helpers/emailTemplates/forgotPasswordTemplate");
 
 //signup controller
 const signup = async (req, res) => {
@@ -52,14 +54,7 @@ const signup = async (req, res) => {
         to: email,
         subject: "Verify Your Campus Event Hub Account",
         text: `Your verification code is ${emailOtp}.`,
-        html: `
-          <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee;">
-            <h2>Email Verification</h2>
-            <p>Thank you for registering. Use the following OTP to verify your email:</p>
-            <h1 style="color: #4A90E2;">${emailOtp}</h1>
-            <p>This code expires in 10 minutes.</p>
-          </div>
-        `,
+        html: verifyEmailTemplate(emailOtp),
       });
 
       return res.status(201).json({
@@ -116,14 +111,7 @@ const resendEmailVerificationOtp = async (req, res) => {
       to: email,
       subject: "Verify Your Campus Event Hub Account",
       text: `Your verification code is ${emailOtp}.`,
-      html: `
-        <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee;">
-          <h2>Email Verification</h2>
-          <p>Use the following OTP to verify your email:</p>
-          <h1 style="color: #4A90E2;">${emailOtp}</h1>
-          <p>This code expires in 10 minutes.</p>
-        </div>
-      `,
+      html: verifyEmailTemplate(emailOtp),
     });
 
     return res.status(200).json({ message: "Verification OTP sent to email." });
@@ -259,11 +247,7 @@ const forgotPassword = async (req, res) => {
       to: email,
       subject: "Password Reset OTP",
       text: `Your OTP for password reset is ${otp}. It will expire in 10 minutes.`,
-      html: `
-    <h2>Password Reset</h2>
-    <p>Your OTP is <b>${otp}</b></p>
-    <p>Valid for 10 minutes.</p>
-  `,
+      html: forgotPasswordTemplate(otp),
     });
 
     res.status(200).json({
