@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import "../styles/auth.css";
+import api from "../api";
 
 function ResetPassword() {
   const [otp, setOtp] = useState("");
@@ -14,35 +15,30 @@ function ResetPassword() {
     e.preventDefault();
 
     if (password !== confirm) {
-      alert("Passwords do not match");
+      toast.error("Passwords do not match");
       return;
     }
 
     try {
-      await axios.post("http://localhost:3000/auth/reset-password", {
+      await api.post("/auth/reset-password", {
         otp,
         newPassword: password,
       });
 
-      alert("Password updated");
+      toast.success("Password updated");
       navigate("/");
-
     } catch {
-      alert("Reset failed");
+      toast.error("Reset failed");
     }
   };
 
   return (
     <div className="auth-container">
       <div className="auth-card">
-
         <h2>Reset Password</h2>
-        <p className="auth-subtitle">
-          Create a new password
-        </p>
+        <p className="auth-subtitle">Create a new password</p>
 
         <form onSubmit={handleSubmit}>
-
           <input
             type="text"
             placeholder="OTP"
@@ -67,12 +63,8 @@ function ResetPassword() {
             required
           />
 
-          <button className="auth-btn">
-            Update Password
-          </button>
-
+          <button className="auth-btn">Update Password</button>
         </form>
-
       </div>
     </div>
   );

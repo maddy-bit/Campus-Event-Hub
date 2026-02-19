@@ -23,6 +23,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.23.0",
     "nodemailer": "^8.0.1",
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "zeptomail": "^7.0.2"
   }
 }

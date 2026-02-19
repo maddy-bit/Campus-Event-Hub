@@ -1,17 +1,17 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
- 
 import "../styles/registrationPage.css"; // reuse same CSS
- 
+import api from "../api";
+
 const LoginPage = () => {
   const navigate = useNavigate();
- 
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
- 
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -19,36 +19,36 @@ const LoginPage = () => {
       [name]: value,
     });
   };
- 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
- 
+
     try {
-      const res = await axios.post("http://localhost:3000/auth/login", {
+      const res = await api.post("/auth/login", {
         email: formData.email,
         password: formData.password,
       });
- 
-      alert(res.data.message);
- 
+
+      toast.success(res.data.message);
+
       if (res.data.token) {
         localStorage.setItem("token", res.data.token);
       }
- 
-      navigate("/dashboard");
- 
+
+      // No dashboard route yet, go back to landing page
+      navigate("/");
     } catch (err) {
-      console.log(err);
-      alert(err.response?.data?.message || "Login failed");
+      console.error(err);
+      toast.error(err.response?.data?.message || "Login failed");
     }
   };
- 
+
   return (
     <div className="registration-container">
       <div className="registration-card">
         <h2>Welcome Back</h2>
         <p>Please login to your account</p>
- 
+
         <form onSubmit={handleSubmit}>
           {/* Email */}
           <div className="form-group">
@@ -62,7 +62,7 @@ const LoginPage = () => {
               required
             />
           </div>
- 
+
           {/* Password */}
           <div className="form-group">
             <label>Password</label>
@@ -75,7 +75,7 @@ const LoginPage = () => {
               required
             />
           </div>
- 
+
           {/* Forgot Password */}
           <div style={{ textAlign: "right", marginBottom: "15px" }}>
             <span
@@ -89,12 +89,12 @@ const LoginPage = () => {
               Forgot password?
             </span>
           </div>
- 
+
           <button type="submit" className="submit-btn">
             Login
           </button>
         </form>
- 
+
         <div className="footer-text">
           Don’t have an account?
           <a onClick={() => navigate("/register")}> Register</a>
@@ -103,5 +103,5 @@ const LoginPage = () => {
     </div>
   );
 };
- 
+
 export default LoginPage;
