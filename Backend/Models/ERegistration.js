@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-
 const ERegistrationSchema = new mongoose.Schema({
   eventId: {
     type: mongoose.Schema.Types.ObjectId,
