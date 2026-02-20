@@ -47,7 +47,24 @@ const loginvad = (req, res, next) => {
     }
     req.body = value;
     next();
-}
+};
+const verifyEmailVad = (req, res, next) => {
+    const schema = joi.object({
+        email: joi.string().email().required(),
+        otp: joi.string().required()
+    });
+
+    const { value, error } = schema.validate(req.body, { stripUnknown: true });
+
+    if (error) {
+        return res.status(400).json({
+            message: error.details[0].message
+        });
+    }
+
+    req.body = value;
+    next();
+};
 
 module.exports = {
     signupvad, loginvad
