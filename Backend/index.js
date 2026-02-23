@@ -7,6 +7,8 @@ const cookieParser = require('cookie-parser');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const authroutes = require('./Routes/AuthRoutes');
+const eventRoutes = require('./Routes/EventRoutes');
+const eRegistrationRoutes = require('./Routes/ERegistrationRoutes');
 
 // Middleware
 app.use(cors({
@@ -18,6 +20,8 @@ app.use(cookieParser());
 
 // Routes
 app.use('/auth', authroutes);
+app.use('/events', eventRoutes);
+app.use('/registrations', eRegistrationRoutes);
 
 app.get('/check', (req, res) => {
     res.send(`Server is running in ${process.env.NODE_ENV || 'development'} mode`);
