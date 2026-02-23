@@ -18,7 +18,7 @@ const LandingPage = () => {
       Landing page  Will be created at the end of the project
       {actions.map((action) => (
         <button
-        className="bg-red-400 block rounded-lg text-white py-6"
+          className="bg-red-400 block rounded-lg text-white py-6"
           key={action.path}
           onClick={() => navigate(action.path)}
         >
