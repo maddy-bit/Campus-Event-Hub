@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { signup,login, forgotPassword, resetPassword, verifyResetOtp, verifyEmail, logout, resendEmailVerificationOtp } = require('../Controllers/AuthControl');
-const { signupvad, loginvad } = require('../Middleware/AuthMiddleware');
+const { signupvad, loginvad, verifyEmailVad } = require('../Middleware/AuthMiddleware');
 const { protect } = require('../Middleware/AuthGuard');
 
 

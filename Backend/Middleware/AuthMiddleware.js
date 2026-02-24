@@ -102,6 +102,7 @@ const checkRole = (...allowedRoles) => {
 module.exports = {
     signupvad, 
     loginvad,
+    verifyEmailVad,
     verifyToken,
     checkRole
 };
