@@ -11,6 +11,7 @@ const PORT = process.env.PORT || 3000;
 const authroutes = require('./Routes/AuthRoutes');
 const eventRoutes = require('./Routes/EventRoutes');
 const eRegistrationRoutes = require('./Routes/ERegistrationRoutes');
+const dashboardRoutes= require('./Routes/DashboardRoutes')
 
 // Middleware
 app.use(cors({
@@ -25,6 +26,7 @@ app.use(cookieParser());
 app.use('/auth', authroutes);
 app.use('/events', eventRoutes);
 app.use('/registrations', eRegistrationRoutes);
+app.use('/dashboard', dashboardRoutes);
 
 app.get('/check', (req, res) => {
     res.send(`Server is running in ${process.env.NODE_ENV || 'development'} mode`);
