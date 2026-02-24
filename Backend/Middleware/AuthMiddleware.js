@@ -1,4 +1,5 @@
 const joi = require('joi');
+const jwt = require('jsonwebtoken');
 
 const signupvad = (req, res, next) => {
     const signupschema = joi.object({
@@ -49,6 +50,41 @@ const loginvad = (req, res, next) => {
     next();
 }
 
+// Verify JWT token
+const verifyToken = (req, res, next) => {
+    try {
+        const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
+
+        if (!token) {
+            return res.status(401).json({ message: 'Access denied. No token provided.' });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+        req.user = decoded;
+        next();
+    } catch (err) {
+        return res.status(401).json({ message: 'Invalid or expired token' });
+    }
+};
+
+// Check if user has required role
+const checkRole = (...allowedRoles) => {
+    return (req, res, next) => {
+        if (!req.user) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+
+        if (!allowedRoles.includes(req.user.role)) {
+            return res.status(403).json({ message: 'Access denied. Insufficient permissions.' });
+        }
+
+        next();
+    };
+};
+
 module.exports = {
-    signupvad, loginvad
+    signupvad, 
+    loginvad,
+    verifyToken,
+    checkRole
 };
