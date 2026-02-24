@@ -17,7 +17,7 @@ import {
     Send,
     ChevronDown
 } from "lucide-react";
-import "./CreateEvent.css";
+import "../styles/CreateEvent.css";
 
 const CreateEvent = () => {
     return (
