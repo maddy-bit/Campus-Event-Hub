@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import "../styles/registrationPage.css";
@@ -12,6 +12,26 @@ const LoginPage = () => {
     password: "",
   });
 
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const { data } = await api.get("/auth/me");
+
+        // If user exists redirect
+        if (data.role === "super_admin") navigate("/superadmin/dashboard");
+        else if (data.role === "admin") navigate("/admin/dashboard");
+        else if (data.role === "organizer") navigate("/organizer/dashboard");
+        else if (data.role === "student") navigate("/student/dashboard");
+
+      } catch (err) {
+        console.log(err);
+        
+      }
+    };
+
+    checkUser();
+  }, [navigate]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -24,26 +44,16 @@ const LoginPage = () => {
     e.preventDefault();
 
     try {
-      await api.post("/auth/login", formData);
-      toast.success("Login successfull");
+      const res = await api.post("/auth/login", formData);
 
+      toast.success(res.data.message);
 
-      const { data } = await api.get("/auth/me");
+      const role = res.data.user.role;
 
-      toast.success("Login successful");
-
-      //  redirect based on role
-      if (data.role === "super_admin") {
-        navigate("/superadmin");
-      } else if (data.role === "admin") {
-        navigate("/admin");
-      } else if (data.role === "organizer") {
-        navigate("/organizer");
-      } else if (data.role === "student") {
-        navigate("/student");
-      } else {
-        navigate("/");
-      }
+      if (role === "super_admin") navigate("/superadmin/dashboard");
+      else if (role === "admin") navigate("/admin/dashboard");
+      else if (role === "organizer") navigate("/organizer/dashboard");
+      else if (role === "student") navigate("/student/dashboard");
 
     } catch (err) {
       toast.error(err.response?.data?.message || "Login failed");
@@ -81,28 +91,10 @@ const LoginPage = () => {
             />
           </div>
 
-          <div style={{ textAlign: "right", marginBottom: "15px" }}>
-            <span
-              style={{
-                fontSize: "0.85rem",
-                color: "#2563eb",
-                cursor: "pointer",
-              }}
-              onClick={() => navigate("/forgot-password")}
-            >
-              Forgot password?
-            </span>
-          </div>
-
           <button type="submit" className="submit-btn">
             Login
           </button>
         </form>
-
-        <div className="footer-text">
-          Don’t have an account?
-          <a onClick={() => navigate("/register")}> Register</a>
-        </div>
       </div>
     </div>
   );
