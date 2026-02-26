@@ -18,7 +18,7 @@ const LoginPage = () => {
         const { data } = await api.get("/auth/me");
 
         // If user exists redirect
-        if (data.role === "super_admin") navigate("/superadmin/dashboard");
+        if (data.role === "superadmin") navigate("/superadmin/dashboard");
         else if (data.role === "admin") navigate("/admin/dashboard");
         else if (data.role === "organizer") navigate("/organizer/dashboard");
         else if (data.role === "student") navigate("/student/dashboard");
@@ -50,7 +50,7 @@ const LoginPage = () => {
 
       const role = res.data.user.role;
 
-      if (role === "super_admin") navigate("/superadmin/dashboard");
+      if (role === "superadmin") navigate("/superadmin/dashboard");
       else if (role === "admin") navigate("/admin/dashboard");
       else if (role === "organizer") navigate("/organizer/dashboard");
       else if (role === "student") navigate("/student/dashboard");
