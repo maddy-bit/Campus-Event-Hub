@@ -13,7 +13,7 @@ const signupvad = (req, res, next) => {
         password: joi.string().min(6).required(),
         confirmPassword: joi.string().valid(joi.ref('password')).required()
             .messages({ 'any.only': 'Passwords do not match' }),
-        role: joi.string().valid('admin', 'clubauthority', 'student').optional()
+        role: joi.string().valid('superadmin','admin', 'organizer', 'student').optional()
     });
 
     const { value, error } = signupschema.validate(req.body, { 

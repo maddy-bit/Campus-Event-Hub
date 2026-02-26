@@ -9,14 +9,14 @@ const {
   deleteEvent,
 } = require("../Controllers/EventController");
 
-router.post("/create", verifyToken, checkRole("admin", "clubauthority"), createEvent);
+router.post("/create", verifyToken, checkRole("admin", "organizer"), createEvent);
 
 router.get("/", verifyToken, getAllEvents);
 
 router.get("/:id", verifyToken, getEventById);
 
-router.put("/:id", verifyToken, checkRole("admin", "clubauthority"), updateEvent);
+router.put("/:id", verifyToken, checkRole("admin", "organizer"), updateEvent);
 
-router.delete("/:id", verifyToken, checkRole("admin", "clubauthority"), deleteEvent);
+router.delete("/:id", verifyToken, checkRole("admin", "organizer"), deleteEvent);
 
 module.exports = router;

@@ -2,8 +2,6 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import { Navigate } from "react-router-dom";
 
-import "./App.css";
-
 import Login from "./components/Login";
 import RegistrationPage from "./components/RegistrationPage";
 import ForgotPassword from "./components/ForgotPassword";
@@ -17,6 +15,13 @@ import DashboardLayout from "./components/DashboardLayout";
 // Importing ProtectedRoute for role-based access control
 import ProtectedRoute from "./components/ProtectedRoute";
 
+// Importing layouts for different roles
+import AdminLayout from "./layouts/AdminLayout";
+import OrganizerLayout from "./layouts/OrganizerLayout";
+import StudentLayout from "./layouts/StudentLayout";
+import SuperAdminLayout from "./layouts/SuperAdminLayout";
+
+
 // Importing dashboards for different roles
 import AdminDashboard from "./pages/admin/Dashboard";
 import OrganizerDashboard from "./pages/organizer/Dashboard";
@@ -27,10 +32,10 @@ function App() {
   return (
     <>
       <Toaster position="top-center" richColors />
-      <Router>
+
         <Routes>
 
-          //super admin route
+          {/* super admin route */}
           <Route
             path="/superadmin"
             element={
@@ -44,7 +49,7 @@ function App() {
             <Route path="admins" element={<div>Manage Admins</div>} />
           </Route>
 
-          //admin route
+          {/* admin route */}
           <Route
             path="/admin"
             element={
@@ -59,7 +64,7 @@ function App() {
             <Route path="analytics" element={<div>Analytics Page</div>} />
           </Route>
 
-          //organizer route
+          {/* organizer route */}
           <Route
             path="/organizer"
             element={
@@ -73,7 +78,7 @@ function App() {
             <Route path="create-event" element={<div>Create Event Page</div>} />
           </Route>
 
-          //student route
+          {/* student route */}
           <Route
             path="/student"
             element={
@@ -86,7 +91,7 @@ function App() {
             <Route path="dashboard" element={<StudentDashboard />} />
             <Route path="events" element={<div>Browse Events</div>} />
           </Route>
-          
+
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<RegistrationPage />} />
@@ -97,7 +102,7 @@ function App() {
           <Route path="/create-event" element={<CreateEvent />} />
           <Route path="/dashboard" element={<DashboardLayout />} />
         </Routes>
-      </Router>
+
     </>
   );
 }

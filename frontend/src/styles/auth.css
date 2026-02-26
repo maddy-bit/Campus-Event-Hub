@@ -1,14 +1,4 @@
 /* Common Auth Pages Style */
-
-* {
-  box-sizing: border-box;
-  font-family: "Poppins", sans-serif;
-}
-body {
-  overflow-x: hidden;
-}
-
-
 /* Background */
 .auth-container {
   position: fixed;
