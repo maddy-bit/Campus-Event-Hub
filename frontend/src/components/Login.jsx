@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import "../styles/registrationPage.css"; // reuse same CSS
+import "../styles/registrationPage.css";
 import api from "../api";
 
 const LoginPage = () => {
@@ -24,21 +24,28 @@ const LoginPage = () => {
     e.preventDefault();
 
     try {
-      const res = await api.post("/auth/login", {
-        email: formData.email,
-        password: formData.password,
-      });
+      await api.post("/auth/login", formData);
+      toast.success("Login successfull");
 
-      toast.success(res.data.message);
 
-      if (res.data.token) {
-        localStorage.setItem("token", res.data.token);
+      const { data } = await api.get("/auth/me");
+
+      toast.success("Login successful");
+
+      //  redirect based on role
+      if (data.role === "super_admin") {
+        navigate("/superadmin");
+      } else if (data.role === "admin") {
+        navigate("/admin");
+      } else if (data.role === "organizer") {
+        navigate("/organizer");
+      } else if (data.role === "student") {
+        navigate("/student");
+      } else {
+        navigate("/");
       }
 
-      // No dashboard route yet, go back to landing page
-      navigate("/");
     } catch (err) {
-      console.error(err);
       toast.error(err.response?.data?.message || "Login failed");
     }
   };
@@ -50,7 +57,6 @@ const LoginPage = () => {
         <p>Please login to your account</p>
 
         <form onSubmit={handleSubmit}>
-          {/* Email */}
           <div className="form-group">
             <label>Email</label>
             <input
@@ -63,7 +69,6 @@ const LoginPage = () => {
             />
           </div>
 
-          {/* Password */}
           <div className="form-group">
             <label>Password</label>
             <input
@@ -76,7 +81,6 @@ const LoginPage = () => {
             />
           </div>
 
-          {/* Forgot Password */}
           <div style={{ textAlign: "right", marginBottom: "15px" }}>
             <span
               style={{
