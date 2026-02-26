@@ -1,6 +1,6 @@
 const router = require('express').Router();
-const { signup,login, forgotPassword, resetPassword, verifyResetOtp, verifyEmail, logout, resendEmailVerificationOtp } = require('../Controllers/AuthControl');
-const { signupvad, loginvad, verifyEmailVad } = require('../Middleware/AuthMiddleware');
+const { signup,login, forgotPassword, resetPassword, verifyResetOtp, verifyEmail, logout, resendEmailVerificationOtp, sendDetails } = require('../Controllers/AuthControl');
+const { signupvad, loginvad, verifyEmailVad, verifyToken } = require('../Middleware/AuthMiddleware');
 const { protect } = require('../Middleware/AuthGuard');
 
 
@@ -14,5 +14,6 @@ router.post('/forgot-password', forgotPassword)
 router.post('/verify-reset-otp', verifyResetOtp);
 router.post('/reset-password', resetPassword);
 router.post('/verify-email', verifyEmailVad, verifyEmail);
+router.post('/me',verifyToken,sendDetails);
 
 module.exports = router;

@@ -11,6 +11,7 @@ import ResetPassword from "./components/ResetPassword";
 import VerifyEmail from "./components/VerifyEmail";
 import LandingPage from "./components/LandingPage";
 import CreateEvent from "./components/CreateEvent";
+import DashboardLayout from "./components/DashboardLayout";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="/verify-otp" element={<VerifyOtp />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/create-event" element={<CreateEvent />} />
+          <Route path="/dashboard" element={<DashboardLayout />} />
         </Routes>
       </Router>
     </>

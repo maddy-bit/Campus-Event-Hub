@@ -315,6 +315,29 @@ const resetPassword = async (req, res) => {
   }
 };
 
+const sendDetails = async (req, res) => {
+  try {
+    const user = await UserModel
+      .findById(req.user._id)
+      .select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({
+      id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      role: user.role
+    });
+
+  } catch (error) {
+    console.error("Auth Me Error:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   signup,
   login,
@@ -324,4 +347,5 @@ module.exports = {
   logout,
   verifyEmail,
   resendEmailVerificationOtp,
+  sendDetails
 };
