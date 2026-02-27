@@ -27,6 +27,7 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import OrganizerDashboard from "./pages/organizer/Dashboard";
 import StudentDashboard from "./pages/student/Dashboard";
 import SuperAdminDashboard from "./pages/superadmin/Dashboard";
+import MyEvents from "./pages/organizer/MyEvents";
 
 function App() {
   return (
@@ -76,6 +77,7 @@ function App() {
             <Route index element={<Navigate to="dashboard" />} />
             <Route path="dashboard" element={<OrganizerDashboard />} />
             <Route path="create-event" element={<div>Create Event Page</div>} />
+            <Route path="events" element={<MyEvents/>}/>
           </Route>
 
           {/* student route */}
@@ -99,8 +101,8 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/verify-otp" element={<VerifyOtp />} />
           <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/create-event" element={<CreateEvent />} />
-          <Route path="/dashboard" element={<DashboardLayout />} />
+          {/* <Route path="/create-event" element={<CreateEvent />} /> */}
+          {/* <Route path="/dashboard" element={<DashboardLayout />} /> */}
         </Routes>
 
     </>
