@@ -28,6 +28,7 @@ app.use('/events', eventRoutes);
 app.use('/registrations', eRegistrationRoutes);
 app.use('/dashboard', dashboardRoutes);
 
+
 app.get('/check', (req, res) => {
     res.send(`Server is running in ${process.env.NODE_ENV || 'development'} mode`);
 });
