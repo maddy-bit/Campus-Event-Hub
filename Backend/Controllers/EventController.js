@@ -1,37 +1,51 @@
-const { EventModel } = require("../Models/event");
+const  EventModel  = require("../Models/event");
 
 const createEvent = async (req, res) => {
   try {
     const {
-      eventName,
-      description,
-      eventDate,
-      eventTime,
-      venue,
-      organizer,
-      category,
-      maxParticipants,
-      registrationDeadline,
-      imageUrl,
-    } = req.body;
+  title,
+  description,
+  eventDate,
+  startTime,
+  endTime,
+  location,
+  category,
+  maxSeats,
+  registrationDeadline,
+  posterUrl,
+  isPaidEvent,
+  ticketPrice
+} = req.body;
 
-    if (!eventName || !description || !eventDate || !eventTime || !venue || !organizer || !category || !maxParticipants || !registrationDeadline) {
-      return res.status(400).json({ message: "All required fields must be provided" });
-    }
+    if (
+  !title ||
+  !description ||
+  !eventDate ||
+  !startTime ||
+  !location ||
+  !category ||
+  !registrationDeadline
+) {
+  return res.status(400).json({
+    message: "All required fields must be provided",
+  });
+}
 
-    const newEvent = new EventModel({
-      eventName,
-      description,
-      eventDate,
-      eventTime,
-      venue,
-      organizer,
-      category,
-      maxParticipants,
-      registrationDeadline,
-      imageUrl,
-      createdBy: req.user._id,
-    });
+const newEvent = new EventModel({
+  title,
+  description,
+  eventDate,
+  startTime,
+  endTime,
+  location,
+  category,
+  maxSeats,
+  registrationDeadline,
+  posterUrl,
+  isPaidEvent,
+  ticketPrice,
+  createdBy: req.user._id
+});
 
     await newEvent.save();
 
