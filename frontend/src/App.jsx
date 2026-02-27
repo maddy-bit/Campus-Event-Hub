@@ -77,7 +77,7 @@ function App() {
             <Route index element={<Navigate to="dashboard" />} />
             <Route path="dashboard" element={<OrganizerDashboard />} />
             <Route path="create-event" element={<div>Create Event Page</div>} />
-            <Route path="events" element={<MyEvents/>}/>
+            <Route path="myevents" element={<MyEvents/>}/>
           </Route>
 
           {/* student route */}

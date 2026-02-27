@@ -33,6 +33,6 @@ const ERegistrationSchema = new mongoose.Schema({
   seatNumber: {
     type: Number
   }
-});
+},{ timestamps: true });
 
 module.exports = mongoose.model('ERegistration', ERegistrationSchema);

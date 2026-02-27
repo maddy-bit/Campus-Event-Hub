@@ -14,6 +14,7 @@ import {
   Calendar
 } from 'lucide-react';
 import api from '../../api';
+import { Link } from 'react-router-dom';
 
 // --- STYLED COMPONENTS ---
 
@@ -27,10 +28,10 @@ const BrutalistBox = ({ children, className = "", onClick }) => (
 );
 
 const StatCard = ({ label, count, color, isActive }) => (
-  <div className={`flex items-center gap-4 p-2 border-2 border-black min-w-[140px] bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] ${isActive ? 'ring-2 ring-black ring-offset-2' : ''}`}>
+  <div className={`flex items-center gap-4 p-2 border-2 border-black min-w-[140px] bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] cursor-pointer transition-transform ${isActive ? 'scale-105 border-b-4' : ''}`}>
     <div className="text-xl font-bold border-r-2 border-black pr-4">{count}</div>
     <div className="flex items-center gap-2">
-      <div className={`w-3 h-5 ${color} border-l border-black`}></div>
+      <div className={`w-3 h-5 ${color} border border-black`}></div>
       <span className="text-[10px] font-bold tracking-tighter uppercase">{label}</span>
     </div>
   </div>
@@ -60,7 +61,6 @@ const App = () => {
     fetchEvents();
   }, []);
 
-
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-IN", {
       day: "2-digit",
@@ -70,17 +70,23 @@ const App = () => {
   };
 
   const getStatusStyles = (status) => {
-    switch (status) {
-      case 'Approved': return 'bg-[#B6FF60] text-black';
-      case 'Draft': return 'bg-[#FFF6A0] text-black';
-      case 'Rejected': return 'bg-[#FF8A8A] text-black';
+    switch (status?.toLowerCase()) {
+      case 'approved': return 'bg-[#B6FF60] text-black';
+      case 'draft': return 'bg-[#FFF6A0] text-black';
+      case 'rejected': return 'bg-[#FF8A8A] text-black';
       default: return 'bg-gray-200 text-black';
     }
   };
 
+  // --- SEARCH & FILTER LOGIC ---
   const filteredEvents = useMemo(() => {
     return events.filter(event => {
-      const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase());
+      const searchStr = searchTerm.toLowerCase();
+      const matchesSearch = 
+        event.title.toLowerCase().includes(searchStr) ||
+        event.category.toLowerCase().includes(searchStr) ||
+        event.location.toLowerCase().includes(searchStr);
+      
       const matchesStatus = statusFilter === "ALL" || event.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
@@ -116,10 +122,12 @@ const App = () => {
           </div>
         </div>
         
-        <BrutalistBox className="bg-[#B6FF60] px-6 py-3 flex items-center gap-2 font-bold uppercase text-sm">
-          <PlusCircle size={20} />
-          Create New Event
-        </BrutalistBox>
+        <Link to="/create">
+          <BrutalistBox className="bg-[#B6FF60] px-6 py-3 flex items-center gap-2 font-bold uppercase text-sm">
+            <PlusCircle size={20} />
+            Create New Event
+          </BrutalistBox>
+        </Link>
       </div>
 
       {/* Stats Section */}
@@ -128,13 +136,13 @@ const App = () => {
           <StatCard label="All Events" count={stats.total} color="bg-black" isActive={statusFilter === "ALL"} />
         </div>
         <div onClick={() => setStatusFilter("Draft")}>
-          <StatCard label="Draft" count={stats.draft} color="bg-yellow-300" isActive={statusFilter === "Draft"} />
+          <StatCard label="Pending" count={stats.draft} color="bg-[#FFF6A0]" isActive={statusFilter === "Draft"} />
         </div>
         <div onClick={() => setStatusFilter("Approved")}>
-          <StatCard label="Approved" count={stats.approved} color="bg-green-400" isActive={statusFilter === "Approved"} />
+          <StatCard label="Approved" count={stats.approved} color="bg-[#B6FF60]" isActive={statusFilter === "Approved"} />
         </div>
         <div onClick={() => setStatusFilter("Rejected")}>
-          <StatCard label="Rejected" count={stats.rejected} color="bg-red-400" isActive={statusFilter === "Rejected"} />
+          <StatCard label="Rejected" count={stats.rejected} color="bg-[#FF8A8A]" isActive={statusFilter === "Rejected"} />
         </div>
       </div>
 
@@ -144,18 +152,19 @@ const App = () => {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-black" size={18} />
           <input 
             type="text" 
-            placeholder="SEARCH EVENTS..."
+            placeholder="SEARCH BY NAME, CATEGORY OR LOCATION..."
             className="w-full bg-white border-2 border-black p-3 pl-12 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:outline-none font-bold uppercase text-xs"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
 
-        <BrutalistBox className="flex items-center justify-between px-4 py-3 min-w-[160px] text-xs font-bold uppercase">
+        <BrutalistBox className="flex items-center justify-between px-4 py-3 min-w-[160px] text-xs font-bold uppercase relative group">
           Status: {statusFilter}
           <ChevronDown size={16} />
         </BrutalistBox>
 
+        {/* pending implementation of export functionality */}
         <BrutalistBox className="flex items-center gap-2 px-4 py-3 text-xs font-bold uppercase">
           <Menu size={16} />
           Export CSV
@@ -163,85 +172,92 @@ const App = () => {
       </div>
 
       {/* Table Container */}
-      <div className="border-2 border-black bg-white overflow-hidden mb-6">
+      <div className="border-2 border-black bg-white overflow-hidden mb-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
         <div className="bg-black text-white p-3 flex justify-between items-center px-4">
           <h2 className="text-sm font-bold tracking-widest uppercase">Event_List</h2>
           <span className="text-[10px] text-gray-400 font-bold uppercase">
-            {isLoading ? 'Fetching data...' : `Showing ${filteredEvents.length} events`}
+            {isLoading ? 'Fetching data...' : `Showing ${filteredEvents.length} of ${events.length} events`}
           </span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="bg-[#1A1A1A] text-[10px] text-gray-400 font-bold uppercase text-left">
-                <th className="p-4">Event Identity</th>
-                <th className="p-4">Category</th>
-                <th className="p-4">Timeline</th>
-                <th className="p-4">Location</th>
-                <th className="p-4">Status</th>
+              <tr className="bg-white text-[10px] text-gray-500 font-bold uppercase text-left border-b-2 border-black">
+                <th className="p-4 border-r border-gray-100">Poster</th>
+                <th className="p-4 border-r border-gray-100">Event Name</th>
+                <th className="p-4 border-r border-gray-100">Date</th>
+                <th className="p-4 border-r border-gray-100">Seats Filled</th>
+                <th className="p-4 border-r border-gray-100">Status</th>
                 <th className="p-4 text-center">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y-2 divide-[#EEEEEE]">
+            <tbody className="divide-y divide-gray-200">
               {isLoading ? (
-                 <tr>
-                  <td colSpan="6" className="p-12 text-center text-gray-400 font-bold animate-pulse">LOADING_DATA_FROM_SERVER...</td>
+                <tr>
+                  <td colSpan="6" className="p-12 text-center text-gray-400 font-bold animate-pulse uppercase">Syncing_with_database...</td>
                 </tr>
               ) : filteredEvents.length > 0 ? (
-                filteredEvents.map((event) => (
-                  <tr key={event._id} className="hover:bg-gray-50 transition-colors">
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-black text-[#B6FF60] border-2 border-black flex items-center justify-center font-black text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                          {event.title.charAt(0)}
+                filteredEvents.map((event) => {
+                  const percentage = Math.round((event.seatsFilled / event.maxSeats) * 100) || 0;
+                  return (
+                    <tr key={event._id} className="hover:bg-gray-50 transition-colors">
+                      <td className="p-4">
+                        <div className="w-10 h-10 bg-[#E0F2FE] text-blue-600 border-2 border-black flex items-center justify-center font-black text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                          {event.title.charAt(0).toUpperCase()}
                         </div>
-                        <div className="text-xs font-black uppercase tracking-tight">{event.title}</div>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="text-[9px] font-bold text-gray-500 uppercase px-2 py-1 border border-black inline-block bg-gray-50">
-                        {event.category}
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-1 text-[10px] font-black uppercase">
-                          <Calendar size={12} /> {formatDate(event.eventDate)}
+                      </td>
+                      <td className="p-4">
+                        <div className="flex flex-col">
+                          <span className="text-xs font-black uppercase tracking-tight">{event.title}</span>
+                          <span className="text-[9px] font-bold text-gray-400 uppercase">{event.category}</span>
                         </div>
-                        <div className="text-[9px] font-bold text-gray-400 ml-4">{event.startTime}</div>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-1 text-[10px] font-bold text-gray-600">
-                        <MapPin size={12} className="text-red-500" />
-                        {event.location}
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-black border border-black uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${getStatusStyles(event.status)}`}>
-                        <Circle size={6} fill="black" />
-                        {event.status}
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex justify-center gap-2">
-                        <button title="View" className="p-1 border border-black hover:bg-black hover:text-[#B6FF60] transition-colors">
-                          <Eye size={14} />
-                        </button>
-                        <button title="Edit" className="p-1 border border-black hover:bg-black hover:text-[#B6FF60] transition-colors">
-                          <Edit3 size={14} />
-                        </button>
-                        <button title="Delete" className="p-1 border border-black hover:bg-red-500 hover:text-white transition-colors">
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td className="p-4">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-bold uppercase">{formatDate(event.eventDate)}</span>
+                          <span className="text-[9px] text-gray-400 font-bold">{event.startTime}</span>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex flex-col gap-1 min-w-[120px]">
+                          <div className="flex justify-between text-[10px] font-bold">
+                            <span>{event.seatsFilled} / {event.maxSeats}</span>
+                            <span className="text-gray-400">({percentage}%)</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-gray-100 border border-black overflow-hidden">
+                            <div 
+                              className="h-full bg-red-500 transition-all duration-500" 
+                              style={{ width: `${percentage}%` }}
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div className={`inline-flex items-center gap-2 px-4 py-1 border-2 border-black text-[10px] font-black uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${getStatusStyles(event.status)}`}>
+                          <Circle size={6} fill="black" />
+                          {event.status}
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex justify-center gap-2">
+                          <button  className="p-1.5 border-2 border-black hover:bg-black hover:text-white transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px]">
+                            <Eye size={14} />
+                          </button>
+                          <button className="p-1.5 border-2 border-black hover:bg-black hover:text-white transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px]">
+                            <Edit3 size={14} />
+                          </button>
+                          <button className="p-1.5 border-2 border-black hover:bg-red-500 hover:text-white transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px]">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
-                  <td colSpan="6" className="p-12 text-center text-gray-400 font-bold">NO_RESULTS_FOUND</td>
+                  <td colSpan="6" className="p-12 text-center text-gray-400 font-bold uppercase">No_Matching_Events_Found</td>
                 </tr>
               )}
             </tbody>
@@ -251,13 +267,13 @@ const App = () => {
 
       {/* Pagination */}
       <div className="flex justify-between items-center py-4 px-2">
-        <div className="text-[10px] font-bold text-gray-400 uppercase">Registry Page 1 of 1</div>
+        <div className="text-[10px] font-bold text-gray-400 uppercase">Page 1 of 1</div>
         <div className="flex items-center gap-1">
-          <button className="p-1 border-2 border-black bg-white hover:bg-gray-100 disabled:opacity-50">
+          <button className="p-1 border-2 border-black bg-white hover:bg-gray-100 disabled:opacity-50 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
             <ChevronLeft size={20} />
           </button>
-          <button className="w-8 h-8 border-2 border-black bg-[#B6FF60] font-bold text-sm">1</button>
-          <button className="p-1 border-2 border-black bg-white hover:bg-gray-100 disabled:opacity-50">
+          <button className="w-8 h-8 border-2 border-black bg-[#B6FF60] font-bold text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">1</button>
+          <button className="p-1 border-2 border-black bg-white hover:bg-gray-100 disabled:opacity-50 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
             <ChevronRight size={20} />
           </button>
         </div>

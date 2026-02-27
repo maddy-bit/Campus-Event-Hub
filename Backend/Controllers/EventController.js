@@ -1,4 +1,5 @@
 const  EventModel  = require("../Models/event");
+const ERegistration = require("../Models/ERegistration");
 
 const createEvent = async (req, res) => {
   try {
@@ -150,13 +151,33 @@ const deleteEvent = async (req, res) => {
 //to get all events of that particular user who created the event
 const getMyEvents = async (req, res) => {
   try {
-    const events = await EventModel.find({ createdBy: req.user._id }).populate("createdBy", "fullName email").sort({ eventDate: 1 });
+    const events = await EventModel.find({
+      createdBy: req.user._id
+    })
+      .populate("createdBy", "fullName email")
+      .sort({ eventDate: 1 });
+
+    const eventsWithSeatData = await Promise.all(
+      events.map(async (event) => {
+        const seatsFilled = await ERegistration.countDocuments({
+          eventId: event._id,
+          status: "Registered"
+        });
+
+        return {
+          ...event.toObject(), // keep all event details
+          seatsFilled,         // add registered seats
+          seatsAvailable: event.maxSeats - seatsFilled
+        };
+      })
+    );
 
     res.status(200).json({
       message: "My events retrieved successfully",
-      count: events.length,
-      events,
+      count: eventsWithSeatData.length,
+      events: eventsWithSeatData,
     });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
