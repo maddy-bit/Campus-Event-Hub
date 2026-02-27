@@ -44,10 +44,60 @@ const userSchema = new mongoose.Schema(
       select: false,
     },
 
+    profilePicture: {
+      type: String, 
+      default: null,
+    },
+
     role: {
       type: String,
       enum: ["superadmin","admin", "organizer", "student"],
       default: "student",
+    },
+
+    // Organizer-specific fields bro
+    clubName: {
+      type: String,
+      trim: true,
+    },
+
+    clubCategory: {
+      type: String,
+      enum: ["Technical", "Cultural", "Sports", "Literary", "Social Service", "Other"],
+    },
+
+    clubDescription: {
+      type: String,
+      trim: true,
+    },
+
+    clubLogo: {
+      type: String, 
+    },
+
+    socialLinks: {
+      email: String,
+      phone: String,
+      website: String,
+      clubWebsite: String,
+    },
+    stats: {
+      eventsCreated: {
+        type: Number,
+        default: 0,
+      },
+      totalParticipants: {
+        type: Number,
+        default: 0,
+      },
+      activeEvents: {
+        type: Number,
+        default: 0,
+      },
+      completedEvents: {
+        type: Number,
+        default: 0,
+      },
     },
 
     isEmailVerified: {
