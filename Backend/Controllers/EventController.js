@@ -146,6 +146,8 @@ const deleteEvent = async (req, res) => {
   }
 };
 
+
+//to get all events of that particular user who created the event
 const getMyEvents = async (req, res) => {
   try {
     const events = await EventModel.find({ createdBy: req.user._id }).populate("createdBy", "fullName email").sort({ eventDate: 1 });

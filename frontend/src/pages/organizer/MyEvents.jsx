@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Search, 
   ChevronDown, 
@@ -9,24 +9,13 @@ import {
   Trash2, 
   ChevronLeft, 
   ChevronRight,
-  Circle
+  Circle,
+  MapPin,
+  Calendar
 } from 'lucide-react';
+import api from '../../api';
 
-// Mock Data from the image
-const INITIAL_EVENTS = [
-  { id: 1, name: "ROBO-SPRINT 2024", category: "ROBOTICS", date: "Oct 24, 2024", time: "09:00 AM", seats: 120, totalSeats: 150, status: "APPROVED", initial: "R", color: "bg-blue-200" },
-  { id: 2, name: "AI WORKSHOP", category: "AI & ML", date: "Nov 2, 2024", time: "10:00 AM", seats: 50, totalSeats: 50, status: "APPROVED", initial: "A", color: "bg-lime-200" },
-  { id: 3, name: "MICRO-MOUSE COMP", category: "ROBOTICS", date: "Nov 15, 2024", time: "06:00 AM", seats: 12, totalSeats: 100, status: "PENDING", initial: "M", color: "bg-yellow-200" },
-  { id: 4, name: "IOT SUMMIT 2024", category: "IOT", date: "Dec 1, 2024", time: "11:00 AM", seats: 140, totalSeats: 200, status: "APPROVED", initial: "I", color: "bg-red-200" },
-  { id: 5, name: "DRONE RACE FINALS", category: "ROBOTICS", date: "Dec 10, 2024", time: "02:00 PM", seats: 60, totalSeats: 100, status: "APPROVED", initial: "D", color: "bg-blue-100" },
-  { id: 6, name: "CODE SPRINT FALL", category: "HACKATHON", date: "Nov 20, 2024", time: "09:00 AM", seats: 85, totalSeats: 120, status: "PENDING", initial: "C", color: "bg-green-200" },
-  { id: 7, name: "CIRCUIT DESIGN BOOT", category: "WORKSHOP", date: "Oct 30, 2024", time: "10:00 AM", seats: 30, totalSeats: 40, status: "REJECTED", initial: "C", color: "bg-red-300" },
-  { id: 8, name: "ML BOOTCAMP", category: "AI & ML", date: "Jan 15, 2025", time: "09:30 AM", seats: 20, totalSeats: 60, status: "PENDING", initial: "M", color: "bg-yellow-100" },
-  { id: 9, name: "EMBEDDED SYS CONF", category: "CONFERENCE", date: "Feb 5, 2025", time: "10:00 AM", seats: 75, totalSeats: 80, status: "APPROVED", initial: "E", color: "bg-blue-50" },
-  { id: 10, name: "PCB DESIGN SPRINT", category: "WORKSHOP", date: "Sep 18, 2024", time: "08:00 AM", seats: 25, totalSeats: 30, status: "REJECTED", initial: "P", color: "bg-red-400" },
-  { id: 11, name: "AUTONOMOUS CAR RACE", category: "ROBOTICS", date: "Mar 10, 2025", time: "10:00 AM", seats: 0, totalSeats: 80, status: "PENDING", initial: "A", color: "bg-orange-100" },
-  { id: 12, name: "WEB DEV HACKATHON", category: "HACKATHON", date: "Jan 20, 2025", time: "09:00 AM", seats: 44, totalSeats: 100, status: "APPROVED", initial: "W", color: "bg-green-100" },
-];
+// --- STYLED COMPONENTS ---
 
 const BrutalistBox = ({ children, className = "", onClick }) => (
   <div 
@@ -47,32 +36,62 @@ const StatCard = ({ label, count, color, isActive }) => (
   </div>
 );
 
-const MyEvents = () => {
+const App = () => {
+  const [events, setEvents] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredEvents = useMemo(() => {
-    return INITIAL_EVENTS.filter(event => {
-      const matchesSearch = event.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = statusFilter === "ALL" || event.status === statusFilter;
-      return matchesSearch && matchesStatus;
+  // --- API LOGIC ---
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      setIsLoading(true);
+      try {
+        const response = await api.get("/events/my-events");
+        setEvents(response.data.events);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Failed to fetch events:", error);
+        setIsLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
     });
-  }, [searchTerm, statusFilter]);
+  };
 
   const getStatusStyles = (status) => {
     switch (status) {
-      case 'APPROVED': return 'bg-[#B6FF60] text-black';
-      case 'PENDING': return 'bg-[#FFF6A0] text-black';
-      case 'REJECTED': return 'bg-[#FF8A8A] text-black';
+      case 'Approved': return 'bg-[#B6FF60] text-black';
+      case 'Draft': return 'bg-[#FFF6A0] text-black';
+      case 'Rejected': return 'bg-[#FF8A8A] text-black';
       default: return 'bg-gray-200 text-black';
     }
   };
 
-  const getProgressColor = (percent) => {
-    if (percent >= 100) return 'bg-red-500';
-    if (percent >= 80) return 'bg-green-400';
-    if (percent >= 40) return 'bg-gray-600';
-    return 'bg-yellow-400';
+  const filteredEvents = useMemo(() => {
+    return events.filter(event => {
+      const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = statusFilter === "ALL" || event.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [events, searchTerm, statusFilter]);
+
+  // Derived Stats
+  const stats = {
+    total: events.length,
+    draft: events.filter(e => e.status === 'Draft').length,
+    approved: events.filter(e => e.status === 'Approved').length,
+    rejected: events.filter(e => e.status === 'Rejected').length,
   };
 
   return (
@@ -90,7 +109,7 @@ const MyEvents = () => {
           <h1 className="text-6xl font-black tracking-tighter mb-2">MY_EVENTS</h1>
           <div className="bg-black text-[#B6FF60] px-3 py-1 inline-flex items-center gap-2 text-[10px] font-bold uppercase border-2 border-black">
             <span className="flex items-center gap-1">
-              <Circle size={8} fill="#B6FF60" /> 12 Total Events
+              <Circle size={8} fill="#B6FF60" /> {stats.total} Total Events
             </span>
             <span className="text-gray-500">//</span>
             <span>Last updated: Today</span>
@@ -105,10 +124,18 @@ const MyEvents = () => {
 
       {/* Stats Section */}
       <div className="flex flex-wrap gap-4 mb-8">
-        <StatCard label="All Events" count={12} color="bg-black" isActive={statusFilter === "ALL"} />
-        <StatCard label="Pending" count={3} color="bg-yellow-300" isActive={statusFilter === "PENDING"} />
-        <StatCard label="Approved" count={7} color="bg-green-400" isActive={statusFilter === "APPROVED"} />
-        <StatCard label="Rejected" count={2} color="bg-red-400" isActive={statusFilter === "REJECTED"} />
+        <div onClick={() => setStatusFilter("ALL")}>
+          <StatCard label="All Events" count={stats.total} color="bg-black" isActive={statusFilter === "ALL"} />
+        </div>
+        <div onClick={() => setStatusFilter("Draft")}>
+          <StatCard label="Draft" count={stats.draft} color="bg-yellow-300" isActive={statusFilter === "Draft"} />
+        </div>
+        <div onClick={() => setStatusFilter("Approved")}>
+          <StatCard label="Approved" count={stats.approved} color="bg-green-400" isActive={statusFilter === "Approved"} />
+        </div>
+        <div onClick={() => setStatusFilter("Rejected")}>
+          <StatCard label="Rejected" count={stats.rejected} color="bg-red-400" isActive={statusFilter === "Rejected"} />
+        </div>
       </div>
 
       {/* Filters Section */}
@@ -125,12 +152,7 @@ const MyEvents = () => {
         </div>
 
         <BrutalistBox className="flex items-center justify-between px-4 py-3 min-w-[160px] text-xs font-bold uppercase">
-          All Status
-          <ChevronDown size={16} />
-        </BrutalistBox>
-
-        <BrutalistBox className="flex items-center justify-between px-4 py-3 min-w-[160px] text-xs font-bold uppercase">
-          Newest First
+          Status: {statusFilter}
           <ChevronDown size={16} />
         </BrutalistBox>
 
@@ -142,76 +164,86 @@ const MyEvents = () => {
 
       {/* Table Container */}
       <div className="border-2 border-black bg-white overflow-hidden mb-6">
-        {/* Table Header */}
         <div className="bg-black text-white p-3 flex justify-between items-center px-4">
           <h2 className="text-sm font-bold tracking-widest uppercase">Event_List</h2>
-          <span className="text-[10px] text-gray-400 font-bold uppercase">Showing {filteredEvents.length} of 12 events</span>
+          <span className="text-[10px] text-gray-400 font-bold uppercase">
+            {isLoading ? 'Fetching data...' : `Showing ${filteredEvents.length} events`}
+          </span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-[#1A1A1A] text-[10px] text-gray-400 font-bold uppercase text-left">
-                <th className="p-4 w-16">Poster</th>
-                <th className="p-4">Event Name</th>
-                <th className="p-4">Date</th>
-                <th className="p-4">Seats Filled</th>
+                <th className="p-4">Event Identity</th>
+                <th className="p-4">Category</th>
+                <th className="p-4">Timeline</th>
+                <th className="p-4">Location</th>
                 <th className="p-4">Status</th>
                 <th className="p-4 text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y-2 divide-[#EEEEEE]">
-              {filteredEvents.map((event) => {
-                const percent = Math.round((event.seats / event.totalSeats) * 100);
-                return (
-                  <tr key={event.id} className="hover:bg-gray-50 transition-colors">
+              {isLoading ? (
+                 <tr>
+                  <td colSpan="6" className="p-12 text-center text-gray-400 font-bold animate-pulse">LOADING_DATA_FROM_SERVER...</td>
+                </tr>
+              ) : filteredEvents.length > 0 ? (
+                filteredEvents.map((event) => (
+                  <tr key={event._id} className="hover:bg-gray-50 transition-colors">
                     <td className="p-4">
-                      <div className={`w-8 h-8 ${event.color} border-2 border-black flex items-center justify-center font-black text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]`}>
-                        {event.initial}
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-black text-[#B6FF60] border-2 border-black flex items-center justify-center font-black text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                          {event.title.charAt(0)}
+                        </div>
+                        <div className="text-xs font-black uppercase tracking-tight">{event.title}</div>
                       </div>
                     </td>
                     <td className="p-4">
-                      <div className="text-xs font-black uppercase tracking-tight">{event.name}</div>
-                      <div className="text-[9px] font-bold text-gray-500 uppercase">{event.category}</div>
+                      <div className="text-[9px] font-bold text-gray-500 uppercase px-2 py-1 border border-black inline-block bg-gray-50">
+                        {event.category}
+                      </div>
                     </td>
                     <td className="p-4">
-                      <div className="text-[10px] font-black">{event.date}</div>
-                      <div className="text-[9px] font-bold text-gray-400">{event.time}</div>
-                    </td>
-                    <td className="p-4 min-w-[150px]">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] font-black">{event.seats} / {event.totalSeats}</span>
-                        <span className="text-[9px] font-bold text-gray-300">({percent}%)</span>
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-1 text-[10px] font-black uppercase">
+                          <Calendar size={12} /> {formatDate(event.eventDate)}
+                        </div>
+                        <div className="text-[9px] font-bold text-gray-400 ml-4">{event.startTime}</div>
                       </div>
-                      <div className="h-1 w-full bg-gray-100 border border-gray-200">
-                        <div 
-                          className={`h-full ${getProgressColor(percent)}`} 
-                          style={{ width: `${percent}%` }}
-                        ></div>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-1 text-[10px] font-bold text-gray-600">
+                        <MapPin size={12} className="text-red-500" />
+                        {event.location}
                       </div>
                     </td>
                     <td className="p-4">
                       <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-black border border-black uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${getStatusStyles(event.status)}`}>
-                        <Circle size={6} fill="currentColor" />
+                        <Circle size={6} fill="black" />
                         {event.status}
                       </div>
                     </td>
                     <td className="p-4">
-                      <div className="flex justify-center gap-1">
-                        <button className="p-1 border border-black hover:bg-black hover:text-white transition-colors">
+                      <div className="flex justify-center gap-2">
+                        <button title="View" className="p-1 border border-black hover:bg-black hover:text-[#B6FF60] transition-colors">
                           <Eye size={14} />
                         </button>
-                        <button className="p-1 border border-black hover:bg-black hover:text-white transition-colors">
+                        <button title="Edit" className="p-1 border border-black hover:bg-black hover:text-[#B6FF60] transition-colors">
                           <Edit3 size={14} />
                         </button>
-                        <button className="p-1 border border-black hover:bg-black hover:text-white transition-colors">
+                        <button title="Delete" className="p-1 border border-black hover:bg-red-500 hover:text-white transition-colors">
                           <Trash2 size={14} />
                         </button>
                       </div>
                     </td>
                   </tr>
-                );
-              })}
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="p-12 text-center text-gray-400 font-bold">NO_RESULTS_FOUND</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -219,14 +251,13 @@ const MyEvents = () => {
 
       {/* Pagination */}
       <div className="flex justify-between items-center py-4 px-2">
-        <div className="text-[10px] font-bold text-gray-400 uppercase">Page 1 of 2</div>
+        <div className="text-[10px] font-bold text-gray-400 uppercase">Registry Page 1 of 1</div>
         <div className="flex items-center gap-1">
-          <button className="p-1 border-2 border-black bg-white hover:bg-gray-100">
+          <button className="p-1 border-2 border-black bg-white hover:bg-gray-100 disabled:opacity-50">
             <ChevronLeft size={20} />
           </button>
           <button className="w-8 h-8 border-2 border-black bg-[#B6FF60] font-bold text-sm">1</button>
-          <button className="w-8 h-8 border-2 border-black bg-white font-bold text-sm hover:bg-gray-100">2</button>
-          <button className="p-1 border-2 border-black bg-white hover:bg-gray-100">
+          <button className="p-1 border-2 border-black bg-white hover:bg-gray-100 disabled:opacity-50">
             <ChevronRight size={20} />
           </button>
         </div>
@@ -235,4 +266,4 @@ const MyEvents = () => {
   );
 };
 
-export default MyEvents;
+export default App;
