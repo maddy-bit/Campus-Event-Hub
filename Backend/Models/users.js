@@ -19,23 +19,7 @@ const userSchema = new mongoose.Schema(
     phoneNumber: {
       type: String,
       required: true,
-    },
-
-    collegeName: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-
-    department: {
-      type: String,
-      required: true,
-    },
-
-    yearOfStudy: {
-      type: String,
-      required: true,
-      match: [/^\d{4}$/, "Year of study must be a 4-digit number"],
+      match: [/^[0-9]{10}$/, "Phone number must be 10 digits"],
     },
 
     password: {
@@ -45,17 +29,38 @@ const userSchema = new mongoose.Schema(
     },
 
     profilePicture: {
-      type: String, 
+      type: String,
       default: null,
     },
 
     role: {
       type: String,
-      enum: ["superadmin","admin", "organizer", "student"],
+      enum: ["superadmin", "admin", "organizer", "student"],
       default: "student",
+      index: true,
     },
 
-    // Organizer-specific fields bro
+    collegeName: {
+      type: String,
+      required: function () {
+        return this.role !== "superadmin";
+      },
+      trim: true,
+    },
+
+    department: {
+      type: String,
+      required: function () {
+        return this.role === "student";
+      },
+    },
+
+    yearOfStudy: {
+      type: String,
+      required: true,
+      match: [/^\d{4}$/, "Year of study must be a 4-digit number"],
+    },
+
     clubName: {
       type: String,
       trim: true,
@@ -63,7 +68,14 @@ const userSchema = new mongoose.Schema(
 
     clubCategory: {
       type: String,
-      enum: ["Technical", "Cultural", "Sports", "Literary", "Social Service", "Other"],
+      enum: [
+        "Technical",
+        "Cultural",
+        "Sports",
+        "Literary",
+        "Social Service",
+        "Other",
+      ],
     },
 
     clubDescription: {
@@ -72,32 +84,20 @@ const userSchema = new mongoose.Schema(
     },
 
     clubLogo: {
-      type: String, 
+      type: String,
     },
 
     socialLinks: {
-      email: String,
-      phone: String,
       website: String,
-      clubWebsite: String,
+      instagram: String,
+      linkedin: String,
     },
+
     stats: {
-      eventsCreated: {
-        type: Number,
-        default: 0,
-      },
-      totalParticipants: {
-        type: Number,
-        default: 0,
-      },
-      activeEvents: {
-        type: Number,
-        default: 0,
-      },
-      completedEvents: {
-        type: Number,
-        default: 0,
-      },
+      eventsCreated: { type: Number, default: 0 },
+      totalParticipants: { type: Number, default: 0 },
+      activeEvents: { type: Number, default: 0 },
+      completedEvents: { type: Number, default: 0 },
     },
 
     isEmailVerified: {
@@ -105,26 +105,19 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
 
-    emailVerificationToken: {
-      type: String,
-    },
+    emailVerificationToken: String,
+    emailVerificationExpiry: Date,
+    passwordResetToken: String,
+    passwordResetExpiry: Date,
 
-    emailVerificationExpiry: {
-      type: Date,
-    },
-
-    passwordResetToken: {
-      type: String,
-    },
-
-    passwordResetExpiry: {
-      type: Date,
+    isDeleted: {
+      type: Boolean,
+      default: false,
     },
   },
   {
     timestamps: true,
-  },
+  }
 );
 
-const UserModel = mongoose.model("User", userSchema);
-module.exports = { UserModel };
+module.exports = mongoose.model("User", userSchema);
