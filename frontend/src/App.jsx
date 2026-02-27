@@ -22,7 +22,7 @@ import StudentLayout from "./layouts/StudentLayout";
 import SuperAdminLayout from "./layouts/SuperAdminLayout";
 
 
-// Importing dashboards for different roles
+// Importing pages for different roles
 import AdminDashboard from "./pages/admin/Dashboard";
 import OrganizerDashboard from "./pages/organizer/Dashboard";
 import StudentDashboard from "./pages/student/Dashboard";

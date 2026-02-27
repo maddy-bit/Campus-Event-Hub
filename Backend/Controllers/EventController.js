@@ -106,7 +106,7 @@ const updateEvent = async (req, res) => {
       return res.status(404).json({ message: "Event not found" });
     }
 
-    if (event.createdBy.toString() !== req.user._id && req.user.role !== "admin") {
+    if (event.createdBy.toString() !== req.user._id.toString() && req.user.role !== "admin") {
       return res.status(403).json({ message: "You don't have permission to update this event" });
     }
 
