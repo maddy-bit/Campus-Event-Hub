@@ -8,7 +8,9 @@ const {
   updateEvent,
   deleteEvent,
   getMyEvents,
+  getparticipantsByEventId,
 } = require("../Controllers/EventController");
+const { get } = require("mongoose");
 
 router.post("/create", verifyToken, checkRole("admin", "organizer"), createEvent);
 
@@ -17,6 +19,9 @@ router.get("/", verifyToken, getAllEvents);
 
 //for getting the details of the event for that particular user
 router.get("/my-events", verifyToken, getMyEvents);
+
+//get all participants of that particular event
+router.get("/event/:eventId", verifyToken, getparticipantsByEventId);
 
 router.get("/:id", verifyToken, getEventById);
 

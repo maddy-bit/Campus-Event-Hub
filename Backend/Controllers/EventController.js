@@ -183,6 +183,23 @@ const getMyEvents = async (req, res) => {
   }
 };
 
+//to get participants by event id 
+const getparticipantsByEventId = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+
+    const registrations = await ERegistration.find({ eventId })
+      .populate("userId", "fullName email");
+
+    res.status(200).json({
+      count: registrations.length,
+      registrations
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
 module.exports = {
   createEvent,
   getAllEvents,
@@ -190,4 +207,5 @@ module.exports = {
   updateEvent,
   deleteEvent,
   getMyEvents,
+  getparticipantsByEventId
 };
