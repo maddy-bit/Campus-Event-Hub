@@ -52,8 +52,11 @@ const App = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [formData, setFormData] = useState({});
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 7; // how many events per page
 
   useEffect(() => {
+    setCurrentPage(1);
     const fetchEvents = async () => {
       setIsLoading(true);
       try {
@@ -67,7 +70,7 @@ const App = () => {
     };
 
     fetchEvents();
-  }, []);
+  }, [searchTerm, statusFilter]);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-IN", {
@@ -160,6 +163,12 @@ const handleDelete = async (eventId) => {
     alert("FATAL_ERROR: UNABLE TO DELETE EVENT");
   }
 };
+const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  
+  // These are the items actually displayed on the current page
+  const currentItems = filteredEvents.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
     <div className="min-h-screen bg-[#F5F5F0] text-black font-mono p-4 md:p-8">
@@ -292,8 +301,8 @@ const handleDelete = async (eventId) => {
                     Syncing_with_database...
                   </td>
                 </tr>
-              ) : filteredEvents.length > 0 ? (
-                filteredEvents.map((event) => {
+              ) : currentItems.length > 0 ? (
+                currentItems.map((event) => {
                   const percentage =
                     Math.round((event.seatsFilled / event.maxSeats) * 100) || 0;
                   return (
@@ -581,22 +590,46 @@ const handleDelete = async (eventId) => {
       </div>
 
       {/* Pagination */}
+      {/* Pagination Container */}
       <div className="flex justify-between items-center py-4 px-2">
         <div className="text-[10px] font-bold text-gray-400 uppercase">
-          Page 1 of 1
+          Page {currentPage} of {totalPages || 1}
         </div>
+        
         <div className="flex items-center gap-1">
-          <button className="p-1 border-2 border-black bg-white hover:bg-gray-100 disabled:opacity-50 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+          {/* Previous Button */}
+          <button 
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(prev => prev - 1)}
+            className="p-1 border-2 border-black bg-white hover:bg-gray-100 disabled:opacity-50 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] transition-all"
+          >
             <ChevronLeft size={20} />
           </button>
-          <button className="w-8 h-8 border-2 border-black bg-[#B6FF60] font-bold text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-            1
-          </button>
-          <button className="p-1 border-2 border-black bg-white hover:bg-gray-100 disabled:opacity-50 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+
+          {/* Page Number Buttons */}
+          {[...Array(totalPages)].map((_, i) => (
+            <button
+              key={i + 1}
+              onClick={() => setCurrentPage(i + 1)}
+              className={`w-8 h-8 border-2 border-black font-bold text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] transition-all ${
+                currentPage === i + 1 ? "bg-[#B6FF60]" : "bg-white"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+
+          {/* Next Button */}
+          <button 
+            disabled={currentPage === totalPages || totalPages === 0}
+            onClick={() => setCurrentPage(prev => prev + 1)}
+            className="p-1 border-2 border-black bg-white hover:bg-gray-100 disabled:opacity-50 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px] transition-all"
+          >
             <ChevronRight size={20} />
           </button>
         </div>
       </div>
+
       {deleteTarget && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
           <div className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 max-w-sm w-full animate-in fade-in zoom-in duration-200">
