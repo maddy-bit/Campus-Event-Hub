@@ -13,8 +13,8 @@ import {
 const organizerMenuItems = [
   { name: "Dashboard", path: "/organizer/dashboard", icon: LayoutDashboard },
   { name: "Create Event", path: "/organizer/create-event", icon: CalendarPlus },
-  { name: "My Events", path: "/organizer/events", icon: ListChecks },
-  { name: "Participants", path: "/organizer/participants", icon: Users },
+  { name: "My Events", path: "/organizer/myevents", icon: ListChecks },
+  { name: "Participants", path: "/organizer/view-participants", icon: Users },
   { name: "Profile", path: "/organizer/profile", icon: UserCircle2 },
 ];
 

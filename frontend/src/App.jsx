@@ -28,6 +28,7 @@ import OrganizerDashboard from "./pages/organizer/Dashboard";
 import StudentDashboard from "./pages/student/Dashboard";
 import SuperAdminDashboard from "./pages/superadmin/Dashboard";
 import MyEvents from "./pages/organizer/MyEvents";
+import ViewParticipants from "./pages/organizer/ViewParticipants";
 
 function App() {
   return (
@@ -78,6 +79,7 @@ function App() {
             <Route path="dashboard" element={<OrganizerDashboard />} />
             <Route path="create-event" element={<div>Create Event Page</div>} />
             <Route path="myevents" element={<MyEvents/>}/>
+            <Route path="view-participants" element={<ViewParticipants/>}/>
           </Route>
 
           {/* student route */}
