@@ -146,10 +146,25 @@ const deleteEvent = async (req, res) => {
   }
 };
 
+const getMyEvents = async (req, res) => {
+  try {
+    const events = await EventModel.find({ createdBy: req.user._id }).populate("createdBy", "fullName email").sort({ eventDate: 1 });
+
+    res.status(200).json({
+      message: "My events retrieved successfully",
+      count: events.length,
+      events,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 module.exports = {
   createEvent,
   getAllEvents,
   getEventById,
   updateEvent,
   deleteEvent,
+  getMyEvents,
 };

@@ -26,7 +26,7 @@ const OrganizerLayout = () => {
       <Sidebar menuItems={organizerMenuItems} />
 
       {/* Main Section */}
-      <div className="flex-1 md:ml-64 flex flex-col">
+      <div className="flex-1 flex flex-col">
         <Header title="Organizer Panel" />
 
         <div className="p-6">

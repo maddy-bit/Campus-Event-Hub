@@ -7,11 +7,16 @@ const {
   getEventById,
   updateEvent,
   deleteEvent,
+  getMyEvents,
 } = require("../Controllers/EventController");
 
 router.post("/create", verifyToken, checkRole("admin", "organizer"), createEvent);
 
+//to get only the count of the evnts  
 router.get("/", verifyToken, getAllEvents);
+
+//for getting the details of the event for that particular user
+router.get("/my-events", verifyToken, getMyEvents);
 
 router.get("/:id", verifyToken, getEventById);
 
