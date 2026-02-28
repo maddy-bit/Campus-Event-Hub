@@ -8,9 +8,8 @@ const {
   updateEvent,
   deleteEvent,
   getMyEvents,
-  getparticipantsByEventId,
+  updatePaymentStatus,
 } = require("../Controllers/EventController");
-const { get } = require("mongoose");
 
 router.post("/create", verifyToken, checkRole("admin", "organizer"), createEvent);
 
@@ -18,15 +17,15 @@ router.post("/create", verifyToken, checkRole("admin", "organizer"), createEvent
 router.get("/", verifyToken, getAllEvents);
 
 //for getting the details of the event for that particular user
-router.get("/my-events", verifyToken, getMyEvents);
-
-//get all participants of that particular event
-router.get("/event/:eventId", verifyToken, getparticipantsByEventId);
+router.get("/my-events", verifyToken, checkRole("admin", "organizer"), getMyEvents);
 
 router.get("/:id", verifyToken, getEventById);
 
 router.put("/:id", verifyToken, checkRole("admin", "organizer"), updateEvent);
 
 router.delete("/:id", verifyToken, checkRole("admin", "organizer"), deleteEvent);
+
+//updatig the payment status of the participant
+router.patch("/:id/payment", verifyToken, updatePaymentStatus);
 
 module.exports = router;

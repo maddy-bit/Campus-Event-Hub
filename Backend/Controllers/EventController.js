@@ -184,21 +184,79 @@ const getMyEvents = async (req, res) => {
 };
 
 //to get participants by event id 
-const getparticipantsByEventId = async (req, res) => {
+const getParticipantsByEventId = async (req, res) => {
   try {
     const { eventId } = req.params;
 
+    const event = await EventModel.findById(eventId);
+
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    if (
+      event.createdBy.toString() !== req.user._id.toString() &&
+      req.user.role !== "admin" &&
+      req.user.role !== "superadmin"
+    ) {
+      return res.status(403).json({
+        message: "You are not authorized to view participants of this event"
+      });
+    }
+
     const registrations = await ERegistration.find({ eventId })
-      .populate("userId", "fullName email");
+      .populate("userId", "fullName email department yearOfStudy collegeName phoneNumber")
+      .sort({ createdAt: -1 });
 
     res.status(200).json({
       count: registrations.length,
-      registrations
+      participants: registrations
     });
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-}
+};
+
+//updating the payment status of the participant
+const updatePaymentStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { paymentStatus } = req.body;
+
+    const registration = await ERegistration.findById(id).populate("eventId");
+
+    if (!registration) {
+      return res.status(404).json({ message: "Registration not found" });
+    }
+
+    if (
+      registration.eventId.createdBy.toString() !== req.user._id.toString() &&
+      req.user.role !== "admin" &&
+      req.user.role !== "superadmin"
+    ) {
+      return res.status(403).json({
+        message: "You don't have permission to update payment status"
+      });
+    }
+
+    registration.payment.status = paymentStatus;
+
+    await registration.save();
+
+    res.status(200).json({
+      message: "Payment status updated successfully",
+      registration
+    });
+
+  } catch (err) {
+    console.error("Update payment status error:", err);
+    res.status(500).json({
+      message: "Failed to update payment status",
+      error: err.message
+    });
+  }
+};
 
 module.exports = {
   createEvent,
@@ -207,5 +265,6 @@ module.exports = {
   updateEvent,
   deleteEvent,
   getMyEvents,
-  getparticipantsByEventId
+  getParticipantsByEventId,
+  updatePaymentStatus
 };

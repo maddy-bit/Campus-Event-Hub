@@ -53,7 +53,7 @@ const App = () => {
   const [formData, setFormData] = useState({});
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 7; // how many events per page
+  const itemsPerPage = import.meta.env.VITE_ITEM_PER_PAGE_IN_MY_EVENTS ?? 10; // how many events per page
 
   useEffect(() => {
     setCurrentPage(1);
