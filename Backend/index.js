@@ -11,7 +11,8 @@ const PORT = process.env.PORT || 3000;
 const authroutes = require('./Routes/AuthRoutes');
 const eventRoutes = require('./Routes/EventRoutes');
 const eRegistrationRoutes = require('./Routes/ERegistrationRoutes');
-const dashboardRoutes= require('./Routes/DashboardRoutes')
+const dashboardRoutes= require('./Routes/DashboardRoutes');
+const profileRoutes = require('./Routes/ProfileRoutes');
 
 // Middleware
 app.use(cors({
@@ -19,14 +20,19 @@ app.use(cors({
     credentials: true
 }));
 
-app.use(bodyParser.json());
+app.use(express.json()); // Use express built-in JSON parser
+app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 app.use(cookieParser());
+
+// Serve static files for uploads
+app.use('/uploads', express.static('uploads'));
 
 // Routes
 app.use('/auth', authroutes);
 app.use('/events', eventRoutes);
 app.use('/registrations', eRegistrationRoutes);
 app.use('/dashboard', dashboardRoutes);
+app.use('/profile', profileRoutes);
 
 
 app.get('/check', (req, res) => {
