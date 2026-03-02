@@ -1,4 +1,4 @@
-const UserModel = require("../Models/users");
+const { UserModel } = require("../Models/users");
 const fs = require('fs');
 const path = require('path');
 

@@ -26,6 +26,7 @@ import SuperAdminLayout from "./layouts/SuperAdminLayout";
 import AdminDashboard from "./pages/admin/Dashboard";
 import OrganizerDashboard from "./pages/organizer/Dashboard";
 import StudentDashboard from "./pages/student/Dashboard";
+import StudentEvents from "./pages/student/Events";
 import SuperAdminDashboard from "./pages/superadmin/Dashboard";
 
 function App() {
@@ -89,7 +90,7 @@ function App() {
           >
             <Route index element={<Navigate to="dashboard" />} />
             <Route path="dashboard" element={<StudentDashboard />} />
-            <Route path="events" element={<div>Browse Events</div>} />
+            <Route path="events" element={<StudentEvents />} />
           </Route>
 
           <Route path="/" element={<LandingPage />} />

@@ -47,7 +47,7 @@ const createEvent = async (req, res) => {
 
 const getAllEvents = async (req, res) => {
   try {
-    const events = await EventModel.find().populate("createdBy", "fullName email").sort({ eventDate: 1 });
+    const events = await EventModel.find().populate("createdBy", "fullName email collegeName").sort({ eventDate: 1 });
 
     res.status(200).json({
       message: "Events retrieved successfully",
@@ -64,7 +64,7 @@ const getEventById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const event = await EventModel.findById(id).populate("createdBy", "fullName email");
+    const event = await EventModel.findById(id).populate("createdBy", "fullName email collegeName");
 
     if (!event) {
       return res.status(404).json({ message: "Event not found" });

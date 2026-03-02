@@ -35,4 +35,5 @@ const ERegistrationSchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('ERegistration', ERegistrationSchema);
+const ERegistrationModel = mongoose.model('ERegistration', ERegistrationSchema);
+module.exports = { ERegistrationModel };

@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 require("dotenv").config();
 
-const User = require("./Models/users"); 
+const { UserModel: User } = require("./Models/users"); 
 
 const MONGO_URI = process.env.MONGO_URI; 
 
