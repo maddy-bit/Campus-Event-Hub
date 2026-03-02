@@ -20,20 +20,13 @@ const organizerMenuItems = [
 
 const OrganizerLayout = () => {
   return (
-    <div className="flex min-h-screen bg-gray-100">
-
-      {/* Sidebar */}
-      <Sidebar menuItems={organizerMenuItems} />
-
+    <div className="min-h-screen bg-[#f5f5f0]">
       {/* Main Section */}
-      <div className="flex-1 md:ml-64 flex flex-col">
-        <Header title="Organizer Panel" />
-
-        <div className="p-6">
+      <div className="flex flex-col">
+        <div className="p-0">
           <Outlet />
         </div>
       </div>
-
     </div>
   );
 };
