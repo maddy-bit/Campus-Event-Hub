@@ -9,7 +9,7 @@ router.post('/signup', signupvad, signup);
 router.post('/verify-email', verifyEmail)
 router.post('/resend-verification-otp', resendEmailVerificationOtp)
 router.post('/login', loginvad, login);
-router.post('/logout', protect, logout);
+router.post('/logout', verifyToken, logout);
 router.post('/forgot-password', forgotPassword)
 router.post('/verify-reset-otp', verifyResetOtp);
 router.post('/reset-password', resetPassword);

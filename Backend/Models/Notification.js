@@ -90,4 +90,4 @@ notificationSchema.index({ sender: 1 });
 
 const NotificationModel = mongoose.model("Notification", notificationSchema);
 
-module.exports = { Notification };
+module.exports = { NotificationModel };

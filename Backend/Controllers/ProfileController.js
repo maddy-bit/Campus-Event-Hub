@@ -2,7 +2,7 @@ const { UserModel } = require("../Models/users");
 const fs = require('fs');
 const path = require('path');
 
-// Get user profile
+// get user profile
 const getProfile = async (req, res) => {
   try {
     const userId = req.params.userId || req.user._id;
@@ -30,7 +30,7 @@ const getProfile = async (req, res) => {
   }
 };
 
-// Update basic profile information (available to all users)
+// update basic profile information (available to all users)
 const updateBasicProfile = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -71,7 +71,7 @@ const updateBasicProfile = async (req, res) => {
   }
 };
 
-// Update club information (only for organizers)
+// update club information (only for organizers)
 const updateClubInfo = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -111,7 +111,7 @@ const updateClubInfo = async (req, res) => {
   }
 };
 
-// Upload profile picture
+// upload profile picture
 const uploadProfilePicture = async (req, res) => {
   try {
     if (!req.file) {
@@ -124,7 +124,6 @@ const uploadProfilePicture = async (req, res) => {
     const userId = req.user._id;
     const user = await UserModel.findById(userId);
 
-    // Delete old profile picture if exists
     if (user.profilePicture) {
       const oldPath = path.join(__dirname, '..', user.profilePicture);
       if (fs.existsSync(oldPath)) {
@@ -132,7 +131,7 @@ const uploadProfilePicture = async (req, res) => {
       }
     }
 
-    // Update with new profile picture path
+    // pending uploading to cloud strg
     const profilePicturePath = `uploads/profiles/${req.file.filename}`;
     user.profilePicture = profilePicturePath;
     await user.save();
@@ -153,7 +152,7 @@ const uploadProfilePicture = async (req, res) => {
   }
 };
 
-// Upload club logo (only for organizers)
+// upload club logo (only for organizers)
 const uploadClubLogo = async (req, res) => {
   try {
     if (!req.file) {
@@ -166,9 +165,7 @@ const uploadClubLogo = async (req, res) => {
     const userId = req.user._id;
     const user = await UserModel.findById(userId);
 
-    // Check if user is organizer
     if (user.role !== 'organizer' && user.role !== 'admin' && user.role !== 'superadmin') {
-      // Delete uploaded file
       fs.unlinkSync(req.file.path);
       return res.status(403).json({
         success: false,
@@ -176,7 +173,6 @@ const uploadClubLogo = async (req, res) => {
       });
     }
 
-    // Delete old club logo if exists
     if (user.clubLogo) {
       const oldPath = path.join(__dirname, '..', user.clubLogo);
       if (fs.existsSync(oldPath)) {
@@ -184,7 +180,6 @@ const uploadClubLogo = async (req, res) => {
       }
     }
 
-    // Update with new club logo path
     const clubLogoPath = `uploads/clubs/${req.file.filename}`;
     user.clubLogo = clubLogoPath;
     await user.save();
@@ -205,7 +200,7 @@ const uploadClubLogo = async (req, res) => {
   }
 };
 
-// Delete profile picture
+//pending 
 const deleteProfilePicture = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -218,13 +213,11 @@ const deleteProfilePicture = async (req, res) => {
       });
     }
 
-    // Delete file from filesystem
     const filePath = path.join(__dirname, '..', user.profilePicture);
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
 
-    // Remove from database
     user.profilePicture = null;
     await user.save();
 
@@ -241,7 +234,8 @@ const deleteProfilePicture = async (req, res) => {
   }
 };
 
-// Delete club logo (only for organizers)
+//pending
+// delete club logo 
 const deleteClubLogo = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -261,13 +255,11 @@ const deleteClubLogo = async (req, res) => {
       });
     }
 
-    // Delete file from filesystem
     const filePath = path.join(__dirname, '..', user.clubLogo);
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
 
-    // Remove from database
     user.clubLogo = null;
     await user.save();
 
