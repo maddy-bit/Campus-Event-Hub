@@ -4,6 +4,7 @@ const { verifyToken, checkRole } = require("../Middleware/AuthMiddleware");
 const {
   registerForEvent,
   getAllRegistrations,
+  getMyRegistrations,
   getRegistrationById,
   cancelRegistration,
 } = require("../Controllers/ERegistrationController");
@@ -11,6 +12,8 @@ const {
 router.post("/register", verifyToken, checkRole("student"), registerForEvent);
 
 router.get("/", verifyToken, getAllRegistrations);
+
+router.get("/my", verifyToken, getMyRegistrations);
 
 router.get("/:id", verifyToken, getRegistrationById);
 
