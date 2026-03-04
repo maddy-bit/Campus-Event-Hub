@@ -1,42 +1,71 @@
 const { EventModel } = require("../Models/event");
+const cloudinary = require("../Config/cloudinary");
+const fs = require("fs");
 
 const createEvent = async (req, res) => {
   try {
     const {
-      eventName,
+      title,
       description,
       eventDate,
-      eventTime,
-      venue,
-      organizer,
+      startTime,
+      endTime,
+      location,
       category,
-      maxParticipants,
+      maxSeats,
       registrationDeadline,
-      imageUrl,
+      isPaidEvent,
+      ticketPrice,
     } = req.body;
 
-    if (!eventName || !description || !eventDate || !eventTime || !venue || !organizer || !category || !maxParticipants || !registrationDeadline) {
+    if (!title || !description || !eventDate || !startTime || !location || !category || !registrationDeadline) {
       return res.status(400).json({ message: "All required fields must be provided" });
     }
 
+    let posterUrl = "";
+
+    // upload poster to Cloudinary if file is provided
+    if (req.file) {
+      try {
+        const result = await cloudinary.uploader.upload(req.file.path, {
+          folder: "campuseventhub/events",
+          transformation: [
+            { width: 1200, height: 630, crop: "limit" },
+            { quality: "auto", fetch_format: "auto" },
+          ],
+        });
+        posterUrl = result.secure_url;
+
+        fs.unlink(req.file.path, (err) => {
+          if (err) console.error("Temp file cleanup error:", err);
+        });
+      } catch (uploadErr) {
+        console.error("Cloudinary upload error:", uploadErr);
+        return res.status(500).json({ message: "Image upload failed", error: uploadErr.message });
+      }
+    }
+
     const newEvent = new EventModel({
-      eventName,
+      title,
       description,
       eventDate,
-      eventTime,
-      venue,
-      organizer,
+      startTime,
+      endTime,
+      location,
       category,
-      maxParticipants,
+      maxSeats: maxSeats || 100,
       registrationDeadline,
-      imageUrl,
+      isPaidEvent: isPaidEvent === "true" || isPaidEvent === true,
+      ticketPrice: ticketPrice || 0,
+      posterUrl,
       createdBy: req.user._id,
+      status: "Submitted",
     });
 
     await newEvent.save();
 
     res.status(201).json({
-      message: "Event created successfully",
+      message: "Event created successfully and submitted for approval",
       event: newEvent,
     });
   } catch (err) {
@@ -47,7 +76,7 @@ const createEvent = async (req, res) => {
 
 const getAllEvents = async (req, res) => {
   try {
-    const events = await EventModel.find().populate("createdBy", "fullName email").sort({ eventDate: 1 });
+    const events = await EventModel.find().populate("createdBy", "fullName email collegeName").sort({ eventDate: 1 });
 
     res.status(200).json({
       message: "Events retrieved successfully",
@@ -64,7 +93,7 @@ const getEventById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const event = await EventModel.findById(id).populate("createdBy", "fullName email");
+    const event = await EventModel.findById(id).populate("createdBy", "fullName email collegeName");
 
     if (!event) {
       return res.status(404).json({ message: "Event not found" });
@@ -93,6 +122,26 @@ const updateEvent = async (req, res) => {
 
     if (event.createdBy.toString() !== req.user._id && req.user.role !== "admin") {
       return res.status(403).json({ message: "You don't have permission to update this event" });
+    }
+
+    // handling poster update 
+    if (req.file) {
+      try {
+        const result = await cloudinary.uploader.upload(req.file.path, {
+          folder: "campuseventhub/events",
+          transformation: [
+            { width: 1200, height: 630, crop: "limit" },
+            { quality: "auto", fetch_format: "auto" },
+          ],
+        });
+        updates.posterUrl = result.secure_url;
+
+        fs.unlink(req.file.path, (err) => {
+          if (err) console.error("Temp file cleanup error:", err);
+        });
+      } catch (uploadErr) {
+        console.error("Cloudinary upload error:", uploadErr);
+      }
     }
 
     const updatedEvent = await EventModel.findByIdAndUpdate(id, updates, { new: true, runValidators: true });

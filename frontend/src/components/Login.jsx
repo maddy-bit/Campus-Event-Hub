@@ -6,38 +6,39 @@ import api from "../api";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-
+  const [loading, setLoading] = useState(true); 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
   useEffect(() => {
-    const checkUser = async () => {
-      try {
-        const { data } = await api.get("/auth/me");
+  const checkUser = async () => {
+    try {
+      const { data } = await api.get("/auth/me");
 
-        // If user exists redirect
-        if (data.role === "superadmin") navigate("/superadmin/dashboard");
-        else if (data.role === "admin") navigate("/admin/dashboard");
-        else if (data.role === "organizer") navigate("/organizer/dashboard");
-        else if (data.role === "student") navigate("/student/dashboard");
-
-      } catch (err) {
-        console.log(err);
-        
+      if (data?.role === "student") {
+        navigate(`/${data.role}/events`);
+      } else if (data?.role) {
+        navigate(`/${data.role}/dashboard`);
       }
-    };
 
-    checkUser();
-  }, [navigate]);
+    } catch (err) {
+      console.log("Not authenticated, staying on login.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  checkUser();
+}, [navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
-    });
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -45,20 +46,27 @@ const LoginPage = () => {
 
     try {
       const res = await api.post("/auth/login", formData);
-
-      toast.success(res.data.message);
+      toast.success(res.data.message || "Login successful");
 
       const role = res.data.user.role;
-
-      if (role === "superadmin") navigate("/superadmin/dashboard");
-      else if (role === "admin") navigate("/admin/dashboard");
-      else if (role === "organizer") navigate("/organizer/dashboard");
-      else if (role === "student") navigate("/student/dashboard");
+       if (role === "student") {
+        navigate(`/${role}/events`);
+      } else if (role) {
+        navigate(`/${role}/dashboard`);
+      }
 
     } catch (err) {
       toast.error(err.response?.data?.message || "Login failed");
     }
   };
+
+  if (loading) {
+    return (
+      <div className="registration-container">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="registration-container">

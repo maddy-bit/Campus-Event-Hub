@@ -1,4 +1,4 @@
-const { UserModel } = require("../Models/users");
+const  {UserModel}  = require("../Models/users");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const sendEmail = require("../utils/sendEmail");
@@ -329,7 +329,8 @@ const sendDetails = async (req, res) => {
       id: user._id,
       fullName: user.fullName,
       email: user.email,
-      role: user.role
+      role: user.role,
+      collegeName: user.collegeName,
     });
 
   } catch (error) {

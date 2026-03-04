@@ -25,9 +25,13 @@ import SuperAdminLayout from "./layouts/SuperAdminLayout";
 // Importing dashboards for different roles
 import AdminDashboard from "./pages/admin/Dashboard";
 import OrganizerDashboard from "./pages/organizer/Dashboard";
-import OrganizerProfile from "./pages/organizer/Profile";
-import StudentDashboard from "./pages/student/Dashboard";
+
+import SendNotification from "./pages/organizer/SendNotification";
+import StudentEvents from "./pages/student/Events";
 import SuperAdminDashboard from "./pages/superadmin/Dashboard";
+import StudentProfile from "./pages/student/Profile";
+import Notification from "./pages/student/Notification";
+import Registrations from "./pages/student/Registrations";
 
 function App() {
   return (
@@ -65,34 +69,37 @@ function App() {
           <Route path="analytics" element={<div>Analytics Page</div>} />
         </Route>
 
-        {/* organizer route */}
-        <Route
-          path="/organizer"
-          element={
-            //<ProtectedRoute allowedRoles={["organizer"]}>
-            <OrganizerLayout />
-            //</ProtectedRoute>
-          }
-        >
-          <Route index element={<Navigate to="dashboard" />} />
-          <Route path="dashboard" element={<OrganizerDashboard />} />
-          <Route path="create-event" element={<CreateEvent />} />
-          <Route path="profile" element={<OrganizerProfile />} />
-        </Route>
 
-        {/* student route */}
-        <Route
-          path="/student"
-          element={
-            <ProtectedRoute allowedRoles={["student"]}>
-              <StudentLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Navigate to="dashboard" />} />
-          <Route path="dashboard" element={<StudentDashboard />} />
-          <Route path="events" element={<div>Browse Events</div>} />
-        </Route>
+          {/* organizer route */}
+          <Route
+            path="/organizer"
+            element={
+              //<ProtectedRoute allowedRoles={["organizer"]}>
+                <OrganizerLayout />
+              //</ProtectedRoute>
+            }
+          >
+            <Route index element={<Navigate to="dashboard" />} />
+            <Route path="dashboard" element={<OrganizerDashboard />} />
+            <Route path="create-event" element={<CreateEvent />} />
+            <Route path="notifications" element={<SendNotification />} />
+          </Route>
+
+          {/* student route */}
+          <Route
+            path="/student"
+            element={
+              <ProtectedRoute allowedRoles={["student"]}>
+                <StudentLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Navigate to="dashboard" />} />
+            <Route path="events" element={<StudentEvents />} />
+            <Route path="profile" element={<StudentProfile />} />
+            <Route path="notification" element={<Notification />} />
+            <Route path="registrations" element={<Registrations />} />
+          </Route>
 
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />

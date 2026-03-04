@@ -1,0 +1,118 @@
+:root {
+  --border-black: #000;
+  --border-width: 3px;
+  --accent-green: #9BE22D;
+  --sidebar-bg: #F2F2EC;
+}
+
+/* MOBILE BUTTON */
+.mobile-toggle {
+  display: none;
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 100;
+  background: #F5D94E;
+  padding: 10px;
+  border: 3px solid black;
+  box-shadow: 4px 4px 0px black;
+}
+
+@media (max-width: 768px) {
+  .mobile-toggle {
+    display: block;
+  }
+}
+
+/* OVERLAY */
+.mobile-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 90;
+}
+
+/* SIDEBAR */
+.neo-sidebar {
+  width: 240px;
+  min-height: 100vh;
+  background: var(--sidebar-bg);
+  border-right: var(--border-width) solid var(--border-black);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  top: 0;
+  transform: translateX(0);
+  transition: transform 0.3s ease;
+  z-index: 95;
+}
+
+@media (max-width: 768px) {
+  .neo-sidebar {
+    transform: translateX(-100%);
+  }
+  .neo-sidebar.open {
+    transform: translateX(0);
+  }
+}
+
+/* LOGO */
+.neo-logo {
+  background: black;
+  color: white;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  border-bottom: var(--border-width) solid var(--border-black);
+}
+
+.neo-logo-icon {
+  background: var(--accent-green);
+  color: black;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+}
+
+/* NAV */
+.neo-nav {
+  margin-top: 20px;
+  flex: 1;
+}
+
+.neo-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 24px;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  color: black;
+  transition: 0.2s ease;
+}
+
+.neo-nav-item.active {
+  background: var(--accent-green);
+  border-top: var(--border-width) solid black;
+  border-bottom: var(--border-width) solid black;
+}
+
+.neo-nav-item:hover:not(.active) {
+  background: rgba(0,0,0,0.05);
+}
+
+/* FOOTER */
+.neo-sidebar-footer {
+  border-top: var(--border-width) solid black;
+  padding: 20px 0;
+}

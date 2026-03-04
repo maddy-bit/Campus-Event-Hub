@@ -54,7 +54,7 @@ const getAllRegistrations = async (req, res) => {
   try {
     const registrations = await ERegistrationModel.find()
       .populate("userId", "fullName email phoneNumber")
-      .populate("eventId", "eventName eventDate venue")
+      .populate("eventId", "title eventDate location category startTime endTime registrationDeadline maxSeats posterUrl status")
       .sort({ registrationDate: -1 });
 
     res.status(200).json({
@@ -65,6 +65,25 @@ const getAllRegistrations = async (req, res) => {
   } catch (err) {
     console.error("Get all registrations error:", err);
     res.status(500).json({ message: "Failed to retrieve registrations", error: err.message });
+  }
+};
+
+const getMyRegistrations = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const registrations = await ERegistrationModel.find({ userId })
+      .populate("eventId", "title eventDate location category startTime endTime registrationDeadline maxSeats posterUrl status createdBy")
+      .sort({ registrationDate: -1 });
+
+    res.status(200).json({
+      message: "Your registrations retrieved successfully",
+      count: registrations.length,
+      registrations,
+    });
+  } catch (err) {
+    console.error("Get my registrations error:", err);
+    res.status(500).json({ message: "Failed to retrieve your registrations", error: err.message });
   }
 };
 
@@ -124,6 +143,7 @@ const cancelRegistration = async (req, res) => {
 module.exports = {
   registerForEvent,
   getAllRegistrations,
+  getMyRegistrations,
   getRegistrationById,
   cancelRegistration,
 };
