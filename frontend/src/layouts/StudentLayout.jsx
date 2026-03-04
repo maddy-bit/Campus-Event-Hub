@@ -1,30 +1,21 @@
 import { Outlet } from "react-router-dom";
-import Sidebar from "../components/Sidebar";
+import StudentSidebar from "../components/StudentSidebar";
 import Header from "../components/Header";
-import {
-  LayoutDashboard,
-  CalendarDays,
-  Ticket,
-  User
-} from "lucide-react";
-
-const studentMenuItems = [
-  { name: "Dashboard", path: "/student/dashboard", icon: LayoutDashboard },
-  { name: "Browse Events", path: "/student/events", icon: CalendarDays },
-  { name: "My Registrations", path: "/student/registrations", icon: Ticket },
-  { name: "Profile", path: "/student/profile", icon: User },
-];
 
 const StudentLayout = () => {
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-[#f3f1ea] font-sans selection:bg-[#ccff00]">
 
-      <Sidebar menuItems={studentMenuItems} />
+      <StudentSidebar />
 
-      <div className="flex-1 flex flex-col">
-        <Header title="Student Panel" />
+      {/* Main content — shifted right on desktop for the fixed sidebar */}
+      <div className="flex-1 flex flex-col md:ml-52">
+        <Header
+          hideMenu={true}
+          variant="student"
+        />
 
-        <div className="p-6">
+        <div className="p-6 pb-28 md:pb-6">
           <Outlet />
         </div>
       </div>

@@ -25,16 +25,49 @@ import api from "../../api";
 
 /* ── Config ─────────────────────────────────────────── */
 const CATEGORY_CONFIG = {
-  Competition: { color: "bg-blue-100 text-blue-800", accent: "#3b82f6", abbr: "CMP" },
-  Conference: { color: "bg-purple-100 text-purple-800", accent: "#8b5cf6", abbr: "CNF" },
-  Workshop: { color: "bg-amber-100 text-amber-800", accent: "#f59e0b", abbr: "WRK" },
-  Seminar: { color: "bg-teal-100 text-teal-800", accent: "#14b8a6", abbr: "SEM" },
-  Sports: { color: "bg-green-100 text-green-800", accent: "#22c55e", abbr: "SPT" },
-  Cultural: { color: "bg-pink-100 text-pink-800", accent: "#ec4899", abbr: "CLT" },
+  Competition: {
+    color: "bg-blue-100 text-blue-800",
+    accent: "#3b82f6",
+    abbr: "CMP",
+  },
+  Conference: {
+    color: "bg-purple-100 text-purple-800",
+    accent: "#8b5cf6",
+    abbr: "CNF",
+  },
+  Workshop: {
+    color: "bg-amber-100 text-amber-800",
+    accent: "#f59e0b",
+    abbr: "WRK",
+  },
+  Seminar: {
+    color: "bg-teal-100 text-teal-800",
+    accent: "#14b8a6",
+    abbr: "SEM",
+  },
+  Sports: {
+    color: "bg-green-100 text-green-800",
+    accent: "#22c55e",
+    abbr: "SPT",
+  },
+  Cultural: {
+    color: "bg-pink-100 text-pink-800",
+    accent: "#ec4899",
+    abbr: "CLT",
+  },
   Other: { color: "bg-gray-100 text-gray-800", accent: "#6b7280", abbr: "OTH" },
 };
 
-const CATEGORIES = ["All", "Competition", "Conference", "Workshop", "Seminar", "Sports", "Cultural", "Other"];
+const CATEGORIES = [
+  "All",
+  "Competition",
+  "Conference",
+  "Workshop",
+  "Seminar",
+  "Sports",
+  "Cultural",
+  "Other",
+];
 
 const SORT_OPTIONS = [
   { label: "Date (Soonest)", value: "date_asc" },
@@ -83,7 +116,10 @@ const BrutalDropdown = ({ options, value, onChange, icon: Icon }) => {
           {Icon && <Icon size={12} />}
           <span>{selected?.label || "Select"}</span>
         </div>
-        <ChevronDown size={12} className={`transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
+        <ChevronDown
+          size={12}
+          className={`transition-transform duration-150 ${open ? "rotate-180" : ""}`}
+        />
       </button>
 
       {open && (
@@ -91,9 +127,13 @@ const BrutalDropdown = ({ options, value, onChange, icon: Icon }) => {
           {options.map((opt) => (
             <button
               key={opt.value}
-              onClick={() => { onChange(opt.value); setOpen(false); }}
-              className={`block w-full text-left px-4 py-2.5 text-[11px] font-black uppercase transition-all hover:bg-black hover:text-[#B6FF60] border-b border-black/10 last:border-0 ${value === opt.value ? "bg-black text-[#B6FF60]" : ""
-                }`}
+              onClick={() => {
+                onChange(opt.value);
+                setOpen(false);
+              }}
+              className={`block w-full text-left px-4 py-2.5 text-[11px] font-black uppercase transition-all hover:bg-black hover:text-[#B6FF60] border-b border-black/10 last:border-0 ${
+                value === opt.value ? "bg-black text-[#B6FF60]" : ""
+              }`}
             >
               {opt.label}
             </button>
@@ -105,13 +145,23 @@ const BrutalDropdown = ({ options, value, onChange, icon: Icon }) => {
 };
 
 /* ── Event Detail Dialog ────────────────────────────── */
-const EventDialog = ({ event, isOpen, onClose, onRegister, isRegistered, isRegistering }) => {
+const EventDialog = ({
+  event,
+  isOpen,
+  onClose,
+  onRegister,
+  isRegistered,
+  isRegistering,
+}) => {
   if (!isOpen || !event) return null;
   const cat = CATEGORY_CONFIG[event.category] || CATEGORY_CONFIG.Other;
   const deadlinePassed = isDeadlinePassed(event.registrationDeadline);
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+      onClick={onClose}
+    >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
 
       <div
@@ -130,16 +180,25 @@ const EventDialog = ({ event, isOpen, onClose, onRegister, isRegistered, isRegis
         <div className="h-52 border-b-4 border-black relative bg-gray-100 overflow-hidden">
           {event.posterUrl ? (
             <img
-              src={event.posterUrl.startsWith("http") ? event.posterUrl : `${import.meta.env.VITE_API_BASE_URL || "http://localhost:5000"}/${event.posterUrl}`}
+              src={
+                event.posterUrl.startsWith("http")
+                  ? event.posterUrl
+                  : `${import.meta.env.VITE_API_BASE_URL || "http://localhost:5000"}/${event.posterUrl}`
+              }
               alt={event.title}
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="flex items-center justify-center h-full text-9xl font-black uppercase select-none" style={{ color: `${cat.accent}18` }}>
+            <div
+              className="flex items-center justify-center h-full text-9xl font-black uppercase select-none"
+              style={{ color: `${cat.accent}18` }}
+            >
               {cat.abbr}
             </div>
           )}
-          <div className={`absolute top-4 left-4 px-3 py-1 border-2 border-black text-[10px] font-black uppercase shadow-[2px_2px_0px_#000] ${cat.color}`}>
+          <div
+            className={`absolute top-4 left-4 px-3 py-1 border-2 border-black text-[10px] font-black uppercase shadow-[2px_2px_0px_#000] ${cat.color}`}
+          >
             {event.category}
           </div>
           {isRegistered && (
@@ -157,17 +216,42 @@ const EventDialog = ({ event, isOpen, onClose, onRegister, isRegistered, isRegis
 
           <div className="grid grid-cols-2 gap-3 mb-6">
             {[
-              { icon: Calendar, label: "Event Date", value: fmtDate(event.eventDate) },
-              { icon: Clock, label: "Time", value: `${event.startTime || "TBA"}${event.endTime ? ` — ${event.endTime}` : ""}` },
-              { icon: MapPin, label: "Location", value: event.location || "TBA" },
-              { icon: Users, label: "Capacity", value: `${event.maxSeats || 100} seats` },
-              { icon: Tag, label: "Reg. Deadline", value: fmtDate(event.registrationDeadline), red: deadlinePassed },
+              {
+                icon: Calendar,
+                label: "Event Date",
+                value: fmtDate(event.eventDate),
+              },
+              {
+                icon: Clock,
+                label: "Time",
+                value: `${event.startTime || "TBA"}${event.endTime ? ` — ${event.endTime}` : ""}`,
+              },
+              {
+                icon: MapPin,
+                label: "Location",
+                value: event.location || "TBA",
+              },
+              {
+                icon: Users,
+                label: "Capacity",
+                value: `${event.maxSeats || 100} seats`,
+              },
+              {
+                icon: Tag,
+                label: "Reg. Deadline",
+                value: fmtDate(event.registrationDeadline),
+                red: deadlinePassed,
+              },
             ].map(({ icon: Icon, label, value, red }) => (
               <div key={label} className="border-2 border-black p-3 bg-gray-50">
                 <div className="flex items-center gap-1.5 text-[9px] font-bold text-gray-400 uppercase mb-1">
                   <Icon size={11} /> {label}
                 </div>
-                <div className={`text-sm font-black uppercase ${red ? "text-red-500" : ""}`}>{value}</div>
+                <div
+                  className={`text-sm font-black uppercase ${red ? "text-red-500" : ""}`}
+                >
+                  {value}
+                </div>
               </div>
             ))}
             {event.isPaidEvent && (
@@ -175,7 +259,9 @@ const EventDialog = ({ event, isOpen, onClose, onRegister, isRegistered, isRegis
                 <div className="flex items-center gap-1.5 text-[9px] font-bold text-gray-600 uppercase mb-1">
                   <IndianRupee size={11} /> Ticket Price
                 </div>
-                <div className="text-sm font-black uppercase">₹{event.ticketPrice || 0}</div>
+                <div className="text-sm font-black uppercase">
+                  ₹{event.ticketPrice || 0}
+                </div>
               </div>
             )}
           </div>
@@ -195,10 +281,16 @@ const EventDialog = ({ event, isOpen, onClose, onRegister, isRegistered, isRegis
                 {event.createdBy.fullName?.[0]?.toUpperCase() || "?"}
               </div>
               <div>
-                <div className="text-[9px] font-bold text-gray-400 uppercase">Organized By</div>
-                <div className="text-xs font-black uppercase">{event.createdBy.fullName}</div>
+                <div className="text-[9px] font-bold text-gray-400 uppercase">
+                  Organized By
+                </div>
+                <div className="text-xs font-black uppercase">
+                  {event.createdBy.fullName}
+                </div>
                 {event.createdBy.collegeName && (
-                  <div className="text-[10px] text-gray-500 font-bold">{event.createdBy.collegeName}</div>
+                  <div className="text-[10px] text-gray-500 font-bold">
+                    {event.createdBy.collegeName}
+                  </div>
                 )}
               </div>
             </div>
@@ -219,7 +311,11 @@ const EventDialog = ({ event, isOpen, onClose, onRegister, isRegistered, isRegis
                 disabled={isRegistering}
                 className="flex-1 flex items-center justify-center gap-2 py-3 border-4 border-black font-black text-xs uppercase bg-[#B6FF60] hover:bg-black hover:text-[#B6FF60] shadow-[4px_4px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_#000] transition-all"
               >
-                {isRegistering ? <Loader2 size={15} className="animate-spin" /> : <Ticket size={15} />}
+                {isRegistering ? (
+                  <Loader2 size={15} className="animate-spin" />
+                ) : (
+                  <Ticket size={15} />
+                )}
                 {isRegistering ? "Registering..." : "Confirm Registration"}
               </button>
             )}
@@ -257,12 +353,17 @@ const StudentEvents = () => {
         setLoading(true);
         setUserLoading(true);
         const userRes = await api.get("/auth/me");
-        setUserCollege(userRes.data?.collegeName || userRes.data?.user?.collegeName || "");
+        setUserCollege(
+          userRes.data?.collegeName || userRes.data?.user?.collegeName || "",
+        );
         setUserLoading(false);
 
         const eventRes = await api.get("/events");
         const approved = (eventRes.data.events || []).filter(
-          (e) => e.status === "Approved" || e.status === "Draft" || e.status === "Submitted"
+          (e) =>
+            e.status === "Approved" ||
+            e.status === "Draft" ||
+            e.status === "Submitted",
         );
         setEvents(approved);
 
@@ -271,7 +372,9 @@ const StudentEvents = () => {
           const regIds = new Set(
             (regRes.data.registrations || [])
               .filter((r) => r.eventId)
-              .map((r) => (typeof r.eventId === "string" ? r.eventId : r.eventId._id))
+              .map((r) =>
+                typeof r.eventId === "string" ? r.eventId : r.eventId._id,
+              ),
           );
           setRegisteredEventIds(regIds);
         } catch {
@@ -304,18 +407,29 @@ const StudentEvents = () => {
         (e) =>
           e.title?.toLowerCase().includes(q) ||
           e.category?.toLowerCase().includes(q) ||
-          e.location?.toLowerCase().includes(q)
+          e.location?.toLowerCase().includes(q),
       );
     }
     result.sort((a, b) => {
-      if (sortBy === "date_asc") return new Date(a.eventDate) - new Date(b.eventDate);
-      if (sortBy === "date_desc") return new Date(b.eventDate) - new Date(a.eventDate);
-      if (sortBy === "title_asc") return (a.title || "").localeCompare(b.title || "");
-      if (sortBy === "title_desc") return (b.title || "").localeCompare(a.title || "");
+      if (sortBy === "date_asc")
+        return new Date(a.eventDate) - new Date(b.eventDate);
+      if (sortBy === "date_desc")
+        return new Date(b.eventDate) - new Date(a.eventDate);
+      if (sortBy === "title_asc")
+        return (a.title || "").localeCompare(b.title || "");
+      if (sortBy === "title_desc")
+        return (b.title || "").localeCompare(a.title || "");
       return 0;
     });
     return result;
-  }, [events, activeCategory, searchQuery, sortBy, collegeContext, userCollege]);
+  }, [
+    events,
+    activeCategory,
+    searchQuery,
+    sortBy,
+    collegeContext,
+    userCollege,
+  ]);
 
   const handleRegister = async (eventId) => {
     try {
@@ -339,10 +453,19 @@ const StudentEvents = () => {
     }
   };
 
-  const openDialog = (event) => { setSelectedEvent(event); setDialogOpen(true); };
-  const closeDialog = () => { setDialogOpen(false); setSelectedEvent(null); };
+  const openDialog = (event) => {
+    setSelectedEvent(event);
+    setDialogOpen(true);
+  };
+  const closeDialog = () => {
+    setDialogOpen(false);
+    setSelectedEvent(null);
+  };
 
-  const categoryOptions = CATEGORIES.map((c) => ({ label: c === "All" ? "All Categories" : c, value: c }));
+  const categoryOptions = CATEGORIES.map((c) => ({
+    label: c === "All" ? "All Categories" : c,
+    value: c,
+  }));
 
   return (
     <div className="w-full font-mono min-h-screen">
@@ -351,7 +474,9 @@ const StudentEvents = () => {
         isOpen={dialogOpen}
         onClose={closeDialog}
         onRegister={handleRegister}
-        isRegistered={selectedEvent ? registeredEventIds.has(selectedEvent._id) : false}
+        isRegistered={
+          selectedEvent ? registeredEventIds.has(selectedEvent._id) : false
+        }
         isRegistering={registeringId === selectedEvent?._id}
       />
 
@@ -369,7 +494,10 @@ const StudentEvents = () => {
       {/* ── Search ── */}
       <div className="bg-white border-4 border-black p-1 shadow-[6px_6px_0px_#000] mb-6 flex">
         <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={17} />
+          <Search
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+            size={17}
+          />
           <input
             type="text"
             className="w-full border-0 py-3 pl-12 pr-4 font-bold uppercase text-sm focus:outline-none placeholder:text-gray-400 bg-white"
@@ -390,20 +518,25 @@ const StudentEvents = () => {
 
       {/* ── Filters Row ── */}
       <div className="flex flex-col md:flex-row gap-3 mb-6 items-start md:items-center flex-wrap">
-
         {/* College Context Tabs */}
         <div className="border-4 border-black inline-flex bg-white shadow-[4px_4px_0px_#000] shrink-0">
           <button
             onClick={() => setCollegeContext("My College")}
-            className={`px-5 py-2.5 flex items-center gap-2 border-r-4 border-black text-[11px] font-black uppercase transition-all ${collegeContext === "My College" ? "bg-[#B6FF60]" : "hover:bg-gray-100"
-              }`}
+            className={`px-5 py-2.5 flex items-center gap-2 border-r-4 border-black text-[11px] font-black uppercase transition-all ${
+              collegeContext === "My College"
+                ? "bg-[#B6FF60]"
+                : "hover:bg-gray-100"
+            }`}
           >
             <School size={13} /> My College
           </button>
           <button
             onClick={() => setCollegeContext("External")}
-            className={`px-5 py-2.5 flex items-center gap-2 text-[11px] font-black uppercase transition-all ${collegeContext === "External" ? "bg-black text-[#B6FF60]" : "hover:bg-gray-100"
-              }`}
+            className={`px-5 py-2.5 flex items-center gap-2 text-[11px] font-black uppercase transition-all ${
+              collegeContext === "External"
+                ? "bg-black text-[#B6FF60]"
+                : "hover:bg-gray-100"
+            }`}
           >
             <Globe size={13} /> External
           </button>
@@ -443,39 +576,56 @@ const StudentEvents = () => {
       {loading || userLoading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
           <Loader2 className="animate-spin text-black" size={40} />
-          <p className="text-sm font-bold uppercase text-gray-400">LOADING_EVENTS...</p>
+          <p className="text-sm font-bold uppercase text-gray-400">
+            LOADING_EVENTS...
+          </p>
         </div>
       ) : filteredEvents.length === 0 ? (
         <div className="border-4 border-dashed border-black bg-white p-16 text-center shadow-[6px_6px_0px_rgba(0,0,0,0.06)]">
           <Frown className="mx-auto mb-4 text-gray-300" size={56} />
-          <p className="text-base font-black uppercase text-gray-500">NO EVENTS FOUND</p>
-          <p className="text-xs text-gray-400 mt-1 uppercase font-bold">Try adjusting your filters or switching tabs.</p>
+          <p className="text-base font-black uppercase text-gray-500">
+            NO EVENTS FOUND
+          </p>
+          <p className="text-xs text-gray-400 mt-1 uppercase font-bold">
+            Try adjusting your filters or switching tabs.
+          </p>
         </div>
       ) : (
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {filteredEvents.map((event) => {
-            const catConfig = CATEGORY_CONFIG[event.category] || CATEGORY_CONFIG.Other;
+            const catConfig =
+              CATEGORY_CONFIG[event.category] || CATEGORY_CONFIG.Other;
             const deadlinePassed = isDeadlinePassed(event.registrationDeadline);
             const isRegistered = registeredEventIds.has(event._id);
 
             return (
-              <article key={event._id} className="relative group cursor-pointer" onClick={() => openDialog(event)}>
+              <article
+                key={event._id}
+                className="relative group cursor-pointer"
+                onClick={() => openDialog(event)}
+              >
                 {/* Shadow layer */}
                 <div className="absolute inset-0 bg-black translate-x-2 translate-y-2 group-hover:translate-x-3 group-hover:translate-y-3 transition-all duration-200" />
 
                 {/* Card */}
                 <div className="relative bg-white border-4 border-black flex flex-col h-full overflow-hidden group-hover:-translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200">
-
                   {/* Poster */}
                   <div className="h-44 border-b-4 border-black relative bg-gray-100 overflow-hidden">
                     {event.posterUrl ? (
                       <img
-                        src={event.posterUrl.startsWith("http") ? event.posterUrl : `${import.meta.env.VITE_API_BASE_URL || "http://localhost:5000"}/${event.posterUrl}`}
+                        src={
+                          event.posterUrl.startsWith("http")
+                            ? event.posterUrl
+                            : `${import.meta.env.VITE_API_BASE_URL || "http://localhost:5000"}/${event.posterUrl}`
+                        }
                         alt={event.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                     ) : (
-                      <div className="flex items-center justify-center h-full text-7xl font-black uppercase select-none" style={{ color: `${catConfig.accent}15` }}>
+                      <div
+                        className="flex items-center justify-center h-full text-7xl font-black uppercase select-none"
+                        style={{ color: `${catConfig.accent}15` }}
+                      >
                         {catConfig.abbr}
                       </div>
                     )}
@@ -486,7 +636,9 @@ const StudentEvents = () => {
                     </div>
 
                     {/* Category badge */}
-                    <div className={`absolute bottom-3 left-3 px-2 py-0.5 border-2 border-black text-[9px] font-black uppercase shadow-[2px_2px_0px_#000] ${catConfig.color}`}>
+                    <div
+                      className={`absolute bottom-3 left-3 px-2 py-0.5 border-2 border-black text-[9px] font-black uppercase shadow-[2px_2px_0px_#000] ${catConfig.color}`}
+                    >
                       {event.category}
                     </div>
 
@@ -496,8 +648,6 @@ const StudentEvents = () => {
                         <Globe size={11} />
                       </div>
                     )}
-
-
 
                     {/* Registered */}
                     {isRegistered && (
@@ -516,7 +666,9 @@ const StudentEvents = () => {
                     <div className="space-y-2 mb-4 text-[11px] font-bold text-gray-500 uppercase">
                       <div className="flex items-center gap-2">
                         <MapPin size={11} className="text-black shrink-0" />
-                        <span className="truncate">{event.location || "TBA"}</span>
+                        <span className="truncate">
+                          {event.location || "TBA"}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Clock size={11} className="text-black shrink-0" />
@@ -538,7 +690,9 @@ const StudentEvents = () => {
                       />
                     </div>
                     <div className="text-[9px] font-bold uppercase text-gray-400 mb-4">
-                      {deadlinePassed ? "DEADLINE PASSED" : `DEADLINE: ${fmtDate(event.registrationDeadline)}`}
+                      {deadlinePassed
+                        ? "DEADLINE PASSED"
+                        : `DEADLINE: ${fmtDate(event.registrationDeadline)}`}
                     </div>
 
                     {/* Actions */}
@@ -549,19 +703,26 @@ const StudentEvents = () => {
                         </div>
                       ) : (
                         <button
-                          onClick={(e) => { e.stopPropagation(); openDialog(event); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openDialog(event);
+                          }}
                           disabled={deadlinePassed}
-                          className={`flex-1 flex items-center justify-center gap-2 py-2.5 border-2 border-black font-black text-[10px] uppercase shadow-[3px_3px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#000] transition-all ${deadlinePassed
+                          className={`flex-1 flex items-center justify-center gap-2 py-2.5 border-2 border-black font-black text-[10px] uppercase shadow-[3px_3px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#000] transition-all ${
+                            deadlinePassed
                               ? "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none"
                               : "bg-[#B6FF60] hover:bg-black hover:text-[#B6FF60]"
-                            }`}
+                          }`}
                         >
                           <Ticket size={13} />
                           {deadlinePassed ? "CLOSED" : "VIEW & REGISTER"}
                         </button>
                       )}
                       <button
-                        onClick={(e) => { e.stopPropagation(); handleShare(event); }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleShare(event);
+                        }}
                         className="p-2.5 border-2 border-black bg-white hover:bg-black hover:text-white transition-all shadow-[3px_3px_0px_#000] active:shadow-[1px_1px_0px_#000] active:translate-x-[1px] active:translate-y-[1px]"
                       >
                         <Share2 size={13} />

@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
+import { useState } from "react";
 import {
   LayoutDashboard,
   Users,
@@ -18,13 +19,22 @@ const superAdminMenuItems = [
 ];
 
 const SuperAdminLayout = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-[#f3f1ea] font-sans selection:bg-[#ccff00]">
 
-      <Sidebar menuItems={superAdminMenuItems} />
+      <Sidebar 
+        menuItems={superAdminMenuItems} 
+        isOpen={sidebarOpen}
+        setIsOpen={setSidebarOpen}
+      />
 
-      <div className="flex-1 md:ml-64 flex flex-col">
-        <Header title="Super Admin Panel" />
+      <div className="flex-1 flex flex-col">
+        <Header 
+          title="Super Admin" 
+          onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+        />
 
         <div className="p-6">
           <Outlet />
