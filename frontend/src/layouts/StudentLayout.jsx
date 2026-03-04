@@ -15,6 +15,7 @@ const StudentLayout = () => {
           variant="student"
         />
 
+
         <div className="p-6 pb-28 md:pb-6">
           <Outlet />
         </div>

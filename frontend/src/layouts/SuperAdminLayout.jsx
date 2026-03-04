@@ -36,6 +36,7 @@ const SuperAdminLayout = () => {
           onMenuClick={() => setSidebarOpen(!sidebarOpen)}
         />
 
+
         <div className="p-6">
           <Outlet />
         </div>

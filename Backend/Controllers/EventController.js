@@ -2,9 +2,11 @@ const { EventModel } = require("../Models/event");
 const cloudinary = require("../Config/cloudinary");
 const fs = require("fs");
 
+
 const createEvent = async (req, res) => {
   try {
     const {
+<<<<<<< HEAD
       title,
       description,
       eventDate,
@@ -61,6 +63,7 @@ const createEvent = async (req, res) => {
       createdBy: req.user._id,
       status: "Submitted",
     });
+
 
     await newEvent.save();
 
@@ -120,7 +123,7 @@ const updateEvent = async (req, res) => {
       return res.status(404).json({ message: "Event not found" });
     }
 
-    if (event.createdBy.toString() !== req.user._id && req.user.role !== "admin") {
+    if (event.createdBy.toString() !== req.user._id.toString() && req.user.role !== "admin") {
       return res.status(403).json({ message: "You don't have permission to update this event" });
     }
 
@@ -181,10 +184,124 @@ const deleteEvent = async (req, res) => {
   }
 };
 
+
+//to get all events of that particular user who created the event
+const getMyEvents = async (req, res) => {
+  try {
+    const events = await EventModel.find({
+      createdBy: req.user._id
+    })
+      .populate("createdBy", "fullName email")
+      .sort({ eventDate: 1 });
+
+    const eventsWithSeatData = await Promise.all(
+      events.map(async (event) => {
+        const seatsFilled = await ERegistration.countDocuments({
+          eventId: event._id,
+          status: "Registered"
+        });
+
+        return {
+          ...event.toObject(), // keep all event details
+          seatsFilled,         // add registered seats
+          seatsAvailable: event.maxSeats - seatsFilled
+        };
+      })
+    );
+
+    res.status(200).json({
+      message: "My events retrieved successfully",
+      count: eventsWithSeatData.length,
+      events: eventsWithSeatData,
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+//to get participants by event id 
+const getParticipantsByEventId = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+
+    const event = await EventModel.findById(eventId);
+
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    if (
+      event.createdBy.toString() !== req.user._id.toString() &&
+      req.user.role !== "admin" &&
+      req.user.role !== "superadmin"
+    ) {
+      return res.status(403).json({
+        message: "You are not authorized to view participants of this event"
+      });
+    }
+
+    const registrations = await ERegistration.find({ eventId })
+      .populate("userId", "fullName email department yearOfStudy collegeName phoneNumber")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      count: registrations.length,
+      participants: registrations
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+//updating the payment status of the participant
+const updatePaymentStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { paymentStatus } = req.body;
+
+    const registration = await ERegistration.findById(id).populate("eventId");
+
+    if (!registration) {
+      return res.status(404).json({ message: "Registration not found" });
+    }
+
+    if (
+      registration.eventId.createdBy.toString() !== req.user._id.toString() &&
+      req.user.role !== "admin" &&
+      req.user.role !== "superadmin"
+    ) {
+      return res.status(403).json({
+        message: "You don't have permission to update payment status"
+      });
+    }
+
+    registration.payment.status = paymentStatus;
+
+    await registration.save();
+
+    res.status(200).json({
+      message: "Payment status updated successfully",
+      registration
+    });
+
+  } catch (err) {
+    console.error("Update payment status error:", err);
+    res.status(500).json({
+      message: "Failed to update payment status",
+      error: err.message
+    });
+  }
+};
+
 module.exports = {
   createEvent,
   getAllEvents,
   getEventById,
   updateEvent,
   deleteEvent,
+  getMyEvents,
+  getParticipantsByEventId,
+  updatePaymentStatus
 };

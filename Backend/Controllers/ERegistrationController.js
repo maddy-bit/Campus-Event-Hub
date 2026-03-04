@@ -1,5 +1,5 @@
-const { ERegistrationModel } = require("../Models/ERegistration");
-const { EventModel } = require("../Models/event");
+const ERegistrationModel  = require("../Models/ERegistration");
+const  EventModel  = require("../Models/event");
 
 const registerForEvent = async (req, res) => {
   try {
@@ -139,6 +139,7 @@ const cancelRegistration = async (req, res) => {
     res.status(500).json({ message: "Failed to cancel registration", error: err.message });
   }
 };
+
 
 module.exports = {
   registerForEvent,

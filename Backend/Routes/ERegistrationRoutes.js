@@ -8,8 +8,10 @@ const {
   getRegistrationById,
   cancelRegistration,
 } = require("../Controllers/ERegistrationController");
+const { getParticipantsByEventId } = require("../Controllers/EventController");
 
-router.post("/register", verifyToken, checkRole("student"), registerForEvent);
+// Route to register for an event
+router.post("/", verifyToken, checkRole("student"), registerForEvent);
 
 router.get("/", verifyToken, getAllRegistrations);
 
@@ -18,5 +20,8 @@ router.get("/my", verifyToken, getMyRegistrations);
 router.get("/:id", verifyToken, getRegistrationById);
 
 router.delete("/:id", verifyToken, cancelRegistration);
+
+//get all participants of that particular event
+router.get("/event/:eventId", verifyToken, getParticipantsByEventId);
 
 module.exports = router;
