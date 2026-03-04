@@ -6,7 +6,6 @@ const fs = require("fs");
 const createEvent = async (req, res) => {
   try {
     const {
-<<<<<<< HEAD
       title,
       description,
       eventDate,

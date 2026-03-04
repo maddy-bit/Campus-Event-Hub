@@ -29,15 +29,11 @@ import OrganizerDashboard from "./pages/organizer/Dashboard";
 import SendNotification from "./pages/organizer/SendNotification";
 import StudentEvents from "./pages/student/Events";
 import SuperAdminDashboard from "./pages/superadmin/Dashboard";
-<<<<<<< HEAD
 import StudentProfile from "./pages/student/Profile";
 import Notification from "./pages/student/Notification";
 import Registrations from "./pages/student/Registrations";
-=======
-import MyEvents from "./pages/organizer/MyEvents";
-import ViewParticipants from "./pages/organizer/ViewParticipants";
+
 import ParticipantRegistry from "./pages/organizer/ViewParticipants";
->>>>>>> feature/view-events-participants
 
 function App() {
   return (
@@ -118,7 +114,6 @@ function App() {
         <Route path="/create-event" element={<CreateEvent />} />
         <Route path="/dashboard" element={<DashboardLayout />} />
       </Routes>
-iew-events-participants
 
     </>
   );
