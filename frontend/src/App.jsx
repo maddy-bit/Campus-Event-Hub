@@ -22,55 +22,54 @@ import StudentLayout from "./layouts/StudentLayout";
 import SuperAdminLayout from "./layouts/SuperAdminLayout";
 
 
-// Importing pages for different roles
+// Importing dashboards for different roles
 import AdminDashboard from "./pages/admin/Dashboard";
 import OrganizerDashboard from "./pages/organizer/Dashboard";
-
 import SendNotification from "./pages/organizer/SendNotification";
+import OrganizerMyEvents from "./pages/organizer/MyEvents";
+import OrganizerProfile from "./pages/organizer/Profile";
+import ViewParticipants from "./pages/organizer/ViewParticipants";
 import StudentEvents from "./pages/student/Events";
 import SuperAdminDashboard from "./pages/superadmin/Dashboard";
 import StudentProfile from "./pages/student/Profile";
 import Notification from "./pages/student/Notification";
 import Registrations from "./pages/student/Registrations";
 
-import ParticipantRegistry from "./pages/organizer/ViewParticipants";
-
 function App() {
   return (
     <>
       <Toaster position="top-center" richColors />
 
-      <Routes>
+        <Routes>
 
-        {/* super admin route */}
-        <Route
-          path="/superadmin"
-          element={
-            <ProtectedRoute allowedRoles={["superadmin"]}>
-              <SuperAdminLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Navigate to="dashboard" />} />
-          <Route path="dashboard" element={<SuperAdminDashboard />} />
-          <Route path="admins" element={<div>Manage Admins</div>} />
-        </Route>
+          {/* super admin route */}
+          <Route
+            path="/superadmin"
+            element={
+              <ProtectedRoute allowedRoles={["superadmin"]}>
+                <SuperAdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Navigate to="dashboard" />} />
+            <Route path="dashboard" element={<SuperAdminDashboard />} />
+            <Route path="admins" element={<div>Manage Admins</div>} />
+          </Route>
 
-        {/* admin route */}
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
-              <AdminLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Navigate to="dashboard" />} />
-          <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="users" element={<div>Users Page</div>} />
-          <Route path="analytics" element={<div>Analytics Page</div>} />
-        </Route>
-
+          {/* admin route */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Navigate to="dashboard" />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="users" element={<div>Users Page</div>} />
+            <Route path="analytics" element={<div>Analytics Page</div>} />
+          </Route>
 
           {/* organizer route */}
           <Route
@@ -84,8 +83,10 @@ function App() {
             <Route index element={<Navigate to="dashboard" />} />
             <Route path="dashboard" element={<OrganizerDashboard />} />
             <Route path="create-event" element={<CreateEvent />} />
+            <Route path="myevents" element={<OrganizerMyEvents />} />
+            <Route path="view-participants" element={<ViewParticipants />} />
+            <Route path="profile" element={<OrganizerProfile />} />
             <Route path="notifications" element={<SendNotification />} />
-
           </Route>
 
           {/* student route */}
@@ -97,23 +98,23 @@ function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<Navigate to="dashboard" />} />
+            <Route index element={<Navigate to="events" />} />
             <Route path="events" element={<StudentEvents />} />
             <Route path="profile" element={<StudentProfile />} />
             <Route path="notification" element={<Notification />} />
             <Route path="registrations" element={<Registrations />} />
           </Route>
 
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<RegistrationPage />} />
-        <Route path="/verify-email" element={<VerifyEmail />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/verify-otp" element={<VerifyOtp />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/create-event" element={<CreateEvent />} />
-        <Route path="/dashboard" element={<DashboardLayout />} />
-      </Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<RegistrationPage />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/verify-otp" element={<VerifyOtp />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/create-event" element={<CreateEvent />} />
+          <Route path="/dashboard" element={<DashboardLayout />} />
+        </Routes>
 
     </>
   );

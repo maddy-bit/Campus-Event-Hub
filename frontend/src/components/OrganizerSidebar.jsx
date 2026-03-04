@@ -18,8 +18,8 @@ import { toast } from "sonner";
 const menuItems = [
   { name: "Dashboard", path: "/organizer/dashboard", icon: LayoutDashboard },
   { name: "Create", path: "/organizer/create-event", icon: CalendarPlus },
-  { name: "Events", path: "/organizer/events", icon: ListChecks },
-  { name: "Participants", path: "/organizer/participants", icon: Users },
+  { name: "Events", path: "/organizer/myevents", icon: ListChecks },
+  { name: "Participants", path: "/organizer/view-participants", icon: Users },
   { name: "Notifs", path: "/organizer/notifications", icon: Bell },
 ];
 

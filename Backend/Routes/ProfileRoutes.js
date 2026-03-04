@@ -7,7 +7,8 @@ const {
   uploadProfilePicture,
   uploadClubLogo,
   deleteProfilePicture,
-  deleteClubLogo
+  deleteClubLogo,
+  changePassword
 } = require('../Controllers/ProfileController');
 const { verifyToken } = require('../Middleware/AuthMiddleware');
 const { checkOrganizerRole, checkProfileOwnership } = require('../Middleware/RoleMiddleware');
@@ -33,5 +34,8 @@ router.delete('/profile-picture', verifyToken, deleteProfilePicture);
 
 // Delete club logo (organizers only)
 router.delete('/club-logo', verifyToken, checkOrganizerRole, deleteClubLogo);
+
+// Change password (all authenticated users)
+router.put('/change-password', verifyToken, changePassword);
 
 module.exports = router;

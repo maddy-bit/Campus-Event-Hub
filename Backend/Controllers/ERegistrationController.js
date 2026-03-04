@@ -1,5 +1,5 @@
-const ERegistrationModel  = require("../Models/ERegistration");
-const  EventModel  = require("../Models/event");
+const { ERegistrationModel } = require("../Models/ERegistration");
+const { EventModel } = require("../Models/event");
 
 const registerForEvent = async (req, res) => {
   try {
@@ -19,7 +19,9 @@ const registerForEvent = async (req, res) => {
       return res.status(400).json({ message: "Registration deadline has passed" });
     }
 
-    if (event.registeredParticipants >= event.maxParticipants) {
+    // Count current registrations for this event
+    const currentCount = await ERegistrationModel.countDocuments({ eventId });
+    if (currentCount >= event.maxSeats) {
       return res.status(400).json({ message: "Event is full" });
     }
 
@@ -36,9 +38,6 @@ const registerForEvent = async (req, res) => {
     });
 
     await registration.save();
-
-    event.registeredParticipants += 1;
-    await event.save();
 
     res.status(201).json({
       message: "Registration successful",
@@ -123,11 +122,7 @@ const cancelRegistration = async (req, res) => {
       return res.status(403).json({ message: "You don't have permission to cancel this registration" });
     }
 
-    const event = await EventModel.findById(registration.eventId);
-    if (event) {
-      event.registeredParticipants = Math.max(0, event.registeredParticipants - 1);
-      await event.save();
-    }
+    // No need to decrement a counter — registration count is derived from the collection
 
     await ERegistrationModel.findByIdAndDelete(id);
 

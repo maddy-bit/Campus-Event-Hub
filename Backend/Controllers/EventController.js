@@ -1,4 +1,5 @@
 const { EventModel } = require("../Models/event");
+const { ERegistrationModel } = require("../Models/ERegistration");
 const cloudinary = require("../Config/cloudinary");
 const fs = require("fs");
 
@@ -195,7 +196,7 @@ const getMyEvents = async (req, res) => {
 
     const eventsWithSeatData = await Promise.all(
       events.map(async (event) => {
-        const seatsFilled = await ERegistration.countDocuments({
+        const seatsFilled = await ERegistrationModel.countDocuments({
           eventId: event._id,
           status: "Registered"
         });
@@ -240,7 +241,7 @@ const getParticipantsByEventId = async (req, res) => {
       });
     }
 
-    const registrations = await ERegistration.find({ eventId })
+    const registrations = await ERegistrationModel.find({ eventId })
       .populate("userId", "fullName email department yearOfStudy collegeName phoneNumber")
       .sort({ createdAt: -1 });
 
@@ -260,7 +261,7 @@ const updatePaymentStatus = async (req, res) => {
     const { id } = req.params;
     const { paymentStatus } = req.body;
 
-    const registration = await ERegistration.findById(id).populate("eventId");
+    const registration = await ERegistrationModel.findById(id).populate("eventId");
 
     if (!registration) {
       return res.status(404).json({ message: "Registration not found" });
