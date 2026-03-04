@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
+import { useState } from "react";
 import {
   LayoutDashboard,
   Users,
@@ -18,14 +19,23 @@ const adminMenuItems = [
 ];
 
 const AdminLayout = () => {
-  return (
-    <div className="flex min-h-screen bg-gray-100">
-      
-      <Sidebar menuItems={adminMenuItems} />
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-      <div className="flex-1 md:ml-64 flex flex-col">
+  return (
+    <div className="flex min-h-screen bg-[#f3f1ea] font-sans selection:bg-[#ccff00]">
+      
+      <Sidebar 
+        menuItems={adminMenuItems} 
+        isOpen={sidebarOpen}
+        setIsOpen={setSidebarOpen}
+      />
+
+      <div className="flex-1 flex flex-col">
         
-        <Header title="Admin Panel" />
+        <Header 
+          title="Admin" 
+          onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+        />
 
         <div className="p-6">
           <Outlet />

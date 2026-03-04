@@ -6,37 +6,35 @@ import api from "../api";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-
-  const [loading, setLoading] = useState(true);
-
+  const [loading, setLoading] = useState(true); 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
   useEffect(() => {
-    const checkUser = async () => {
-      try {
-        const { data } = await api.get("/auth/me");
+  const checkUser = async () => {
+    try {
+      const { data } = await api.get("/auth/me");
 
-        if (data?.role === "student") {
-          navigate(`/${data.role}/events`);
-        } else if (data?.role) {
-          navigate(`/${data.role}/dashboard`);
-        }
-      } catch (err) {
-        console.log("Not authenticated, staying on login.");
-      } finally {
-        setLoading(false);
+      if (data?.role === "student") {
+        navigate(`/${data.role}/events`);
+      } else if (data?.role) {
+        navigate(`/${data.role}/dashboard`);
       }
-    };
 
-    checkUser();
-  }, [navigate]);
+    } catch (err) {
+      console.log("Not authenticated, staying on login.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  checkUser();
+}, [navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -48,16 +46,15 @@ const LoginPage = () => {
 
     try {
       const res = await api.post("/auth/login", formData);
-
       toast.success(res.data.message || "Login successful");
 
       const role = res.data.user.role;
-
-      if (role === "student") {
+       if (role === "student") {
         navigate(`/${role}/events`);
       } else if (role) {
         navigate(`/${role}/dashboard`);
       }
+
     } catch (err) {
       toast.error(err.response?.data?.message || "Login failed");
     }
@@ -80,7 +77,6 @@ const LoginPage = () => {
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Email</label>
-
             <input
               type="email"
               name="email"
@@ -93,7 +89,6 @@ const LoginPage = () => {
 
           <div className="form-group">
             <label>Password</label>
-
             <input
               type="password"
               name="password"

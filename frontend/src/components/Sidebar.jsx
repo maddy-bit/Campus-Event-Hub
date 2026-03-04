@@ -1,9 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
-
+ 
 const Sidebar = ({ menuItems, isOpen, setIsOpen, variant }) => {
   const location = useLocation();
   const isFloating = variant === "floating-bottom";
-
+ 
   return (
     <>
       {/* Overlay (Mobile - only for non-floating drawer) */}
@@ -13,7 +13,7 @@ const Sidebar = ({ menuItems, isOpen, setIsOpen, variant }) => {
           onClick={() => setIsOpen(false)}
         />
       )}
-
+ 
       {/* Floating Bottom Nav (Mobile) or Sidebar (Desktop) */}
       <div
         className={`
@@ -35,27 +35,27 @@ const Sidebar = ({ menuItems, isOpen, setIsOpen, variant }) => {
           }
         `}
       >
-
+ 
         {/* Title (Hidden on mobile floating nav) */}
         {!isFloating && (
           <div className="p-6 font-black text-2xl border-b-4 border-black uppercase italic tracking-tighter">
             PANEL
           </div>
         )}
-
+       
         {isFloating && (
           <div className="hidden md:block p-6 font-black text-2xl border-b-4 border-black uppercase italic tracking-tighter w-full">
             STUDENT
           </div>
         )}
-
+ 
         <nav className={`
           ${isFloating ? "flex flex-row w-full justify-around md:flex-col md:space-y-3 md:mt-6" : "p-4 space-y-3"}
         `}>
           {menuItems.map((item, index) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
-
+ 
             return (
               <Link
                 key={index}
@@ -84,5 +84,8 @@ const Sidebar = ({ menuItems, isOpen, setIsOpen, variant }) => {
     </>
   );
 };
-
+ 
 export default Sidebar;
+ 
+ 
+ 
