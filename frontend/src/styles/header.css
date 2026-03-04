@@ -1,60 +1,102 @@
-/* ===== HEADER ===== */
+/* ===== NEO BRUTALISM HEADER ===== */
 .neo-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 30px;
-  background: #f3f1ea;
+  padding: 12px 30px;
+  background: #ffffff;
   border-bottom: 4px solid #000;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0px 4px 0px rgba(0, 0, 0, 0.05);
 }
 
 .neo-header-left {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 20px;
 }
 
 .neo-menu-btn {
-  width: 42px;
-  height: 42px;
-  background: #f6d94c;
+  width: 44px;
+  height: 44px;
+  background: #ffce31;
   border: 4px solid #000;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 4px 4px 0px #000;
   cursor: pointer;
+  transition: all 0.2s;
 }
 
-.neo-search {
+.neo-menu-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #000;
+}
+
+.neo-logo {
   display: flex;
   align-items: center;
-  background: #fff;
+  gap: 12px;
+  text-decoration: none;
+  background: #ccff00;
   border: 4px solid #000;
-  padding: 8px 16px;
-  width: 280px;
+  padding: 6px 16px;
   box-shadow: 4px 4px 0px #000;
+  transition: all 0.2s;
 }
 
-.neo-search input {
-  border: none;
-  outline: none;
-  width: 100%;
+.neo-logo:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 7px 7px 0px #000;
+}
+
+.logo-icon {
+  color: #000;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.logo-text .hub {
+  font-weight: 950;
+  font-size: 20px;
+  letter-spacing: -1.5px;
+}
+
+.logo-text .ceh {
+  font-size: 10px;
   font-weight: 800;
-  font-size: 12px;
   text-transform: uppercase;
-  background: transparent;
+  letter-spacing: 2px;
+}
+
+.neo-header-title {
+  font-weight: 900;
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: #000;
+  opacity: 0.8;
+  background: #fff;
+  border: 3px solid #000;
+  padding: 4px 12px;
+  box-shadow: 3px 3px 0px #000;
 }
 
 .neo-header-right {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 16px;
 }
 
-.neo-icon-box {
-  width: 42px;
-  height: 42px;
+.neo-action-box {
+  width: 44px;
+  height: 44px;
   background: #fff;
   border: 4px solid #000;
   display: flex;
@@ -62,37 +104,68 @@
   justify-content: center;
   box-shadow: 4px 4px 0px #000;
   cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  text-decoration: none;
+  color: #000;
 }
 
-.neo-user-badge {
+.neo-action-box:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #000;
+}
+
+.neo-action-box.logout {
+  background: #ff4d4d;
+  color: #fff;
+}
+
+.notif-dot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 10px;
+  height: 10px;
+  background: #ff0000;
+  border: 2px solid #000;
+  border-radius: 50%;
+}
+
+.neo-profile-badge {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #9be23a;
+  background: #fff;
   border: 4px solid #000;
-  padding: 6px 12px;
+  padding: 4px 12px;
   box-shadow: 4px 4px 0px #000;
 }
 
-.neo-user-initials {
-  width: 30px;
-  height: 30px;
+.avatar {
+  width: 32px;
+  height: 32px;
   background: #000;
   color: #fff;
   font-weight: 900;
-  font-size: 11px;
+  font-size: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  border: 2px solid #000;
+  flex-shrink: 0;
 }
 
-.neo-user-info .name {
+.info .name {
   font-weight: 900;
   font-size: 12px;
+  text-transform: uppercase;
+  line-height: 1;
 }
 
-.neo-user-info .role {
-  font-size: 10px;
-  opacity: 0.7;
+.info .role {
+  font-size: 8px;
+  font-weight: 700;
   text-transform: uppercase;
+  opacity: 0.6;
 }
