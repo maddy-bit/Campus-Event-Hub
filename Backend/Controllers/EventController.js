@@ -92,6 +92,28 @@ const getAllEvents = async (req, res) => {
   }
 };
 
+const getUpcomingEvents = async (req, res) => {
+  try {
+    const currentDate = new Date();
+
+    const events = await EventModel.find({
+      // status: { $in: ["Approved", "Draft", "Submitted"] }, bro we will add if approval requires
+      registrationDeadline: { $gte: currentDate }
+    })
+      .populate("createdBy", "fullName email collegeName")
+      .sort({ eventDate: 1 });
+
+    res.status(200).json({
+      message: "Upcoming events with open registration retrieved successfully",
+      count: events.length,
+      events,
+    });
+  } catch (err) {
+    console.error("Get upcoming events error:", err);
+    res.status(500).json({ message: "Failed to retrieve upcoming events", error: err.message });
+  }
+};
+
 const getEventById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -298,6 +320,7 @@ const updatePaymentStatus = async (req, res) => {
 module.exports = {
   createEvent,
   getAllEvents,
+  getUpcomingEvents,
   getEventById,
   updateEvent,
   deleteEvent,

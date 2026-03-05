@@ -358,7 +358,8 @@ const StudentEvents = () => {
         );
         setUserLoading(false);
 
-        const eventRes = await api.get("/events");
+        // Use the new upcoming events endpoint that filters out closed registrations
+        const eventRes = await api.get("/events/upcoming");
         const approved = (eventRes.data.events || []).filter(
           (e) =>
             e.status === "Approved" ||

@@ -5,6 +5,7 @@ const upload = require("../utils/uploadConfig");
 const {
   createEvent,
   getAllEvents,
+  getUpcomingEvents,
   getEventById,
   updateEvent,
   deleteEvent,
@@ -16,6 +17,9 @@ router.post("/create", verifyToken, checkRole("admin", "organizer"), upload.sing
 
 //to get only the count of the evnts  
 router.get("/", verifyToken, getAllEvents);
+
+//to get upcoming events with open registration
+router.get("/upcoming", verifyToken, getUpcomingEvents);
 
 //for getting the details of the event for that particular user
 router.get("/my-events", verifyToken, checkRole("admin", "organizer"), getMyEvents);
