@@ -11,7 +11,7 @@ const {
 const { getParticipantsByEventId } = require("../Controllers/EventController");
 
 // Route to register for an event
-router.post("/", verifyToken, checkRole("student"), registerForEvent);
+router.post("/register", verifyToken, checkRole("student"), registerForEvent);
 
 router.get("/", verifyToken, getAllRegistrations);
 
