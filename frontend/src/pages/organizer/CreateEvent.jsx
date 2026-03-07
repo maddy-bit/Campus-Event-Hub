@@ -44,7 +44,7 @@ const CreateEvent = () => {
     endTime: "",
     maxSeats: "",
     registrationDeadline: "",
-    isPublic: false,
+    isPublic: true,
     isPaidEvent: false,
     ticketPrice: "",
   });
@@ -55,7 +55,6 @@ const CreateEvent = () => {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
-    console.log(form.isPublic);
   };
 
   const handleFileChange = (e) => {
@@ -155,7 +154,7 @@ const CreateEvent = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
       toast.success("Event submitted for approval!");
-      navigate("/organizer/events");
+      navigate("/organizer/myevents");
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to create event");
     } finally {
@@ -405,18 +404,19 @@ const CreateEvent = () => {
               min="1"
             />
           </div>
-          {/* is public  */}
+          {/* Restrict to college only (inverted isPublic) */}
           <div className="neo-toggle-wrap">
             <div className="toggle-info">
-              <h5>Allow only this college</h5>
-              <p>Turn on to block registrations from other colleges</p>
+              <h5>Restrict to My College Only</h5>
+              <p>Turn on to allow only students from your college to register</p>
             </div>
             <label className="neo-switch">
               <input
                 type="checkbox"
-                name="isPublic"
-                checked={form.isPublic}
-                onChange={handleChange}
+                checked={!form.isPublic}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, isPublic: !e.target.checked }))
+                }
               />
               <span className="slider"></span>
             </label>
