@@ -17,11 +17,10 @@ const notificationSchema = new mongoose.Schema(
     event: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Event",
-      required: true,
     },
     type: {
       type: String,
-      enum: ["Announcement", "Reminder", "Alert", "Update"],
+      enum: ["Announcement", "Reminder", "Alert", "Update", "Submission_Update"],
       default: "Announcement",
       required: true,
     },
