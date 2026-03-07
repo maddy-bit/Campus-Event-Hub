@@ -9,7 +9,6 @@ import VerifyOtp from "./components/VerifyOtp";
 import ResetPassword from "./components/ResetPassword";
 import VerifyEmail from "./components/VerifyEmail";
 import LandingPage from "./components/LandingPage";
-import CreateEvent from "./components/CreateEvent";
 import DashboardLayout from "./components/DashboardLayout";
 
 // Importing ProtectedRoute for role-based access control
@@ -23,6 +22,7 @@ import SuperAdminLayout from "./layouts/SuperAdminLayout";
 
 
 // Importing dashboards for different roles
+import CreateEvent from "./pages/organizer/CreateEvent";
 import AdminDashboard from "./pages/admin/Dashboard";
 import OrganizerDashboard from "./pages/organizer/Dashboard";
 import SendNotification from "./pages/organizer/SendNotification";
