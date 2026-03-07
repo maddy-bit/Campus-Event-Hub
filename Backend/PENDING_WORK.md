@@ -4,7 +4,7 @@
 
 ---
 
-## MILESTONE 1 — Admin & SuperAdmin Dashboard (Current)
+## MILESTONE 2 — Admin & SuperAdmin Dashboard (Current)
 
 ### ✅ COMPLETED (Backend)
 
@@ -85,7 +85,7 @@
 
 ---
 
-## MILESTONE 2 — Feedback, Comments & Verification
+## MILESTONE 4 — Feedback, Comments & Verification
 
 ### 🔲 PENDING — Backend
 
@@ -140,7 +140,7 @@ DELETE /superadmin/admins/:id         → Remove admin
 GET    /superadmin/analytics          → Platform analytics
 ```
 
-### Needs to be built (Milestone 1)
+### Needs to be built (Milestone 3)
 ```
 PATCH  /admin/users/:id/promote       → Promote student → organizer
 POST   /admin/notifications/send      → Send notification to college
@@ -150,7 +150,7 @@ GET    /admin/analytics/trend         → Weekly registration trend data
 GET    /admin/organizers/status       → Organizers grouped by club with event counts
 ```
 
-### Needs to be built (Milestone 2)
+### Needs to be built (Milestone 4)
 ```
 POST   /feedback                      → Submit feedback
 GET    /feedback/event/:eventId       → Get event feedback

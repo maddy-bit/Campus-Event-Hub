@@ -18,6 +18,7 @@ router.use(verifyToken, checkRole("superadmin"));
 // college management
 router.post("/colleges", createCollege);
 router.get("/colleges", getAllColleges);
+//pending to get all the users of the college
 router.put("/colleges/:id", updateCollege);
 router.delete("/colleges/:id", deleteCollege);
 
