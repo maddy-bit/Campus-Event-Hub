@@ -357,6 +357,7 @@ const updatePaymentStatus = async (req, res) => {
 const getMyCollegeEvents = async (req, res) => {
   try {
     const userCollegeId = req.user.collegeId;
+    const currentDate = new Date();
 
     if (!userCollegeId) {
       return res.status(400).json({ message: "User does not belong to a college" });
@@ -365,8 +366,8 @@ const getMyCollegeEvents = async (req, res) => {
     const filter = {
       status: "Approved",
       collegeId: userCollegeId,
-    };
-
+      registrationDeadline: { $gte: currentDate },
+    };  
     const events = await EventModel.find(filter)
       .populate("createdBy", "fullName email")
       .populate("collegeId", "name")
@@ -387,10 +388,12 @@ const getMyCollegeEvents = async (req, res) => {
 const getExternalEvents = async (req, res) => {
   try {
     const userCollegeId = req.user.collegeId;
+    const currentDate = new Date();
 
     const filter = {
       status: "Approved",
       isPublic: true,
+      registrationDeadline: { $gte: currentDate },
     };
 
     // If user belongs to a college, exclude their own college's events
@@ -398,10 +401,14 @@ const getExternalEvents = async (req, res) => {
       filter.collegeId = { $ne: userCollegeId };
     }
 
+    console.log("Fetching external events. Excluding college:", userCollegeId);
+
     const events = await EventModel.find(filter)
       .populate("createdBy", "fullName email")
       .populate("collegeId", "name")
       .sort({ eventDate: 1 });
+
+    console.log(`Found ${events.length} external public events`);
 
     res.status(200).json({
       message: "External events retrieved successfully",
