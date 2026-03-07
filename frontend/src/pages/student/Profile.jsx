@@ -51,7 +51,7 @@ const ProfilePortal = () => {
     setEditForm({
       fullName: user?.fullName || "",
       phoneNumber: user?.phoneNumber || "",
-      collegeName: user?.collegeName || "",
+
       department: user?.department || "",
       yearOfStudy: user?.yearOfStudy || "",
     });
@@ -266,7 +266,7 @@ const ProfilePortal = () => {
                 <div className="flex items-center gap-1.5 text-[9px] font-bold text-gray-500 mb-1">
                   <School size={10} /> COLLEGE / INSTITUTE
                 </div>
-                <p className="text-base font-black">{user.collegeName || "Not set"}</p>
+                <p className="text-base font-black">{user.collegeId?.name || "Not set"}</p>
               </div>
               <div>
                 <div className="flex items-center gap-1.5 text-[9px] font-bold text-gray-500 mb-1">
@@ -332,7 +332,6 @@ const ProfilePortal = () => {
               {[
                 { label: "Full Name", key: "fullName", placeholder: "John Doe" },
                 { label: "Phone Number", key: "phoneNumber", placeholder: "9876543210" },
-                { label: "College Name", key: "collegeName", placeholder: "Delhi Technological University" },
                 { label: "Department", key: "department", placeholder: "Computer Science" },
                 { label: "Year of Study", key: "yearOfStudy", placeholder: "2026" },
               ].map(({ label, key, placeholder }) => (

@@ -88,7 +88,7 @@ const ViewParticipants = () => {
       return (
         user?.fullName?.toLowerCase().includes(search) || 
         user?.email?.toLowerCase().includes(search) || 
-        user?.collegeName?.toLowerCase().includes(search)
+        user?.collegeId?.name?.toLowerCase().includes(search)
       );
     });
   }, [participants, participantSearch]);
@@ -96,7 +96,7 @@ const ViewParticipants = () => {
   const stats = useMemo(() => {
     const total = participants.length;
     const pending = participants.filter(p => p.payment?.status === "Pending").length;
-    const uniqueColleges = [...new Set(participants.map(p => p.userId?.collegeName))].filter(Boolean).length;
+    const uniqueColleges = [...new Set(participants.map(p => p.userId?.collegeId?.name))].filter(Boolean).length;
     const remaining = Math.max(0, (selectedEvent?.maxSeats || 0) - total);
     
     return { total, pending, uniqueColleges, remaining };
@@ -179,7 +179,7 @@ const ViewParticipants = () => {
               <div className="space-y-4">
                 <DetailRow label="FULL NAME" value={activeParticipant?.userId?.fullName} />
                 <DetailRow label="EMAIL ADDRESS" value={activeParticipant?.userId?.email} />
-                <DetailRow label="COLLEGE" value={activeParticipant?.userId?.collegeName} />
+                <DetailRow label="COLLEGE" value={activeParticipant?.userId?.collegeId?.name} />
                 <DetailRow label="REGISTRATION ID" value={activeParticipant?._id} />
                 <DetailRow label="PAYMENT STATUS" value={activeParticipant?.payment?.status} isStatus />
                 <button onClick={closeModals} className="w-full border-4 border-black p-2 mt-4 font-black hover:bg-black hover:text-white transition-all">
@@ -258,7 +258,7 @@ const ViewParticipants = () => {
                   <tr key={p._id} className="border-b-[2px] border-black hover:bg-[#F3F3F3]">
                     <td className="p-4 border-r-[2px] border-black">{index + 1}</td>
                     <td className="p-4 border-r-[2px] border-black font-black">{p.userId?.fullName}</td>
-                    <td className="p-4 border-r-[2px] border-black">{p.userId?.collegeName}</td>
+                    <td className="p-4 border-r-[2px] border-black">{p.userId?.collegeId?.name}</td>
                     <td className="p-4 border-r-[2px] border-black">
                       <select 
                         value={p.payment?.status || "Pending"} 

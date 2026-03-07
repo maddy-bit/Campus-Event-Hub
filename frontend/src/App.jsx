@@ -29,6 +29,7 @@ import SendNotification from "./pages/organizer/SendNotification";
 import OrganizerMyEvents from "./pages/organizer/MyEvents";
 import OrganizerProfile from "./pages/organizer/Profile";
 import ViewParticipants from "./pages/organizer/ViewParticipants";
+import OrganizerNotification from "./pages/organizer/Notification";
 import StudentEvents from "./pages/student/Events";
 import SuperAdminDashboard from "./pages/superadmin/Dashboard";
 import StudentProfile from "./pages/student/Profile";
@@ -86,6 +87,7 @@ function App() {
             <Route path="myevents" element={<OrganizerMyEvents />} />
             <Route path="view-participants" element={<ViewParticipants />} />
             <Route path="profile" element={<OrganizerProfile />} />
+            <Route path="inbox" element={<OrganizerNotification />} />
             <Route path="notifications" element={<SendNotification />} />
           </Route>
 

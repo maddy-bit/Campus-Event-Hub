@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import "../styles/registrationPage.css";
@@ -6,10 +6,11 @@ import api from "../api";
 
 const RegistrationPage = () => {
   const navigate = useNavigate();
+  const [colleges, setColleges] = useState([]);
 
   const [formData, setFormData] = useState({
     name: "",
-    collegeName: "",
+    collegeId: "",
     phoneNumber: "",
     department: "",
     yearOfStudy: "",
@@ -17,6 +18,18 @@ const RegistrationPage = () => {
     password: "",
     confirmPassword: "",
   });
+
+  useEffect(() => {
+    const fetchColleges = async () => {
+      try {
+        const res = await api.get("/colleges");
+        setColleges(res.data.colleges || []);
+      } catch (err) {
+        console.error("Failed to load colleges:", err);
+      }
+    };
+    fetchColleges();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -43,7 +56,7 @@ const RegistrationPage = () => {
         fullName: formData.name,
         email: formData.email,
         phoneNumber: formData.phoneNumber,
-        collegeName: formData.collegeName,
+        collegeId: formData.collegeId,
         department: formData.department,
         yearOfStudy: yearMap[formData.yearOfStudy],
         password: formData.password,
@@ -101,15 +114,22 @@ const RegistrationPage = () => {
           </div>
 
           <div className="form-group">
-            <label>College Name</label>
-            <input
-              type="text"
-              name="collegeName"
-              placeholder="Enter college name"
-              value={formData.collegeName}
+            <label>College</label>
+            <select
+              name="collegeId"
+              value={formData.collegeId}
               onChange={handleChange}
               required
-            />
+            >
+              <option value="" disabled>
+                Select your college
+              </option>
+              {colleges.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="form-group">

@@ -287,9 +287,9 @@ const EventDialog = ({
                 <div className="text-xs font-black uppercase">
                   {event.createdBy.fullName}
                 </div>
-                {event.createdBy.collegeName && (
+                {event.collegeId?.name && (
                   <div className="text-[10px] text-gray-500 font-bold">
-                    {event.createdBy.collegeName}
+                    {event.collegeId.name}
                   </div>
                 )}
               </div>
@@ -340,7 +340,8 @@ const StudentEvents = () => {
   const [activeCategory, setActiveCategory] = useState("All");
   const [sortBy, setSortBy] = useState("date_asc");
   const [registeringId, setRegisteringId] = useState(null);
-  const [userCollege, setUserCollege] = useState("");
+  const [userCollegeId, setUserCollegeId] = useState("");
+  const [userCollegeName, setUserCollegeName] = useState("");
   const [userLoading, setUserLoading] = useState(true);
   const [collegeContext, setCollegeContext] = useState("My College");
   const [registeredEventIds, setRegisteredEventIds] = useState(new Set());
@@ -353,20 +354,17 @@ const StudentEvents = () => {
         setLoading(true);
         setUserLoading(true);
         const userRes = await api.get("/auth/me");
-        setUserCollege(
-          userRes.data?.collegeName || userRes.data?.user?.collegeName || "",
+        setUserCollegeId(
+          userRes.data?.college?._id || "",
+        );
+        setUserCollegeName(
+          userRes.data?.college?.name || "",
         );
         setUserLoading(false);
 
         // Use the new upcoming events endpoint that filters out closed registrations
         const eventRes = await api.get("/events/upcoming");
-        const approved = (eventRes.data.events || []).filter(
-          (e) =>
-            e.status === "Approved" ||
-            e.status === "Draft" ||
-            e.status === "Submitted",
-        );
-        setEvents(approved);
+        setEvents(eventRes.data.events || []);
 
         try {
           const regRes = await api.get("/registrations/my");
@@ -395,9 +393,9 @@ const StudentEvents = () => {
   const filteredEvents = useMemo(() => {
     let result = [...events];
     if (collegeContext === "My College") {
-      result = result.filter((e) => e.createdBy?.collegeName === userCollege);
+      result = result.filter((e) => e.collegeId?._id === userCollegeId);
     } else {
-      result = result.filter((e) => e.createdBy?.collegeName !== userCollege);
+      result = result.filter((e) => e.collegeId?._id !== userCollegeId);
     }
     if (activeCategory !== "All") {
       result = result.filter((e) => e.category === activeCategory);
@@ -429,7 +427,7 @@ const StudentEvents = () => {
     searchQuery,
     sortBy,
     collegeContext,
-    userCollege,
+    userCollegeId,
   ]);
 
   const handleRegister = async (eventId) => {
@@ -644,7 +642,7 @@ const StudentEvents = () => {
                     </div>
 
                     {/* External */}
-                    {event.createdBy?.collegeName !== userCollege && (
+                    {event.collegeId?._id !== userCollegeId && (
                       <div className="absolute top-3 right-3 bg-blue-500 text-white border-2 border-black p-1 shadow-[2px_2px_0px_#000]">
                         <Globe size={11} />
                       </div>
