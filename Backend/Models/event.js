@@ -70,6 +70,11 @@ const eventSchema = new mongoose.Schema(
     index: true
   },
 
+  isPublic: {
+    type: Boolean,
+    default: true
+  },
+
   status: {
     type: String,
     enum: ['Draft', 'Submitted', 'Approved', 'Rejected'],
