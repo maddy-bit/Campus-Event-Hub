@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
-import { Search, Mail, Eye, X } from "lucide-react";
+import { Search, Mail, Eye, X, CalendarOff, Users, Frown, Loader2 } from "lucide-react";
 import api from "../../api";
 import { toast } from "sonner";
 
@@ -34,6 +34,7 @@ const ViewParticipants = () => {
   const [eventSearch, setEventSearch] = useState("");
   const [participantSearch, setParticipantSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [eventsLoading, setEventsLoading] = useState(true);
   
   // 3. Modal State
   const [activeParticipant, setActiveParticipant] = useState(null);
@@ -44,12 +45,15 @@ const ViewParticipants = () => {
 
   useEffect(() => {
     const fetchEvents = async () => {
+      setEventsLoading(true);
       try {
         const res = await api.get("/events/my-events");
         setEvents(res.data.events);
         if (res.data.events.length > 0) setSelectedEvent(res.data.events[0]);
       } catch (err) {
         console.error("Error fetching events:", err);
+      } finally {
+        setEventsLoading(false);
       }
     };
     fetchEvents();
@@ -196,104 +200,179 @@ const ViewParticipants = () => {
   return (
     <div className="bg-[#F3F3F3] min-h-screen p-6 font-mono text-[11px] uppercase tracking-wider relative">
       
-      {/* EVENT SELECTOR */}
-      <div className="mb-8">
-        <div className="relative w-full max-w-md mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input 
-            type="text" 
-            placeholder="SEARCH EVENTS..." 
-            value={eventSearch} 
-            onChange={(e) => setEventSearch(e.target.value)} 
-            className="pl-10 pr-4 py-3 border-[3px] border-black w-full focus:outline-none bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" 
-          />
+      {/* LOADING STATE */}
+      {eventsLoading ? (
+        <div className="flex flex-col items-center justify-center py-32 gap-4">
+          <Loader2 className="animate-spin text-black" size={40} />
+          <p className="text-sm font-bold uppercase text-gray-400">
+            LOADING EVENTS...
+          </p>
         </div>
-        <div className="flex gap-3 flex-wrap">
-          {displayedEvents.map((event) => (
-            <button 
-              key={event._id} 
-              onClick={() => setSelectedEvent(event)} 
-              className={`border-[3px] border-black px-6 py-2 font-black transition-all ${
-                selectedEvent?._id === event._id 
-                  ? "bg-[#B4F481] -translate-y-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" 
-                  : "bg-white hover:bg-gray-50"
-              }`}
+      ) : events.length === 0 ? (
+        /* NO EVENTS CREATED - EMPTY STATE */
+        <div className="flex flex-col items-center justify-center py-20">
+          <div className="border-[4px] border-black bg-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] p-12 max-w-lg w-full text-center">
+            <div className="w-20 h-20 mx-auto mb-6 border-[3px] border-black bg-[#FFEB69] flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <CalendarOff size={36} />
+            </div>
+            <h2 className="text-2xl font-black tracking-tighter mb-3">NO EVENTS CREATED YET</h2>
+            <p className="text-[12px] text-gray-500 font-bold leading-relaxed mb-6 normal-case">
+              You haven't created any events yet. Once you create an event and it gets approved, you'll be able to view and manage participants here.
+            </p>
+            <a
+              href="/organizer/create-event"
+              className="inline-block border-[3px] border-black bg-[#B4F481] px-8 py-3 font-black text-[12px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all"
             >
-              {event.title}
-            </button>
-          ))}
+              + CREATE YOUR FIRST EVENT
+            </a>
+          </div>
         </div>
-      </div>
-
-      {/* DASHBOARD CONTENT */}
-      {selectedEvent && (
-        <div className="border-[3px] border-black bg-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
-          <div className="p-8 border-b-[3px] border-black bg-black text-white flex justify-between items-end">
-            <div>
-              <p className="text-[#B4F481] text-[10px] mb-1 font-bold">ADMIN PANEL</p>
-              <h1 className="text-4xl font-black tracking-tighter">{selectedEvent.title}</h1>
+      ) : (
+        <>
+          {/* EVENT SELECTOR */}
+          <div className="mb-8">
+            <div className="relative w-full max-w-md mb-4">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input 
+                type="text" 
+                placeholder="SEARCH EVENTS..." 
+                value={eventSearch} 
+                onChange={(e) => setEventSearch(e.target.value)} 
+                className="pl-10 pr-4 py-3 border-[3px] border-black w-full focus:outline-none bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" 
+              />
+            </div>
+            <div className="flex gap-3 flex-wrap">
+              {displayedEvents.map((event) => (
+                <button 
+                  key={event._id} 
+                  onClick={() => setSelectedEvent(event)} 
+                  className={`border-[3px] border-black px-6 py-2 font-black transition-all ${
+                    selectedEvent?._id === event._id 
+                      ? "bg-[#B4F481] -translate-y-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" 
+                      : "bg-white hover:bg-gray-50"
+                  }`}
+                >
+                  {event.title}
+                </button>
+              ))}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 border-b-[3px] border-black">
-            <Stat label="REGISTRATIONS" value={stats.total} sub={`of ${selectedEvent.maxSeats}`} color="bg-[#B4F481]" />
-            <Stat label="SEATS LEFT" value={stats.remaining} sub="capacity" color="bg-white" />
-            <Stat label="PENDING" value={stats.pending} sub="actions" color="bg-[#FFEB69]" />
-            <Stat label="COLLEGES" value={stats.uniqueColleges} sub="campuses" color="bg-[#A2D2FF]" />
-          </div>
+          {/* DASHBOARD CONTENT */}
+          {selectedEvent && (
+            <div className="border-[3px] border-black bg-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
+              <div className="p-8 border-b-[3px] border-black bg-black text-white flex justify-between items-end">
+                <div>
+                  <p className="text-[#B4F481] text-[10px] mb-1 font-bold">ADMIN PANEL</p>
+                  <h1 className="text-4xl font-black tracking-tighter">{selectedEvent.title}</h1>
+                </div>
+              </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left">
-              <thead>
-                <tr className="bg-white border-b-[3px] border-black">
-                  <th className="p-4 border-r-[2px] border-black w-12">#</th>
-                  <th className="p-4 border-r-[2px] border-black">PARTICIPANT</th>
-                  <th className="p-4 border-r-[2px] border-black">COLLEGE</th>
-                  <th className="p-4 border-r-[2px] border-black">PAYMENT STATUS</th>
-                  <th className="p-4">ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredParticipants.map((p, index) => (
-                  <tr key={p._id} className="border-b-[2px] border-black hover:bg-[#F3F3F3]">
-                    <td className="p-4 border-r-[2px] border-black">{index + 1}</td>
-                    <td className="p-4 border-r-[2px] border-black font-black">{p.userId?.fullName}</td>
-                    <td className="p-4 border-r-[2px] border-black">{p.userId?.collegeId?.name}</td>
-                    <td className="p-4 border-r-[2px] border-black">
-                      <select 
-                        value={p.payment?.status || "Pending"} 
-                        onChange={(e) => handleStatusChange(p._id, e.target.value)} 
-                        className={`border-2 border-black font-black px-2 py-1 text-[10px] ${
-                          p.payment?.status === "Completed" ? "bg-[#B4F481]" : "bg-[#FFEB69]"
-                        }`}
-                      >
-                        <option value="Pending">PENDING</option>
-                        <option value="Completed">COMPLETED</option>
-                        <option value="Failed">FAILED</option>
-                      </select>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex gap-2">
-                        <button 
-                          onClick={() => { setActiveParticipant(p); setModalType('email'); }} 
-                          className="p-1.5 border-2 border-black hover:bg-black hover:text-white transition-colors"
-                        >
-                          <Mail size={14}/>
-                        </button>
-                        <button 
-                          onClick={() => { setActiveParticipant(p); setModalType('details'); }} 
-                          className="p-1.5 border-2 border-black hover:bg-black hover:text-white transition-colors"
-                        >
-                          <Eye size={14}/>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+              <div className="grid grid-cols-1 md:grid-cols-4 border-b-[3px] border-black">
+                <Stat label="REGISTRATIONS" value={stats.total} sub={`of ${selectedEvent.maxSeats}`} color="bg-[#B4F481]" />
+                <Stat label="SEATS LEFT" value={stats.remaining} sub="capacity" color="bg-white" />
+                <Stat label="PENDING" value={stats.pending} sub="actions" color="bg-[#FFEB69]" />
+                <Stat label="COLLEGES" value={stats.uniqueColleges} sub="campuses" color="bg-[#A2D2FF]" />
+              </div>
+
+              {/* PARTICIPANT SEARCH */}
+              {participants.length > 0 && (
+                <div className="p-4 border-b-[3px] border-black">
+                  <div className="relative w-full max-w-sm">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input 
+                      type="text" 
+                      placeholder="SEARCH PARTICIPANTS..." 
+                      value={participantSearch} 
+                      onChange={(e) => setParticipantSearch(e.target.value)} 
+                      className="pl-10 pr-4 py-2 border-[2px] border-black w-full focus:outline-none bg-white" 
+                    />
+                  </div>
+                </div>
+              )}
+
+              {loading ? (
+                /* Loading participants */
+                <div className="flex flex-col items-center justify-center py-16 gap-3">
+                  <Loader2 className="animate-spin text-black" size={28} />
+                  <p className="text-[11px] font-bold text-gray-400">LOADING PARTICIPANTS...</p>
+                </div>
+              ) : participants.length === 0 ? (
+                /* NO PARTICIPANTS YET */
+                <div className="flex flex-col items-center justify-center py-16 px-6">
+                  <div className="w-16 h-16 mx-auto mb-5 border-[3px] border-black bg-[#A2D2FF] flex items-center justify-center shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                    <Users size={28} />
+                  </div>
+                  <h3 className="text-lg font-black tracking-tighter mb-2">NO PARTICIPANTS YET</h3>
+                  <p className="text-[11px] text-gray-500 font-bold text-center max-w-sm normal-case leading-relaxed">
+                    No one has registered for this event yet. Share it with students and wait for registrations to come in!
+                  </p>
+                </div>
+              ) : filteredParticipants.length === 0 ? (
+                /* SEARCH RETURNED NO RESULTS */
+                <div className="flex flex-col items-center justify-center py-16 px-6">
+                  <Frown className="mb-4 text-gray-300" size={40} />
+                  <h3 className="text-lg font-black tracking-tighter mb-2">NO MATCHING PARTICIPANTS</h3>
+                  <p className="text-[11px] text-gray-500 font-bold text-center max-w-sm normal-case">
+                    No participants match your search "{participantSearch}". Try a different search term.
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse text-left">
+                    <thead>
+                      <tr className="bg-white border-b-[3px] border-black">
+                        <th className="p-4 border-r-[2px] border-black w-12">#</th>
+                        <th className="p-4 border-r-[2px] border-black">PARTICIPANT</th>
+                        <th className="p-4 border-r-[2px] border-black">COLLEGE</th>
+                        <th className="p-4 border-r-[2px] border-black">PAYMENT STATUS</th>
+                        <th className="p-4">ACTIONS</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredParticipants.map((p, index) => (
+                        <tr key={p._id} className="border-b-[2px] border-black hover:bg-[#F3F3F3]">
+                          <td className="p-4 border-r-[2px] border-black">{index + 1}</td>
+                          <td className="p-4 border-r-[2px] border-black font-black">{p.userId?.fullName}</td>
+                          <td className="p-4 border-r-[2px] border-black">{p.userId?.collegeId?.name}</td>
+                          <td className="p-4 border-r-[2px] border-black">
+                            <select 
+                              value={p.payment?.status || "Pending"} 
+                              onChange={(e) => handleStatusChange(p._id, e.target.value)} 
+                              className={`border-2 border-black font-black px-2 py-1 text-[10px] ${
+                                p.payment?.status === "Completed" ? "bg-[#B4F481]" : "bg-[#FFEB69]"
+                              }`}
+                            >
+                              <option value="Pending">PENDING</option>
+                              <option value="Completed">COMPLETED</option>
+                              <option value="Failed">FAILED</option>
+                            </select>
+                          </td>
+                          <td className="p-4">
+                            <div className="flex gap-2">
+                              <button 
+                                onClick={() => { setActiveParticipant(p); setModalType('email'); }} 
+                                className="p-1.5 border-2 border-black hover:bg-black hover:text-white transition-colors"
+                              >
+                                <Mail size={14}/>
+                              </button>
+                              <button 
+                                onClick={() => { setActiveParticipant(p); setModalType('details'); }} 
+                                className="p-1.5 border-2 border-black hover:bg-black hover:text-white transition-colors"
+                              >
+                                <Eye size={14}/>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+        </>
       )}
 
       {/* MODAL PORTAL */}

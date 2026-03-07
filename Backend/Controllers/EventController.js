@@ -2,7 +2,17 @@ const { EventModel } = require("../Models/event");
 const { UserModel } = require("../Models/users");
 const { ERegistrationModel } = require("../Models/ERegistration");
 const cloudinary = require("../Config/cloudinary");
-const fs = require("fs");
+
+// Helper: upload buffer to Cloudinary using upload_stream
+const uploadToCloudinary = (fileBuffer, options) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(options, (error, result) => {
+      if (error) return reject(error);
+      resolve(result);
+    });
+    stream.end(fileBuffer);
+  });
+};
 
 const createEvent = async (req, res) => {
   try {
@@ -35,7 +45,7 @@ const createEvent = async (req, res) => {
 
     if (req.file) {
       try {
-        const result = await cloudinary.uploader.upload(req.file.path, {
+        const result = await uploadToCloudinary(req.file.buffer, {
           folder: "campuseventhub/events",
           transformation: [
             { width: 1200, height: 630, crop: "limit" },
@@ -43,10 +53,6 @@ const createEvent = async (req, res) => {
           ],
         });
         posterUrl = result.secure_url;
-
-        fs.unlink(req.file.path, (err) => {
-          if (err) console.error("Temp file cleanup error:", err);
-        });
       } catch (uploadErr) {
         console.error("Cloudinary upload error:", uploadErr);
         return res.status(500).json({ message: "Image upload failed", error: uploadErr.message });
@@ -194,7 +200,7 @@ const updateEvent = async (req, res) => {
 
     if (req.file) {
       try {
-        const result = await cloudinary.uploader.upload(req.file.path, {
+        const result = await uploadToCloudinary(req.file.buffer, {
           folder: "campuseventhub/events",
           transformation: [
             { width: 1200, height: 630, crop: "limit" },
@@ -202,10 +208,6 @@ const updateEvent = async (req, res) => {
           ],
         });
         updates.posterUrl = result.secure_url;
-
-        fs.unlink(req.file.path, (err) => {
-          if (err) console.error("Temp file cleanup error:", err);
-        });
       } catch (uploadErr) {
         console.error("Cloudinary upload error:", uploadErr);
       }
@@ -351,6 +353,67 @@ const updatePaymentStatus = async (req, res) => {
   }
 };
 
+// get approved events from user's own college only (both public and private)
+const getMyCollegeEvents = async (req, res) => {
+  try {
+    const userCollegeId = req.user.collegeId;
+
+    if (!userCollegeId) {
+      return res.status(400).json({ message: "User does not belong to a college" });
+    }
+
+    const filter = {
+      status: "Approved",
+      collegeId: userCollegeId,
+    };
+
+    const events = await EventModel.find(filter)
+      .populate("createdBy", "fullName email")
+      .populate("collegeId", "name")
+      .sort({ eventDate: 1 });
+
+    res.status(200).json({
+      message: "College events retrieved successfully",
+      count: events.length,
+      events,
+    });
+  } catch (err) {
+    console.error("Get my college events error:", err);
+    res.status(500).json({ message: "Failed to retrieve college events", error: err.message });
+  }
+};
+
+// get public approved events from OTHER colleges only
+const getExternalEvents = async (req, res) => {
+  try {
+    const userCollegeId = req.user.collegeId;
+
+    const filter = {
+      status: "Approved",
+      isPublic: true,
+    };
+
+    // If user belongs to a college, exclude their own college's events
+    if (userCollegeId) {
+      filter.collegeId = { $ne: userCollegeId };
+    }
+
+    const events = await EventModel.find(filter)
+      .populate("createdBy", "fullName email")
+      .populate("collegeId", "name")
+      .sort({ eventDate: 1 });
+
+    res.status(200).json({
+      message: "External events retrieved successfully",
+      count: events.length,
+      events,
+    });
+  } catch (err) {
+    console.error("Get external events error:", err);
+    res.status(500).json({ message: "Failed to retrieve external events", error: err.message });
+  }
+};
+
 module.exports = {
   createEvent,
   getAllEvents,
@@ -360,5 +423,7 @@ module.exports = {
   deleteEvent,
   getMyEvents,
   getParticipantsByEventId,
-  updatePaymentStatus
+  updatePaymentStatus,
+  getMyCollegeEvents,
+  getExternalEvents,
 };

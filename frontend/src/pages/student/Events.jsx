@@ -334,7 +334,8 @@ const EventDialog = ({
 
 /* ── Main Component ─────────────────────────────────── */
 const StudentEvents = () => {
-  const [events, setEvents] = useState([]);
+  const [myCollegeEvents, setMyCollegeEvents] = useState([]);
+  const [externalEvents, setExternalEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
@@ -342,7 +343,6 @@ const StudentEvents = () => {
   const [registeringId, setRegisteringId] = useState(null);
   const [userCollegeId, setUserCollegeId] = useState("");
   const [userCollegeName, setUserCollegeName] = useState("");
-  const [userLoading, setUserLoading] = useState(true);
   const [collegeContext, setCollegeContext] = useState("My College");
   const [registeredEventIds, setRegisteredEventIds] = useState(new Set());
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -352,7 +352,6 @@ const StudentEvents = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        setUserLoading(true);
         const userRes = await api.get("/auth/me");
         setUserCollegeId(
           userRes.data?.college?._id || "",
@@ -360,11 +359,15 @@ const StudentEvents = () => {
         setUserCollegeName(
           userRes.data?.college?.name || "",
         );
-        setUserLoading(false);
 
-        // Use the new upcoming events endpoint that filters out closed registrations
-        const eventRes = await api.get("/events/upcoming");
-        setEvents(eventRes.data.events || []);
+        // Fetch both sets of events in parallel
+        const [myCollegeRes, externalRes] = await Promise.all([
+          api.get("/events/my-college"),
+          api.get("/events/external"),
+        ]);
+
+        setMyCollegeEvents(myCollegeRes.data.events || []);
+        setExternalEvents(externalRes.data.events || []);
 
         try {
           const regRes = await api.get("/registrations/my");
@@ -384,19 +387,17 @@ const StudentEvents = () => {
         toast.error("Failed to load data");
       } finally {
         setLoading(false);
-        setUserLoading(false);
       }
     };
     fetchData();
   }, []);
 
   const filteredEvents = useMemo(() => {
-    let result = [...events];
-    if (collegeContext === "My College") {
-      result = result.filter((e) => e.collegeId?._id === userCollegeId);
-    } else {
-      result = result.filter((e) => e.collegeId?._id !== userCollegeId);
-    }
+    // Pick the right source based on the active tab
+    let result = collegeContext === "My College"
+      ? [...myCollegeEvents]
+      : [...externalEvents];
+
     if (activeCategory !== "All") {
       result = result.filter((e) => e.category === activeCategory);
     }
@@ -422,12 +423,12 @@ const StudentEvents = () => {
     });
     return result;
   }, [
-    events,
+    myCollegeEvents,
+    externalEvents,
     activeCategory,
     searchQuery,
     sortBy,
     collegeContext,
-    userCollegeId,
   ]);
 
   const handleRegister = async (eventId) => {
@@ -572,7 +573,7 @@ const StudentEvents = () => {
       </div>
 
       {/* ── Content ── */}
-      {loading || userLoading ? (
+      {loading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
           <Loader2 className="animate-spin text-black" size={40} />
           <p className="text-sm font-bold uppercase text-gray-400">

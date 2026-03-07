@@ -1,8 +1,33 @@
 const { UserModel } = require("../Models/users");
 const { ClubModel } = require("../Models/club");
 const bcrypt = require("bcryptjs");
-const fs = require('fs');
-const path = require('path');
+const cloudinary = require("../Config/cloudinary");
+
+// Helper: upload buffer to Cloudinary using upload_stream
+const uploadToCloudinary = (fileBuffer, options) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(options, (error, result) => {
+      if (error) return reject(error);
+      resolve(result);
+    });
+    stream.end(fileBuffer);
+  });
+};
+
+// Helper: extract Cloudinary public_id from a URL for deletion
+const getPublicIdFromUrl = (url) => {
+  if (!url || !url.includes("cloudinary")) return null;
+  try {
+    // URL format: https://res.cloudinary.com/<cloud>/image/upload/v123/folder/filename.ext
+    const parts = url.split("/upload/");
+    if (parts.length < 2) return null;
+    const pathAfterUpload = parts[1].replace(/^v\d+\//, ""); // remove version
+    const publicId = pathAfterUpload.replace(/\.[^/.]+$/, ""); // remove extension
+    return publicId;
+  } catch {
+    return null;
+  }
+};
 
 // get user profile
 const getProfile = async (req, res) => {
@@ -93,7 +118,7 @@ const updateClubInfo = async (req, res) => {
   }
 };
 
-// upload profile picture
+// upload profile picture (to Cloudinary, no local files)
 const uploadProfilePicture = async (req, res) => {
   try {
     if (!req.file) {
@@ -103,28 +128,39 @@ const uploadProfilePicture = async (req, res) => {
     const userId = req.user._id;
     const user = await UserModel.findById(userId);
 
-    if (user.profilePicture) {
-      const oldPath = path.join(__dirname, '..', user.profilePicture);
-      if (fs.existsSync(oldPath)) {
-        fs.unlinkSync(oldPath);
+    // Delete old image from Cloudinary if it exists
+    const oldPublicId = getPublicIdFromUrl(user.profilePicture);
+    if (oldPublicId) {
+      try {
+        await cloudinary.uploader.destroy(oldPublicId);
+      } catch (err) {
+        console.error("Failed to delete old profile picture from Cloudinary:", err);
       }
     }
 
-    const profilePicturePath = `uploads/profiles/${req.file.filename}`;
-    user.profilePicture = profilePicturePath;
+    // Upload new image buffer to Cloudinary
+    const result = await uploadToCloudinary(req.file.buffer, {
+      folder: "campuseventhub/profiles",
+      transformation: [
+        { width: 400, height: 400, crop: "limit" },
+        { quality: "auto", fetch_format: "auto" },
+      ],
+    });
+
+    user.profilePicture = result.secure_url;
     await user.save();
 
     return res.status(200).json({
       success: true,
       message: "Profile picture uploaded successfully",
-      data: { profilePicture: profilePicturePath }
+      data: { profilePicture: result.secure_url }
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Error uploading profile picture", error: error.message });
   }
 };
 
-// upload club logo (updates Club collection)
+// upload club logo (to Cloudinary, no local files)
 const uploadClubLogo = async (req, res) => {
   try {
     if (!req.file) {
@@ -135,27 +171,37 @@ const uploadClubLogo = async (req, res) => {
     const user = await UserModel.findById(userId);
 
     if (!user.clubId) {
-      fs.unlinkSync(req.file.path);
       return res.status(400).json({ success: false, message: "No club linked to this user" });
     }
 
     const club = await ClubModel.findById(user.clubId);
 
-    if (club.logo) {
-      const oldPath = path.join(__dirname, '..', club.logo);
-      if (fs.existsSync(oldPath)) {
-        fs.unlinkSync(oldPath);
+    // Delete old logo from Cloudinary if it exists
+    const oldPublicId = getPublicIdFromUrl(club.logo);
+    if (oldPublicId) {
+      try {
+        await cloudinary.uploader.destroy(oldPublicId);
+      } catch (err) {
+        console.error("Failed to delete old club logo from Cloudinary:", err);
       }
     }
 
-    const clubLogoPath = `uploads/clubs/${req.file.filename}`;
-    club.logo = clubLogoPath;
+    // Upload new logo buffer to Cloudinary
+    const result = await uploadToCloudinary(req.file.buffer, {
+      folder: "campuseventhub/clubs",
+      transformation: [
+        { width: 400, height: 400, crop: "limit" },
+        { quality: "auto", fetch_format: "auto" },
+      ],
+    });
+
+    club.logo = result.secure_url;
     await club.save();
 
     return res.status(200).json({
       success: true,
       message: "Club logo uploaded successfully",
-      data: { clubLogo: clubLogoPath }
+      data: { clubLogo: result.secure_url }
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Error uploading club logo", error: error.message });
@@ -172,9 +218,14 @@ const deleteProfilePicture = async (req, res) => {
       return res.status(404).json({ success: false, message: "No profile picture to delete" });
     }
 
-    const filePath = path.join(__dirname, '..', user.profilePicture);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    // Delete from Cloudinary
+    const publicId = getPublicIdFromUrl(user.profilePicture);
+    if (publicId) {
+      try {
+        await cloudinary.uploader.destroy(publicId);
+      } catch (err) {
+        console.error("Failed to delete profile picture from Cloudinary:", err);
+      }
     }
 
     user.profilePicture = null;
@@ -202,9 +253,14 @@ const deleteClubLogo = async (req, res) => {
       return res.status(404).json({ success: false, message: "No club logo to delete" });
     }
 
-    const filePath = path.join(__dirname, '..', club.logo);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    // Delete from Cloudinary
+    const publicId = getPublicIdFromUrl(club.logo);
+    if (publicId) {
+      try {
+        await cloudinary.uploader.destroy(publicId);
+      } catch (err) {
+        console.error("Failed to delete club logo from Cloudinary:", err);
+      }
     }
 
     club.logo = null;
