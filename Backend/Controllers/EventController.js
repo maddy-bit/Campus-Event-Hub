@@ -102,7 +102,7 @@ const getAllEvents = async (req, res) => {
 
     // show approved events: public ones + private ones from user's college
     const filter = {
-      status: "Approved",
+      status: "Approved" ,
       $or: [
         { isPublic: true },
         { collegeId: userCollegeId },
@@ -364,7 +364,7 @@ const getMyCollegeEvents = async (req, res) => {
     }
 
     const filter = {
-      status: "Approved",
+      status: "Approved" , 
       collegeId: userCollegeId,
       registrationDeadline: { $gte: currentDate },
     };  
@@ -391,7 +391,7 @@ const getExternalEvents = async (req, res) => {
     const currentDate = new Date();
 
     const filter = {
-      status: "Approved",
+      status: "Approved" , 
       isPublic: true,
       registrationDeadline: { $gte: currentDate },
     };
@@ -401,14 +401,14 @@ const getExternalEvents = async (req, res) => {
       filter.collegeId = { $ne: userCollegeId };
     }
 
-    console.log("Fetching external events. Excluding college:", userCollegeId);
+    // console.log("Fetching external events. Excluding college:", userCollegeId);
 
     const events = await EventModel.find(filter)
       .populate("createdBy", "fullName email")
       .populate("collegeId", "name")
       .sort({ eventDate: 1 });
 
-    console.log(`Found ${events.length} external public events`);
+    // console.log(`Found ${events.length} external public events`);
 
     res.status(200).json({
       message: "External events retrieved successfully",

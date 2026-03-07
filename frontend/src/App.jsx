@@ -2,14 +2,14 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import { Navigate } from "react-router-dom";
 
-import Login from "./components/Login";
-import RegistrationPage from "./components/RegistrationPage";
-import ForgotPassword from "./components/ForgotPassword";
-import VerifyOtp from "./components/VerifyOtp";
-import ResetPassword from "./components/ResetPassword";
-import VerifyEmail from "./components/VerifyEmail";
+import Login from "./pages/auth/Login";
+import RegistrationPage from "./pages/auth/RegistrationPage";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import VerifyOtp from "./pages/auth/VerifyOtp";
+import ResetPassword from "./pages/auth/ResetPassword";
+import VerifyEmail from "./pages/auth/VerifyEmail";
 import LandingPage from "./components/LandingPage";
-import DashboardLayout from "./components/DashboardLayout";
+
 
 // Importing ProtectedRoute for role-based access control
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -115,7 +115,7 @@ function App() {
           <Route path="/verify-otp" element={<VerifyOtp />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/create-event" element={<CreateEvent />} />
-          <Route path="/dashboard" element={<DashboardLayout />} />
+
         </Routes>
 
     </>
