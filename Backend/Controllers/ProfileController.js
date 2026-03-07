@@ -1,4 +1,5 @@
 const { UserModel } = require("../Models/users");
+const { ClubModel } = require("../Models/club");
 const bcrypt = require("bcryptjs");
 const fs = require('fs');
 const path = require('path');
@@ -8,13 +9,13 @@ const getProfile = async (req, res) => {
   try {
     const userId = req.params.userId || req.user._id;
 
-    const user = await UserModel.findById(userId).select('-password -emailVerificationToken -passwordResetToken');
+    const user = await UserModel.findById(userId)
+      .select('-password -emailVerificationToken -passwordResetToken')
+      .populate("collegeId", "name location logo")
+      .populate("clubId", "name category description logo socialLinks");
 
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found"
-      });
+      return res.status(404).json({ success: false, message: "User not found" });
     }
 
     return res.status(200).json({
@@ -23,39 +24,30 @@ const getProfile = async (req, res) => {
       data: user
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Error fetching profile",
-      error: error.message
-    });
+    return res.status(500).json({ success: false, message: "Error fetching profile", error: error.message });
   }
 };
 
-// update basic profile information (available to all users)
+// update basic profile info
 const updateBasicProfile = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { fullName, phoneNumber, collegeName, department, yearOfStudy } = req.body;
-
-    console.log('Update request body:', req.body);
-    console.log('User ID:', userId);
+    const { fullName, phoneNumber, department, yearOfStudy } = req.body;
 
     const updateData = {};
     if (fullName) updateData.fullName = fullName;
     if (phoneNumber) updateData.phoneNumber = phoneNumber;
-    if (collegeName) updateData.collegeName = collegeName;
     if (department) updateData.department = department;
     if (yearOfStudy) updateData.yearOfStudy = yearOfStudy;
-
-    console.log('Update data:', updateData);
 
     const updatedUser = await UserModel.findByIdAndUpdate(
       userId,
       updateData,
       { new: true, runValidators: true }
-    ).select('-password -emailVerificationToken -passwordResetToken');
-
-    console.log('Updated user:', updatedUser);
+    )
+      .select('-password -emailVerificationToken -passwordResetToken')
+      .populate("collegeId", "name location logo")
+      .populate("clubId", "name category description logo socialLinks");
 
     return res.status(200).json({
       success: true,
@@ -64,51 +56,40 @@ const updateBasicProfile = async (req, res) => {
     });
   } catch (error) {
     console.error('Update profile error:', error);
-    return res.status(500).json({
-      success: false,
-      message: "Error updating profile",
-      error: error.message
-    });
+    return res.status(500).json({ success: false, message: "Error updating profile", error: error.message });
   }
 };
 
-// update club information (only for organizers)
+// update club info (organizers only, updates Club collection)
 const updateClubInfo = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { clubName, clubCategory, clubDescription, socialLinks } = req.body;
+    const { name, category, description, socialLinks } = req.body;
 
-    // Check if user is organizer
-    if (req.user.role !== 'organizer' && req.user.role !== 'admin' && req.user.role !== 'superadmin') {
-      return res.status(403).json({
-        success: false,
-        message: "Only organizers can update club information"
-      });
+    const user = await UserModel.findById(userId);
+    if (!user || !user.clubId) {
+      return res.status(400).json({ success: false, message: "No club linked to this user" });
     }
 
     const updateData = {};
-    if (clubName) updateData.clubName = clubName;
-    if (clubCategory) updateData.clubCategory = clubCategory;
-    if (clubDescription) updateData.clubDescription = clubDescription;
+    if (name) updateData.name = name;
+    if (category) updateData.category = category;
+    if (description) updateData.description = description;
     if (socialLinks) updateData.socialLinks = socialLinks;
 
-    const updatedUser = await UserModel.findByIdAndUpdate(
-      userId,
+    const updatedClub = await ClubModel.findByIdAndUpdate(
+      user.clubId,
       updateData,
       { new: true, runValidators: true }
-    ).select('-password -emailVerificationToken -passwordResetToken');
+    );
 
     return res.status(200).json({
       success: true,
       message: "Club information updated successfully",
-      data: updatedUser
+      data: updatedClub
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Error updating club information",
-      error: error.message
-    });
+    return res.status(500).json({ success: false, message: "Error updating club information", error: error.message });
   }
 };
 
@@ -116,10 +97,7 @@ const updateClubInfo = async (req, res) => {
 const uploadProfilePicture = async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: "No file uploaded"
-      });
+      return res.status(400).json({ success: false, message: "No file uploaded" });
     }
 
     const userId = req.user._id;
@@ -132,7 +110,6 @@ const uploadProfilePicture = async (req, res) => {
       }
     }
 
-    // pending uploading to cloud strg
     const profilePicturePath = `uploads/profiles/${req.file.filename}`;
     user.profilePicture = profilePicturePath;
     await user.save();
@@ -140,78 +117,59 @@ const uploadProfilePicture = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Profile picture uploaded successfully",
-      data: {
-        profilePicture: profilePicturePath
-      }
+      data: { profilePicture: profilePicturePath }
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Error uploading profile picture",
-      error: error.message
-    });
+    return res.status(500).json({ success: false, message: "Error uploading profile picture", error: error.message });
   }
 };
 
-// upload club logo (only for organizers)
+// upload club logo (updates Club collection)
 const uploadClubLogo = async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: "No file uploaded"
-      });
+      return res.status(400).json({ success: false, message: "No file uploaded" });
     }
 
     const userId = req.user._id;
     const user = await UserModel.findById(userId);
 
-    if (user.role !== 'organizer' && user.role !== 'admin' && user.role !== 'superadmin') {
+    if (!user.clubId) {
       fs.unlinkSync(req.file.path);
-      return res.status(403).json({
-        success: false,
-        message: "Only organizers can upload club logo"
-      });
+      return res.status(400).json({ success: false, message: "No club linked to this user" });
     }
 
-    if (user.clubLogo) {
-      const oldPath = path.join(__dirname, '..', user.clubLogo);
+    const club = await ClubModel.findById(user.clubId);
+
+    if (club.logo) {
+      const oldPath = path.join(__dirname, '..', club.logo);
       if (fs.existsSync(oldPath)) {
         fs.unlinkSync(oldPath);
       }
     }
 
     const clubLogoPath = `uploads/clubs/${req.file.filename}`;
-    user.clubLogo = clubLogoPath;
-    await user.save();
+    club.logo = clubLogoPath;
+    await club.save();
 
     return res.status(200).json({
       success: true,
       message: "Club logo uploaded successfully",
-      data: {
-        clubLogo: clubLogoPath
-      }
+      data: { clubLogo: clubLogoPath }
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Error uploading club logo",
-      error: error.message
-    });
+    return res.status(500).json({ success: false, message: "Error uploading club logo", error: error.message });
   }
 };
 
-//pending 
+// delete profile picture
 const deleteProfilePicture = async (req, res) => {
   try {
     const userId = req.user._id;
     const user = await UserModel.findById(userId);
 
     if (!user.profilePicture) {
-      return res.status(404).json({
-        success: false,
-        message: "No profile picture to delete"
-      });
+      return res.status(404).json({ success: false, message: "No profile picture to delete" });
     }
 
     const filePath = path.join(__dirname, '..', user.profilePicture);
@@ -222,112 +180,74 @@ const deleteProfilePicture = async (req, res) => {
     user.profilePicture = null;
     await user.save();
 
-    return res.status(200).json({
-      success: true,
-      message: "Profile picture deleted successfully"
-    });
+    return res.status(200).json({ success: true, message: "Profile picture deleted successfully" });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Error deleting profile picture",
-      error: error.message
-    });
+    return res.status(500).json({ success: false, message: "Error deleting profile picture", error: error.message });
   }
 };
 
-//pending
-// delete club logo 
+// delete club logo
 const deleteClubLogo = async (req, res) => {
   try {
     const userId = req.user._id;
     const user = await UserModel.findById(userId);
 
-    if (user.role !== 'organizer' && user.role !== 'admin' && user.role !== 'superadmin') {
-      return res.status(403).json({
-        success: false,
-        message: "Only organizers can delete club logo"
-      });
+    if (!user.clubId) {
+      return res.status(400).json({ success: false, message: "No club linked to this user" });
     }
 
-    if (!user.clubLogo) {
-      return res.status(404).json({
-        success: false,
-        message: "No club logo to delete"
-      });
+    const club = await ClubModel.findById(user.clubId);
+
+    if (!club.logo) {
+      return res.status(404).json({ success: false, message: "No club logo to delete" });
     }
 
-    const filePath = path.join(__dirname, '..', user.clubLogo);
+    const filePath = path.join(__dirname, '..', club.logo);
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
 
-    user.clubLogo = null;
-    await user.save();
+    club.logo = null;
+    await club.save();
 
-    return res.status(200).json({
-      success: true,
-      message: "Club logo deleted successfully"
-    });
+    return res.status(200).json({ success: true, message: "Club logo deleted successfully" });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Error deleting club logo",
-      error: error.message
-    });
+    return res.status(500).json({ success: false, message: "Error deleting club logo", error: error.message });
   }
 };
 
-// change password (authenticated user)
+// change password
 const changePassword = async (req, res) => {
   try {
     const userId = req.user._id;
     const { currentPassword, newPassword } = req.body;
 
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({
-        success: false,
-        message: "Current password and new password are required"
-      });
+      return res.status(400).json({ success: false, message: "Current password and new password are required" });
     }
 
     if (newPassword.length < 6) {
-      return res.status(400).json({
-        success: false,
-        message: "New password must be at least 6 characters"
-      });
+      return res.status(400).json({ success: false, message: "New password must be at least 6 characters" });
     }
 
     const user = await UserModel.findById(userId).select('+password');
 
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found"
-      });
+      return res.status(404).json({ success: false, message: "User not found" });
     }
 
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
-      return res.status(400).json({
-        success: false,
-        message: "Current password is incorrect"
-      });
+      return res.status(400).json({ success: false, message: "Current password is incorrect" });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
     await user.save();
 
-    return res.status(200).json({
-      success: true,
-      message: "Password changed successfully"
-    });
+    return res.status(200).json({ success: true, message: "Password changed successfully" });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Error changing password",
-      error: error.message
-    });
+    return res.status(500).json({ success: false, message: "Error changing password", error: error.message });
   }
 };
 
