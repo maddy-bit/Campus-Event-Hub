@@ -14,9 +14,13 @@ const ERegistrationSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
+  isCrossCollege: {
+    type: Boolean,
+    default: false
+  },
   status: {
     type: String,
-    enum: ['Registered', 'Waitlisted', 'Cancelled'],
+    enum: ['Registered', 'Waitlisted', 'Cancelled', 'Pending_Approval'],
     default: 'Registered'
   },
   ticketType: {

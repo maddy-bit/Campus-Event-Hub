@@ -61,16 +61,47 @@ const eventSchema = new mongoose.Schema(
     ref: 'User',
     required: true
   },
+
+
+  collegeId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'College',
+    required: true,
+    index: true
+  },
+
+  isPublic: {
+    type: Boolean,
+    default: true
+  },
+
   status: {
     type: String,
     enum: ['Draft', 'Submitted', 'Approved', 'Rejected'],
-    default: 'Draft'
+    default: 'Submitted'
   },
+  moderation: {
+    reviewedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    reviewedAt: {
+      type: Date
+    },
+    rejectionReason: {
+      type: String,
+      trim: true
+    }
+  },
+
   createdAt: {
     type: Date,
     default: Date.now
   }
 });
+
+// Index for admin dashboard: quickly fetch all events for a specific college
+eventSchema.index({ collegeId: 1, status: 1 });
 
 const EventModel = mongoose.model('Event', eventSchema);
 module.exports = { EventModel };

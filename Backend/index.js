@@ -14,6 +14,9 @@ const eRegistrationRoutes = require('./Routes/ERegistrationRoutes');
 const dashboardRoutes= require('./Routes/DashboardRoutes');
 const profileRoutes = require('./Routes/ProfileRoutes');
 const notificationRoutes = require('./Routes/NotificationRoutes');
+const adminRoutes = require('./Routes/AdminRoutes');
+const superAdminRoutes = require('./Routes/SuperAdminRoutes');
+const collegeRoutes = require('./Routes/CollegeRoutes');
  
 // Middleware
 app.use(cors({
@@ -21,8 +24,8 @@ app.use(cors({
     credentials: true
 }));
  
-app.use(express.json()); // Use express built-in JSON parser
-app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
  
 // Serve static files for uploads
@@ -35,6 +38,9 @@ app.use('/registrations', eRegistrationRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/profile', profileRoutes);
 app.use('/notifications', notificationRoutes);
+app.use('/admin', adminRoutes);
+app.use('/superadmin', superAdminRoutes);
+app.use('/colleges', collegeRoutes);
  
  
 app.get('/check', (req, res) => {

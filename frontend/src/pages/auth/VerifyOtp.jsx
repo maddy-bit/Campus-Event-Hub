@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import "../styles/auth.css";
-import api from "../api";
+import "../../styles/auth.css";
+import api from "../../api";
 
 function VerifyOtp() {
   const [otp, setOtp] = useState("");

@@ -1,49 +1,54 @@
 import { Outlet } from "react-router-dom";
-import Sidebar from "../components/Sidebar";
-import Header from "../components/Header";
 import { useState } from "react";
 import {
   LayoutDashboard,
+  CalendarDays,
   Users,
-  ShieldCheck,
-  Settings,
-  LineChart
+  UserCircle,
+  Clock,
+  Bell
 } from "lucide-react";
+import AdminSidebar from "../components/AdminSidebar";
+import AdminHeader from "../components/AdminHeader";
 
-const superAdminMenuItems = [
-  { name: "Dashboard", path: "/superadmin/dashboard", icon: LayoutDashboard },
-  { name: "Manage Admins", path: "/superadmin/admins", icon: ShieldCheck },
-  { name: "All Users", path: "/superadmin/users", icon: Users },
-  { name: "Analytics", path: "/superadmin/analytics", icon: LineChart },
-  { name: "System Settings", path: "/superadmin/settings", icon: Settings },
+// Sidebar Menu items to match the screenshot "Admin Theme"
+const adminMenuItems = [
+  { name: "Overview", path: "/admin/dashboard", icon: LayoutDashboard },
+  { name: "Events", path: "/admin/events", icon: CalendarDays },
+  { name: "Users", path: "/admin/users", icon: Users },
+  { name: "Organizers", path: "/admin/organizers", icon: UserCircle },
+  { name: "Approvals", path: "/admin/approvals", icon: Clock },
+  { name: "Notify", path: "/admin/notify", icon: Bell },
 ];
 
-const SuperAdminLayout = () => {
+const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-[#f3f1ea] font-sans selection:bg-[#ccff00]">
-
-      <Sidebar 
-        menuItems={superAdminMenuItems} 
+    <div className="flex min-h-screen bg-[#f8f9fa] font-sans">
+      
+      <AdminSidebar 
+        menuItems={adminMenuItems} 
         isOpen={sidebarOpen}
         setIsOpen={setSidebarOpen}
       />
 
-      <div className="flex-1 flex flex-col">
-        <Header 
-          title="Super Admin" 
-          onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+      <div className="flex-1 flex flex-col md:ml-[260px] min-h-screen">
+        
+        <AdminHeader 
+          title="Admin" 
+          onMenuClick={() => setSidebarOpen(true)}
         />
 
-
-        <div className="p-6">
-          <Outlet />
+        <div className="p-4 md:p-8 pt-2 md:pt-4">
+          <div className="max-w-[1400px] mx-auto w-full">
+             <Outlet />
+          </div>
         </div>
-      </div>
 
+      </div>
     </div>
   );
 };
 
-export default SuperAdminLayout;
+export default AdminLayout;

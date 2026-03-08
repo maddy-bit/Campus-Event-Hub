@@ -6,6 +6,8 @@ import {
   ListChecks,
   Users,
   Bell,
+  Send,
+  Inbox,
   UserCircle2,
   LogOut,
   Menu,
@@ -20,7 +22,8 @@ const menuItems = [
   { name: "Create", path: "/organizer/create-event", icon: CalendarPlus },
   { name: "Events", path: "/organizer/myevents", icon: ListChecks },
   { name: "Participants", path: "/organizer/view-participants", icon: Users },
-  { name: "Notifs", path: "/organizer/notifications", icon: Bell },
+  { name: "Inbox", path: "/organizer/inbox", icon: Inbox },
+  { name: "Send Notifs", path: "/organizer/notifications", icon: Send },
 ];
 
 const bottomItems = [

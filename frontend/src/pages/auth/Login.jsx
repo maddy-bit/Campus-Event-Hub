@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import "../styles/registrationPage.css";
-import api from "../api";
+import "../../styles/registrationPage.css";
+import api from "../../api";
 
 const LoginPage = () => {
   const navigate = useNavigate();

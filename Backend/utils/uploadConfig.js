@@ -1,34 +1,9 @@
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
 
-// Ensure upload directories exist
-const uploadDirs = ['uploads/profiles', 'uploads/clubs', 'uploads/events'];
-uploadDirs.forEach(dir => {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-});
-
-// Storage configuration
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    if (file.fieldname === 'profilePicture') {
-      cb(null, 'uploads/profiles/');
-    } else if (file.fieldname === 'clubLogo') {
-      cb(null, 'uploads/clubs/');
-    } else if (file.fieldname === 'poster') {
-      cb(null, 'uploads/events/');
-    } else {
-      cb(null, 'uploads/');
-    }
-  },
-
-  filename: (req, file, cb) => {
-    const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
-    cb(null, uniqueName);
-  }
-});
+// Use memory storage — files stay in RAM as buffers
+// No local files are saved to disk
+const storage = multer.memoryStorage();
 
 // File filter for images only
 const fileFilter = (req, file, cb) => {

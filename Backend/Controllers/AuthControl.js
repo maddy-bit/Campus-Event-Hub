@@ -1,54 +1,56 @@
-const  {UserModel}  = require("../Models/users");
+const { UserModel } = require("../Models/users");
+const { CollegeModel } = require("../Models/college");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const sendEmail = require("../utils/sendEmail");
 const verifyEmailTemplate = require("../helpers/emailTemplates/verifyEmailTemplate");
 const forgotPasswordTemplate = require("../helpers/emailTemplates/forgotPasswordTemplate");
 
-//signup controller
+// signup (students and organizers only)
 const signup = async (req, res) => {
   try {
     const {
       fullName,
       email,
       phoneNumber,
-      collegeName,
+      collegeId,
       department,
       yearOfStudy,
       password,
     } = req.body;
 
-    if (!fullName || !email || !phoneNumber || !collegeName || !department || !yearOfStudy || !password) {
+    if (!fullName || !email || !phoneNumber || !collegeId || !department || !yearOfStudy || !password) {
       return res.status(400).json({ message: "All fields are required" });
+    }
+
+    // verify college exists
+    const college = await CollegeModel.findById(collegeId);
+    if (!college) {
+      return res.status(404).json({ message: "College not found" });
     }
 
     const existingUser = await UserModel.findOne({ email });
 
-    // If user already exists and is verified, don't allow re-signup.
     if (existingUser?.isEmailVerified) {
-      return res
-        .status(400)
-        .json({ message: "An account with this email already exists." });
+      return res.status(400).json({ message: "An account with this email already exists." });
     }
 
-    // (Re)generate OTP + (re)upsert user record for unverified users.
     const emailOtp = Math.floor(100000 + Math.random() * 900000).toString();
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const userToSave = existingUser || new UserModel({ email });
     userToSave.fullName = fullName;
     userToSave.phoneNumber = phoneNumber;
-    userToSave.collegeName = collegeName;
+    userToSave.collegeId = collegeId;
     userToSave.department = department;
     userToSave.yearOfStudy = yearOfStudy;
     userToSave.password = hashedPassword;
     userToSave.isEmailVerified = false;
     userToSave.emailVerificationToken = emailOtp;
-    userToSave.emailVerificationExpiry = Date.now() + 10 * 60 * 1000; // 10 mins
+    userToSave.emailVerificationExpiry = Date.now() + 10 * 60 * 1000;
 
     await userToSave.save();
 
-    // send email
     try {
       await sendEmail({
         to: email,
@@ -63,19 +65,13 @@ const signup = async (req, res) => {
           ? "Signup pending. Verification OTP re-sent to email."
           : "Signup successful. Verification OTP sent to email.",
       });
-
     } catch (emailError) {
-      // If email fails on a brand-new signup, delete the new record so they can retry.
       if (!existingUser) {
         await UserModel.findByIdAndDelete(userToSave._id);
       }
-      
       console.error("Email Dispatch Error:", emailError);
-      return res.status(500).json({ 
-        message: "Could not send verification email. Please try again later." 
-      });
+      return res.status(500).json({ message: "Could not send verification email. Please try again later." });
     }
-
   } catch (err) {
     console.error("General Signup Error:", err);
     return res.status(500).json({ message: "Internal server error during registration" });
@@ -93,7 +89,6 @@ const resendEmailVerificationOtp = async (req, res) => {
 
     const user = await UserModel.findOne({ email });
 
-    // Edge case: user is trying to request OTP without completing signup
     if (!user) {
       return res.status(404).json({ message: "Please register first" });
     }
@@ -104,7 +99,7 @@ const resendEmailVerificationOtp = async (req, res) => {
 
     const emailOtp = Math.floor(100000 + Math.random() * 900000).toString();
     user.emailVerificationToken = emailOtp;
-    user.emailVerificationExpiry = Date.now() + 10 * 60 * 1000; // 10 mins
+    user.emailVerificationExpiry = Date.now() + 10 * 60 * 1000;
     await user.save();
 
     await sendEmail({
@@ -121,7 +116,7 @@ const resendEmailVerificationOtp = async (req, res) => {
   }
 };
 
-//email verification controller
+// email verification
 const verifyEmail = async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -137,9 +132,7 @@ const verifyEmail = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(400).json({
-        message: "Invalid or expired OTP",
-      });
+      return res.status(400).json({ message: "Invalid or expired OTP" });
     }
 
     user.isEmailVerified = true;
@@ -148,16 +141,14 @@ const verifyEmail = async (req, res) => {
 
     await user.save();
 
-    res.status(200).json({
-      message: "Email verified successfully.",
-    });
+    res.status(200).json({ message: "Email verified successfully." });
   } catch (err) {
     console.error("Verify email error:", err);
     res.status(500).json({ message: "Email verification failed" });
   }
 };
 
-//login controller
+// login
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -174,13 +165,12 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Edge case: user requested OTP but never verified email
     if (!user.isEmailVerified) {
       return res.status(403).json({ message: "Please register first" });
     }
 
     const token = jwt.sign(
-      { email: user.email, _id: user._id, role: user.role },
+      { email: user.email, _id: user._id, role: user.role, collegeId: user.collegeId },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "24h" },
     );
@@ -206,7 +196,7 @@ const login = async (req, res) => {
   }
 };
 
-//logout controller
+// logout
 const logout = async (req, res) => {
   try {
     res.clearCookie("token", {
@@ -215,16 +205,13 @@ const logout = async (req, res) => {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
     });
 
-    res.status(200).json({
-      message: "Logout successful",
-    });
+    res.status(200).json({ message: "Logout successful" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-//password reset controllers
-//Requesting pswd reset otp
+// forgot password - send OTP
 const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -235,14 +222,12 @@ const forgotPassword = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     user.passwordResetToken = otp;
     user.passwordResetExpiry = Date.now() + 10 * 60 * 1000;
     await user.save();
 
-    // Send OTP email
     await sendEmail({
       to: email,
       subject: "Password Reset OTP",
@@ -250,16 +235,14 @@ const forgotPassword = async (req, res) => {
       html: forgotPasswordTemplate(otp),
     });
 
-    res.status(200).json({
-      message: "Password reset OTP sent to email",
-    });
+    res.status(200).json({ message: "Password reset OTP sent to email" });
   } catch (err) {
     console.log("Error in forgot password:", err);
     res.status(500).json({ error: "Failed to send OTP email" });
   }
 };
 
-//verifying otp
+// verify reset OTP
 const verifyResetOtp = async (req, res) => {
   try {
     const { otp } = req.body;
@@ -270,20 +253,16 @@ const verifyResetOtp = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(400).json({
-        message: "Invalid or expired OTP",
-      });
+      return res.status(400).json({ message: "Invalid or expired OTP" });
     }
 
-    res.status(200).json({
-      message: "OTP verified successfully",
-    });
+    res.status(200).json({ message: "OTP verified successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-//resetting pswd
+// reset password
 const resetPassword = async (req, res) => {
   try {
     const { otp, newPassword } = req.body;
@@ -294,9 +273,7 @@ const resetPassword = async (req, res) => {
     }).select("+password");
 
     if (!user) {
-      return res.status(400).json({
-        message: "Invalid or expired OTP",
-      });
+      return res.status(400).json({ message: "Invalid or expired OTP" });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -307,19 +284,20 @@ const resetPassword = async (req, res) => {
 
     await user.save();
 
-    res.status(200).json({
-      message: "Password reset successful",
-    });
+    res.status(200).json({ message: "Password reset successful" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
+// get current user details
 const sendDetails = async (req, res) => {
   try {
     const user = await UserModel
       .findById(req.user._id)
-      .select("-password");
+      .select("-password")
+      .populate("collegeId", "name location logo")
+      .populate("clubId", "name category description logo socialLinks");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -330,9 +308,9 @@ const sendDetails = async (req, res) => {
       fullName: user.fullName,
       email: user.email,
       role: user.role,
-      collegeName: user.collegeName,
+      college: user.collegeId,
+      club: user.clubId,
     });
-
   } catch (error) {
     console.error("Auth Me Error:", error);
     return res.status(500).json({ message: "Server error" });

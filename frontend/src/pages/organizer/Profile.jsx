@@ -73,9 +73,9 @@ const Profile = () => {
         fullName: data.fullName || "",
         phoneNumber: data.phoneNumber || "",
         department: data.department || "",
-        clubName: data.clubName || "",
-        clubCategory: data.clubCategory || "Technical",
-        clubDescription: data.clubDescription || "",
+        clubName: data.clubId?.name || "",
+        clubCategory: data.clubId?.category || "Technical",
+        clubDescription: data.clubId?.description || "",
       });
     } catch (err) {
       console.error("Failed to fetch profile:", err);
@@ -126,9 +126,9 @@ const Profile = () => {
 
       // Update club info
       await api.put("/profile/club", {
-        clubName: formData.clubName,
-        clubCategory: formData.clubCategory,
-        clubDescription: formData.clubDescription,
+        name: formData.clubName,
+        category: formData.clubCategory,
+        description: formData.clubDescription,
       });
 
       setUser(basicRes.data.data);
@@ -245,9 +245,9 @@ const Profile = () => {
         fullName: user.fullName || "",
         phoneNumber: user.phoneNumber || "",
         department: user.department || "",
-        clubName: user.clubName || "",
-        clubCategory: user.clubCategory || "Technical",
-        clubDescription: user.clubDescription || "",
+        clubName: user.clubId?.name || "",
+        clubCategory: user.clubId?.category || "Technical",
+        clubDescription: user.clubId?.description || "",
       });
     }
     setHasChanges(false);
@@ -361,7 +361,7 @@ const Profile = () => {
                 </div>
                 <div className="item-content">
                   <span className="item-label">College</span>
-                  <span className="item-value">{user.collegeName || "Not set"}</span>
+                  <span className="item-value">{user.collegeId?.name || "Not set"}</span>
                 </div>
               </div>
 
@@ -371,7 +371,7 @@ const Profile = () => {
                 </div>
                 <div className="item-content">
                   <span className="item-label">Club</span>
-                  <span className="item-value">{user.clubName || "Not set"}</span>
+                  <span className="item-value">{user.clubId?.name || "Not set"}</span>
                 </div>
               </div>
             </div>
@@ -514,7 +514,7 @@ const Profile = () => {
                     <label className="nb-form-label">College / Institution</label>
                     <span className="readonly-pips">READ-ONLY</span>
                   </div>
-                  <input type="text" className="nb-input-field readonly" value={user.collegeName || ""} readOnly />
+                  <input type="text" className="nb-input-field readonly" value={user.collegeId?.name || ""} readOnly />
                   <p className="field-hint">Institution is set by your admin.</p>
                 </div>
 
@@ -558,7 +558,7 @@ const Profile = () => {
                       style={{ width: "100%", height: "100%", objectFit: "cover" }}
                     />
                   ) : (
-                    getInitials(user.clubName || user.fullName)
+                    getInitials(user.clubId?.name || user.fullName)
                   )}
                 </div>
                 <div className="nb-upload-text">

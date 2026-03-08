@@ -1,8 +1,18 @@
 const { EventModel } = require("../Models/event");
+const { UserModel } = require("../Models/users");
 const { ERegistrationModel } = require("../Models/ERegistration");
 const cloudinary = require("../Config/cloudinary");
-const fs = require("fs");
 
+// Helper: upload buffer to Cloudinary using upload_stream
+const uploadToCloudinary = (fileBuffer, options) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(options, (error, result) => {
+      if (error) return reject(error);
+      resolve(result);
+    });
+    stream.end(fileBuffer);
+  });
+};
 
 const createEvent = async (req, res) => {
   try {
@@ -18,18 +28,24 @@ const createEvent = async (req, res) => {
       registrationDeadline,
       isPaidEvent,
       ticketPrice,
+      isPublic,
     } = req.body;
 
     if (!title || !description || !eventDate || !startTime || !location || !category || !registrationDeadline) {
       return res.status(400).json({ message: "All required fields must be provided" });
     }
 
+    // get creator's collegeId
+    const creator = await UserModel.findById(req.user._id);
+    if (!creator || !creator.collegeId) {
+      return res.status(400).json({ message: "User must belong to a college to create events" });
+    }
+
     let posterUrl = "";
 
-    // upload poster to Cloudinary if file is provided
     if (req.file) {
       try {
-        const result = await cloudinary.uploader.upload(req.file.path, {
+        const result = await uploadToCloudinary(req.file.buffer, {
           folder: "campuseventhub/events",
           transformation: [
             { width: 1200, height: 630, crop: "limit" },
@@ -37,15 +53,14 @@ const createEvent = async (req, res) => {
           ],
         });
         posterUrl = result.secure_url;
-
-        fs.unlink(req.file.path, (err) => {
-          if (err) console.error("Temp file cleanup error:", err);
-        });
       } catch (uploadErr) {
         console.error("Cloudinary upload error:", uploadErr);
         return res.status(500).json({ message: "Image upload failed", error: uploadErr.message });
       }
     }
+
+    // admin events are auto-approved
+    const status = req.user.role === "admin" ? "Approved" : "Submitted";
 
     const newEvent = new EventModel({
       title,
@@ -59,16 +74,19 @@ const createEvent = async (req, res) => {
       registrationDeadline,
       isPaidEvent: isPaidEvent === "true" || isPaidEvent === true,
       ticketPrice: ticketPrice || 0,
+      isPublic: isPublic === "false" || isPublic === false ? false : true,
       posterUrl,
       createdBy: req.user._id,
-      status: "Submitted",
+      collegeId: creator.collegeId,
+      status,
     });
-
 
     await newEvent.save();
 
     res.status(201).json({
-      message: "Event created successfully and submitted for approval",
+      message: status === "Approved"
+        ? "Event created and auto-approved"
+        : "Event created and submitted for approval",
       event: newEvent,
     });
   } catch (err) {
@@ -77,9 +95,24 @@ const createEvent = async (req, res) => {
   }
 };
 
+// get all approved events (respects visibility)
 const getAllEvents = async (req, res) => {
   try {
-    const events = await EventModel.find().populate("createdBy", "fullName email collegeName").sort({ eventDate: 1 });
+    const userCollegeId = req.user.collegeId;
+
+    // show approved events: public ones + private ones from user's college
+    const filter = {
+      status: "Approved" ,
+      $or: [
+        { isPublic: true },
+        { collegeId: userCollegeId },
+      ],
+    };
+
+    const events = await EventModel.find(filter)
+      .populate("createdBy", "fullName email")
+      .populate("collegeId", "name")
+      .sort({ eventDate: 1 });
 
     res.status(200).json({
       message: "Events retrieved successfully",
@@ -92,19 +125,28 @@ const getAllEvents = async (req, res) => {
   }
 };
 
+// upcoming events with open registration
 const getUpcomingEvents = async (req, res) => {
   try {
     const currentDate = new Date();
+    const userCollegeId = req.user.collegeId;
 
-    const events = await EventModel.find({
-      // status: { $in: ["Approved", "Draft", "Submitted"] }, bro we will add if approval requires
-      registrationDeadline: { $gte: currentDate }
-    })
-      .populate("createdBy", "fullName email collegeName")
+    const filter = {
+      status: "Approved",
+      registrationDeadline: { $gte: currentDate },
+      $or: [
+        { isPublic: true },
+        { collegeId: userCollegeId },
+      ],
+    };
+
+    const events = await EventModel.find(filter)
+      .populate("createdBy", "fullName email")
+      .populate("collegeId", "name")
       .sort({ eventDate: 1 });
 
     res.status(200).json({
-      message: "Upcoming events with open registration retrieved successfully",
+      message: "Upcoming events retrieved successfully",
       count: events.length,
       events,
     });
@@ -118,7 +160,9 @@ const getEventById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const event = await EventModel.findById(id).populate("createdBy", "fullName email collegeName");
+    const event = await EventModel.findById(id)
+      .populate("createdBy", "fullName email")
+      .populate("collegeId", "name");
 
     if (!event) {
       return res.status(404).json({ message: "Event not found" });
@@ -145,14 +189,18 @@ const updateEvent = async (req, res) => {
       return res.status(404).json({ message: "Event not found" });
     }
 
-    if (event.createdBy.toString() !== req.user._id.toString() && req.user.role !== "admin") {
+    // check ownership or same-college admin
+    const isOwner = event.createdBy.toString() === req.user._id.toString();
+    const isSameCollegeAdmin = req.user.role === "admin" &&
+      event.collegeId.toString() === req.user.collegeId?.toString();
+
+    if (!isOwner && !isSameCollegeAdmin) {
       return res.status(403).json({ message: "You don't have permission to update this event" });
     }
 
-    // handling poster update 
     if (req.file) {
       try {
-        const result = await cloudinary.uploader.upload(req.file.path, {
+        const result = await uploadToCloudinary(req.file.buffer, {
           folder: "campuseventhub/events",
           transformation: [
             { width: 1200, height: 630, crop: "limit" },
@@ -160,10 +208,6 @@ const updateEvent = async (req, res) => {
           ],
         });
         updates.posterUrl = result.secure_url;
-
-        fs.unlink(req.file.path, (err) => {
-          if (err) console.error("Temp file cleanup error:", err);
-        });
       } catch (uploadErr) {
         console.error("Cloudinary upload error:", uploadErr);
       }
@@ -191,28 +235,27 @@ const deleteEvent = async (req, res) => {
       return res.status(404).json({ message: "Event not found" });
     }
 
-    if (event.createdBy.toString() !== req.user._id && req.user.role !== "admin") {
+    const isOwner = event.createdBy.toString() === req.user._id.toString();
+    const isSameCollegeAdmin = req.user.role === "admin" &&
+      event.collegeId.toString() === req.user.collegeId?.toString();
+
+    if (!isOwner && !isSameCollegeAdmin) {
       return res.status(403).json({ message: "You don't have permission to delete this event" });
     }
 
     await EventModel.findByIdAndDelete(id);
 
-    res.status(200).json({
-      message: "Event deleted successfully",
-    });
+    res.status(200).json({ message: "Event deleted successfully" });
   } catch (err) {
     console.error("Delete event error:", err);
     res.status(500).json({ message: "Failed to delete event", error: err.message });
   }
 };
 
-
-//to get all events of that particular user who created the event
+// get events created by current user
 const getMyEvents = async (req, res) => {
   try {
-    const events = await EventModel.find({
-      createdBy: req.user._id
-    })
+    const events = await EventModel.find({ createdBy: req.user._id })
       .populate("createdBy", "fullName email")
       .sort({ eventDate: 1 });
 
@@ -224,8 +267,8 @@ const getMyEvents = async (req, res) => {
         });
 
         return {
-          ...event.toObject(), // keep all event details
-          seatsFilled,         // add registered seats
+          ...event.toObject(),
+          seatsFilled,
           seatsAvailable: event.maxSeats - seatsFilled
         };
       })
@@ -236,13 +279,12 @@ const getMyEvents = async (req, res) => {
       count: eventsWithSeatData.length,
       events: eventsWithSeatData,
     });
-
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-//to get participants by event id 
+// get participants by event id
 const getParticipantsByEventId = async (req, res) => {
   try {
     const { eventId } = req.params;
@@ -258,26 +300,27 @@ const getParticipantsByEventId = async (req, res) => {
       req.user.role !== "admin" &&
       req.user.role !== "superadmin"
     ) {
-      return res.status(403).json({
-        message: "You are not authorized to view participants of this event"
-      });
+      return res.status(403).json({ message: "You are not authorized to view participants of this event" });
     }
 
     const registrations = await ERegistrationModel.find({ eventId })
-      .populate("userId", "fullName email department yearOfStudy collegeName phoneNumber")
+      .populate({
+        path: "userId",
+        select: "fullName email department yearOfStudy phoneNumber",
+        populate: { path: "collegeId", select: "name" }
+      })
       .sort({ createdAt: -1 });
 
     res.status(200).json({
       count: registrations.length,
       participants: registrations
     });
-
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-//updating the payment status of the participant
+// update payment status
 const updatePaymentStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -294,26 +337,87 @@ const updatePaymentStatus = async (req, res) => {
       req.user.role !== "admin" &&
       req.user.role !== "superadmin"
     ) {
-      return res.status(403).json({
-        message: "You don't have permission to update payment status"
-      });
+      return res.status(403).json({ message: "You don't have permission to update payment status" });
     }
 
     registration.payment.status = paymentStatus;
-
     await registration.save();
 
     res.status(200).json({
       message: "Payment status updated successfully",
       registration
     });
-
   } catch (err) {
     console.error("Update payment status error:", err);
-    res.status(500).json({
-      message: "Failed to update payment status",
-      error: err.message
+    res.status(500).json({ message: "Failed to update payment status", error: err.message });
+  }
+};
+
+// get approved events from user's own college only (both public and private)
+const getMyCollegeEvents = async (req, res) => {
+  try {
+    const userCollegeId = req.user.collegeId;
+    const currentDate = new Date();
+
+    if (!userCollegeId) {
+      return res.status(400).json({ message: "User does not belong to a college" });
+    }
+
+    const filter = {
+      status: "Approved" , 
+      collegeId: userCollegeId,
+      registrationDeadline: { $gte: currentDate },
+    };  
+    const events = await EventModel.find(filter)
+      .populate("createdBy", "fullName email")
+      .populate("collegeId", "name")
+      .sort({ eventDate: 1 });
+
+    res.status(200).json({
+      message: "College events retrieved successfully",
+      count: events.length,
+      events,
     });
+  } catch (err) {
+    console.error("Get my college events error:", err);
+    res.status(500).json({ message: "Failed to retrieve college events", error: err.message });
+  }
+};
+
+// get public approved events from OTHER colleges only
+const getExternalEvents = async (req, res) => {
+  try {
+    const userCollegeId = req.user.collegeId;
+    const currentDate = new Date();
+
+    const filter = {
+      status: "Approved" , 
+      isPublic: true,
+      registrationDeadline: { $gte: currentDate },
+    };
+
+    // If user belongs to a college, exclude their own college's events
+    if (userCollegeId) {
+      filter.collegeId = { $ne: userCollegeId };
+    }
+
+    // console.log("Fetching external events. Excluding college:", userCollegeId);
+
+    const events = await EventModel.find(filter)
+      .populate("createdBy", "fullName email")
+      .populate("collegeId", "name")
+      .sort({ eventDate: 1 });
+
+    // console.log(`Found ${events.length} external public events`);
+
+    res.status(200).json({
+      message: "External events retrieved successfully",
+      count: events.length,
+      events,
+    });
+  } catch (err) {
+    console.error("Get external events error:", err);
+    res.status(500).json({ message: "Failed to retrieve external events", error: err.message });
   }
 };
 
@@ -326,5 +430,7 @@ module.exports = {
   deleteEvent,
   getMyEvents,
   getParticipantsByEventId,
-  updatePaymentStatus
+  updatePaymentStatus,
+  getMyCollegeEvents,
+  getExternalEvents,
 };

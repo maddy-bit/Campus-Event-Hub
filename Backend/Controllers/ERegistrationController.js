@@ -1,5 +1,6 @@
 const { ERegistrationModel } = require("../Models/ERegistration");
 const { EventModel } = require("../Models/event");
+const { UserModel } = require("../Models/users");
 
 const registerForEvent = async (req, res) => {
   try {
@@ -15,12 +16,19 @@ const registerForEvent = async (req, res) => {
       return res.status(404).json({ message: "Event not found" });
     }
 
+    // only approved events can be registered for
+    if (event.status !== "Approved") {
+      return res.status(400).json({ message: "Event is not yet approved for registration" });
+    }
+
     if (new Date() > new Date(event.registrationDeadline)) {
       return res.status(400).json({ message: "Registration deadline has passed" });
     }
 
-    // Count current registrations for this event
-    const currentCount = await ERegistrationModel.countDocuments({ eventId });
+    const currentCount = await ERegistrationModel.countDocuments({
+      eventId,
+      status: { $in: ["Registered", "Pending_Approval"] }
+    });
     if (currentCount >= event.maxSeats) {
       return res.status(400).json({ message: "Event is full" });
     }
@@ -30,17 +38,25 @@ const registerForEvent = async (req, res) => {
       return res.status(400).json({ message: "You are already registered for this event" });
     }
 
+    // check if cross-college
+    const student = await UserModel.findById(userId);
+    const isCrossCollege = student.collegeId.toString() !== event.collegeId.toString();
+
     const registration = new ERegistrationModel({
       userId,
       eventId,
       additionalInfo,
       paymentAmount: paymentAmount || 0,
+      isCrossCollege,
+      status: isCrossCollege ? "Pending_Approval" : "Registered",
     });
 
     await registration.save();
 
     res.status(201).json({
-      message: "Registration successful",
+      message: isCrossCollege
+        ? "Registration submitted. Pending admin approval for cross-college event."
+        : "Registration successful",
       registration,
     });
   } catch (err) {
@@ -52,7 +68,11 @@ const registerForEvent = async (req, res) => {
 const getAllRegistrations = async (req, res) => {
   try {
     const registrations = await ERegistrationModel.find()
-      .populate("userId", "fullName email phoneNumber")
+      .populate({
+        path: "userId",
+        select: "fullName email phoneNumber",
+        populate: { path: "collegeId", select: "name" }
+      })
       .populate("eventId", "title eventDate location category startTime endTime registrationDeadline maxSeats posterUrl status")
       .sort({ registrationDate: -1 });
 
@@ -91,8 +111,12 @@ const getRegistrationById = async (req, res) => {
     const { id } = req.params;
 
     const registration = await ERegistrationModel.findById(id)
-      .populate("userId", "fullName email phoneNumber collegeName department")
-      .populate("eventId", "eventName eventDate eventTime venue organizer");
+      .populate({
+        path: "userId",
+        select: "fullName email phoneNumber department yearOfStudy",
+        populate: { path: "collegeId", select: "name" }
+      })
+      .populate("eventId", "title eventDate location category");
 
     if (!registration) {
       return res.status(404).json({ message: "Registration not found" });
@@ -122,19 +146,14 @@ const cancelRegistration = async (req, res) => {
       return res.status(403).json({ message: "You don't have permission to cancel this registration" });
     }
 
-    // No need to decrement a counter — registration count is derived from the collection
-
     await ERegistrationModel.findByIdAndDelete(id);
 
-    res.status(200).json({
-      message: "Registration cancelled successfully",
-    });
+    res.status(200).json({ message: "Registration cancelled successfully" });
   } catch (err) {
     console.error("Cancel registration error:", err);
     res.status(500).json({ message: "Failed to cancel registration", error: err.message });
   }
 };
-
 
 module.exports = {
   registerForEvent,

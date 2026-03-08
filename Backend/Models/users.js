@@ -40,12 +40,22 @@ const userSchema = new mongoose.Schema(
       index: true,
     },
 
-    collegeName: {
-      type: String,
+    collegeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "College",
       required: function () {
         return this.role !== "superadmin";
       },
-      trim: true,
+      index: true,
+    },
+
+    // Only for organizers — links to the Club they manage
+    clubId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Club",
+      required: function () {
+        return this.role === "organizer";
+      },
     },
 
     department: {
@@ -57,40 +67,10 @@ const userSchema = new mongoose.Schema(
 
     yearOfStudy: {
       type: String,
-      required: true,
+      required: function () {
+        return this.role === "student" || this.role === "organizer";
+      },
       match: [/^\d{4}$/, "Year of study must be a 4-digit number"],
-    },
-
-    clubName: {
-      type: String,
-      trim: true,
-    },
-
-    clubCategory: {
-      type: String,
-      enum: [
-        "Technical",
-        "Cultural",
-        "Sports",
-        "Literary",
-        "Social Service",
-        "Other",
-      ],
-    },
-
-    clubDescription: {
-      type: String,
-      trim: true,
-    },
-
-    clubLogo: {
-      type: String,
-    },
-
-    socialLinks: {
-      website: String,
-      instagram: String,
-      linkedin: String,
     },
 
     stats: {

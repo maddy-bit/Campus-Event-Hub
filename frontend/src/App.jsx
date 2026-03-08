@@ -2,15 +2,14 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import { Navigate } from "react-router-dom";
 
-import Login from "./components/Login";
-import RegistrationPage from "./components/RegistrationPage";
-import ForgotPassword from "./components/ForgotPassword";
-import VerifyOtp from "./components/VerifyOtp";
-import ResetPassword from "./components/ResetPassword";
-import VerifyEmail from "./components/VerifyEmail";
+import Login from "./pages/auth/Login";
+import RegistrationPage from "./pages/auth/RegistrationPage";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import VerifyOtp from "./pages/auth/VerifyOtp";
+import ResetPassword from "./pages/auth/ResetPassword";
+import VerifyEmail from "./pages/auth/VerifyEmail";
 import LandingPage from "./components/LandingPage";
-import CreateEvent from "./components/CreateEvent";
-import DashboardLayout from "./components/DashboardLayout";
+
 
 // Importing ProtectedRoute for role-based access control
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -23,12 +22,14 @@ import SuperAdminLayout from "./layouts/SuperAdminLayout";
 
 
 // Importing dashboards for different roles
+import CreateEvent from "./pages/organizer/CreateEvent";
 import AdminDashboard from "./pages/admin/Dashboard";
 import OrganizerDashboard from "./pages/organizer/Dashboard";
 import SendNotification from "./pages/organizer/SendNotification";
 import OrganizerMyEvents from "./pages/organizer/MyEvents";
 import OrganizerProfile from "./pages/organizer/Profile";
 import ViewParticipants from "./pages/organizer/ViewParticipants";
+import OrganizerNotification from "./pages/organizer/Notification";
 import StudentEvents from "./pages/student/Events";
 import SuperAdminDashboard from "./pages/superadmin/Dashboard";
 import StudentProfile from "./pages/student/Profile";
@@ -86,6 +87,7 @@ function App() {
             <Route path="myevents" element={<OrganizerMyEvents />} />
             <Route path="view-participants" element={<ViewParticipants />} />
             <Route path="profile" element={<OrganizerProfile />} />
+            <Route path="inbox" element={<OrganizerNotification />} />
             <Route path="notifications" element={<SendNotification />} />
           </Route>
 
@@ -113,7 +115,7 @@ function App() {
           <Route path="/verify-otp" element={<VerifyOtp />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/create-event" element={<CreateEvent />} />
-          <Route path="/dashboard" element={<DashboardLayout />} />
+
         </Routes>
 
     </>
