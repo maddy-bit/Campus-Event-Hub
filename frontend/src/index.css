@@ -33,4 +33,10 @@ html, body, #root {
 body {
   overflow-x: hidden;
   min-height: 100vh;
-} */
+} 
+
+
+.custom-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+

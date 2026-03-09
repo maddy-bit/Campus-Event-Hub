@@ -172,16 +172,36 @@ const getCollegeDetails = async (req, res) => {
 
     const [admins, organizers, students, events] = await Promise.all([
       UserModel.find({ collegeId: id, role: "admin", isDeleted: false })
-        .select("-password"),
+        .select("-password")
+        .lean(),
       UserModel.find({ collegeId: id, role: "organizer", isDeleted: false })
         .select("-password")
-        .populate("clubId", "name category"),
+        .populate("clubId", "name category")
+        .lean(),
       UserModel.find({ collegeId: id, role: "student", isDeleted: false })
-        .select("-password"),
+        .select("-password")
+        .lean(),
       EventModel.find({ collegeId: id })
         .populate("createdBy", "fullName email")
-        .sort({ createdAt: -1 }),
+        .sort({ createdAt: -1 })
+        .lean(),
     ]);
+
+    const eventsCreatedMap = {};
+    events.forEach((event) => {
+      const creatorId = event.createdBy?._id?.toString() || event.createdBy?.toString();
+      if (creatorId) {
+        eventsCreatedMap[creatorId] = (eventsCreatedMap[creatorId] || 0) + 1;
+      }
+    });
+
+    const enrichUser = (user) => ({
+      ...user,
+      stats: {
+        ...user.stats,
+        eventsCreated: eventsCreatedMap[user._id.toString()] || 0,
+      },
+    });
 
     res.status(200).json({
       college,
@@ -191,9 +211,9 @@ const getCollegeDetails = async (req, res) => {
         totalStudents: students.length,
         totalEvents: events.length,
       },
-      admins,
-      organizers,
-      students,
+      admins: admins.map(enrichUser),
+      organizers: organizers.map(enrichUser),
+      students: students.map(enrichUser),
       events,
     });
   } catch (err) {

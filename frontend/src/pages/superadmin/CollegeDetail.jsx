@@ -33,7 +33,7 @@ const CollegeDetail = () => {
   const [activeTab, setActiveTab] = useState("Admins");
   const [searchQuery, setSearchQuery] = useState("");
 
-  // User detail modal state
+  // user detail modal state
   const [selectedUser, setSelectedUser] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [saving, setSaving] = useState(false);
@@ -112,14 +112,12 @@ const CollegeDetail = () => {
     setIsEditing(false);
   };
 
-  // Close modal
   const handleCloseModal = () => {
     setSelectedUser(null);
     setEditForm({});
     setIsEditing(false);
   };
 
-  // Save changes
   const handleSave = async () => {
     if (!selectedUser) return;
 
@@ -128,11 +126,9 @@ const CollegeDetail = () => {
       const res = await api.put(`/superadmin/users/${selectedUser._id}`, editForm);
       toast.success(res.data.message || "User updated successfully");
 
-      // Refresh data
       const refreshed = await api.get(`/superadmin/colleges/${id}/details`);
       setData(refreshed.data);
 
-      // Update selected user in modal with fresh data
       const updatedUser = res.data.user;
       setSelectedUser(updatedUser);
       setIsEditing(false);
@@ -143,7 +139,6 @@ const CollegeDetail = () => {
     }
   };
 
-  // Handle form field change
   const handleFieldChange = (field, value) => {
     setEditForm((prev) => ({ ...prev, [field]: value }));
   };
@@ -358,16 +353,13 @@ const UserDetailModal = ({
 }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto custom-scrollbar">
 
-        {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 rounded-t-2xl flex items-center justify-between z-10">
           <h2 className="text-lg font-bold text-gray-900">User Details</h2>
           <button
@@ -378,7 +370,6 @@ const UserDetailModal = ({
           </button>
         </div>
 
-        {/* User avatar & basic info */}
         <div className="px-6 pt-5 pb-4 border-b border-gray-100">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-full bg-gray-900 text-white flex items-center justify-center text-lg font-bold shrink-0">
@@ -410,7 +401,6 @@ const UserDetailModal = ({
           </div>
         </div>
 
-        {/* Fields */}
         <div className="px-6 py-5 space-y-4">
 
           <ModalField
@@ -438,7 +428,6 @@ const UserDetailModal = ({
             onChange={(val) => onFieldChange("phoneNumber", val)}
           />
 
-          {/* Role selector */}
           <div className="flex items-start gap-3">
             <div className="mt-2.5 text-gray-400">
               <Shield size={15} />
@@ -484,7 +473,6 @@ const UserDetailModal = ({
             placeholder="e.g. 2026"
           />
 
-          {/* Read-only info */}
           <div className="pt-3 border-t border-gray-100 space-y-2">
             <ReadOnlyField label="User ID" value={user._id} />
             <ReadOnlyField label="Email Verified" value={user.isEmailVerified ? "Yes" : "No"} />
@@ -557,10 +545,9 @@ const UserDetailModal = ({
 };
 
 
-/* ─── Small Helper Components ─── */
 
 const ModalField = ({ icon, label, value, isEditing, onChange, type = "text", placeholder = "" }) => (
-  <div className="flex items-start gap-3">
+  <div className="flex items-start gap-3 ">
     <div className="mt-2.5 text-gray-400">{icon}</div>
     <div className="flex-1">
       <label className="text-xs text-gray-400 uppercase tracking-wider font-medium">
@@ -630,7 +617,7 @@ const UserRow = ({ item, role }) => (
 
 const EventRow = ({ item }) => (
   <>
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-3 ">
       <div className="w-9 h-9 rounded-lg bg-gray-100 text-gray-600 flex items-center justify-center shrink-0">
         <CalendarDays size={16} />
       </div>
