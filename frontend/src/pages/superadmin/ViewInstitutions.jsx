@@ -8,7 +8,6 @@ const ViewInstitutions = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch colleges from the API
   useEffect(() => {
     const fetchColleges = async () => {
       try {
@@ -26,7 +25,6 @@ const ViewInstitutions = () => {
     fetchColleges();
   }, []);
 
-  // Memoize colleges to avoid unnecessary re-renders
   const memoizedColleges = useMemo(() => colleges, [colleges]);
 
   if (loading) {

@@ -45,7 +45,6 @@ const CollegeDetail = () => {
     fetchDetails();
   }, [id]);
 
-  // Memoize the filtered list based on active tab and search query
   const filteredList = useMemo(() => {
     if (!data) return [];
 
@@ -88,7 +87,6 @@ const CollegeDetail = () => {
     );
   }, [data, activeTab, searchQuery]);
 
-  // ── Loading ──
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
@@ -97,7 +95,6 @@ const CollegeDetail = () => {
     );
   }
 
-  // ── Error ──
   if (error) {
     return (
       <div className="flex items-center justify-center h-[60vh]">
@@ -113,7 +110,6 @@ const CollegeDetail = () => {
   return (
     <div className="p-6 max-w-6xl mx-auto">
 
-      {/* Back link */}
       <Link
         to="/superadmin/institutions"
         className="inline-flex items-center gap-2 text-gray-500 hover:text-black
@@ -123,7 +119,6 @@ const CollegeDetail = () => {
         <span>Back to all colleges</span>
       </Link>
 
-      {/* ── College Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
         <div className="flex items-start gap-4">
           {college.logo ? (
@@ -167,10 +162,8 @@ const CollegeDetail = () => {
         </div>
       </div>
 
-      {/* ── Primary Admin + Stats Row ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
 
-        {/* Primary Administrator card */}
         <div className="bg-white border border-gray-200 rounded-xl p-5">
           <p className="text-xs text-gray-400 uppercase tracking-wider mb-3 font-semibold">
             Primary Administrator
@@ -190,7 +183,6 @@ const CollegeDetail = () => {
           )}
         </div>
 
-        {/* Ecosystem Breakdown */}
         <div className="lg:col-span-2 bg-white border border-gray-200 rounded-xl p-5">
           <p className="text-xs text-gray-400 uppercase tracking-wider mb-3 font-semibold">
             Ecosystem Breakdown
@@ -204,10 +196,8 @@ const CollegeDetail = () => {
         </div>
       </div>
 
-      {/* ── Tabs + Search ── */}
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
 
-        {/* Tab bar */}
         <div className="flex border-b border-gray-200">
           {TABS.map((tab) => (
             <button
@@ -224,7 +214,6 @@ const CollegeDetail = () => {
           ))}
         </div>
 
-        {/* Search bar */}
         <div className="px-5 pt-4 pb-2">
           <div className="relative">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -263,7 +252,6 @@ const CollegeDetail = () => {
 };
 
 
-/* ─── Small Helper Components ─── */
 
 const StatCard = ({ label, value }) => (
   <div className="bg-gray-50 rounded-lg px-4 py-3 text-center">
@@ -275,7 +263,6 @@ const StatCard = ({ label, value }) => (
 const UserRow = ({ item, role }) => (
   <>
     <div className="flex items-center gap-3">
-      {/* Avatar */}
       <div className="w-9 h-9 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-xs font-bold shrink-0">
         {item.profilePicture ? (
           <img src={item.profilePicture} alt="" className="w-full h-full rounded-full object-cover" />

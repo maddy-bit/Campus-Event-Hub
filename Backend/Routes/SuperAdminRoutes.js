@@ -11,6 +11,7 @@ const {
   removeAdmin,
   getPlatformAnalytics,
   getCollegeDetails,
+  updateUser,
 } = require("../Controllers/SuperAdminController");
 
 // all routes require superadmin role
@@ -28,6 +29,9 @@ router.delete("/colleges/:id", deleteCollege);
 router.post("/admins", createAdmin);
 router.get("/admins", getAllAdmins);
 router.delete("/admins/:id", removeAdmin);
+
+// user management
+router.put("/users/:id", updateUser);
 
 // platform analytics
 router.get("/analytics", getPlatformAnalytics);
