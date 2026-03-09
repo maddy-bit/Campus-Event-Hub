@@ -8,17 +8,22 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
-  Users,
   CalendarDays,
-  Eye,
-  Trash2,
-  Mail,
   Phone,
   Search,
+  X,
+  Save,
+  Mail,
+  User,
+  Shield,
+  BookOpen,
+  Calendar,
 } from "lucide-react";
+import { toast } from "sonner";
 import api from "../../api";
 
 const TABS = ["Admins", "Organizers", "Students", "Events"];
+const ROLES = ["admin", "organizer", "student"];
 
 const CollegeDetail = () => {
   const { id } = useParams();
@@ -27,6 +32,12 @@ const CollegeDetail = () => {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("Admins");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // User detail modal state
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -86,6 +97,56 @@ const CollegeDetail = () => {
         item.phoneNumber?.includes(q)
     );
   }, [data, activeTab, searchQuery]);
+
+  // Open user detail modal
+  const handleUserClick = (user) => {
+    setSelectedUser(user);
+    setEditForm({
+      fullName: user.fullName || "",
+      email: user.email || "",
+      phoneNumber: user.phoneNumber || "",
+      role: user.role || "student",
+      department: user.department || "",
+      yearOfStudy: user.yearOfStudy || "",
+    });
+    setIsEditing(false);
+  };
+
+  // Close modal
+  const handleCloseModal = () => {
+    setSelectedUser(null);
+    setEditForm({});
+    setIsEditing(false);
+  };
+
+  // Save changes
+  const handleSave = async () => {
+    if (!selectedUser) return;
+
+    try {
+      setSaving(true);
+      const res = await api.put(`/superadmin/users/${selectedUser._id}`, editForm);
+      toast.success(res.data.message || "User updated successfully");
+
+      // Refresh data
+      const refreshed = await api.get(`/superadmin/colleges/${id}/details`);
+      setData(refreshed.data);
+
+      // Update selected user in modal with fresh data
+      const updatedUser = res.data.user;
+      setSelectedUser(updatedUser);
+      setIsEditing(false);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update user");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Handle form field change
+  const handleFieldChange = (field, value) => {
+    setEditForm((prev) => ({ ...prev, [field]: value }));
+  };
 
   if (loading) {
     return (
@@ -228,7 +289,6 @@ const CollegeDetail = () => {
           </div>
         </div>
 
-        {/* List */}
         <div className="divide-y divide-gray-100">
           {filteredList.length === 0 ? (
             <div className="px-5 py-10 text-center text-gray-400 text-sm">
@@ -236,7 +296,13 @@ const CollegeDetail = () => {
             </div>
           ) : (
             filteredList.map((item) => (
-              <div key={item._id} className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors">
+              <div
+                key={item._id}
+                onClick={() => activeTab !== "Events" && handleUserClick(item)}
+                className={`flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors ${
+                  activeTab !== "Events" ? "cursor-pointer" : ""
+                }`}
+              >
                 {activeTab === "Events" ? (
                   <EventRow item={item} />
                 ) : (
@@ -247,11 +313,283 @@ const CollegeDetail = () => {
           )}
         </div>
       </div>
+
+      {/* User Detail Modal */}
+      {selectedUser && (
+        <UserDetailModal
+          user={selectedUser}
+          editForm={editForm}
+          isEditing={isEditing}
+          saving={saving}
+          onClose={handleCloseModal}
+          onEdit={() => setIsEditing(true)}
+          onCancel={() => {
+            setIsEditing(false);
+            setEditForm({
+              fullName: selectedUser.fullName || "",
+              email: selectedUser.email || "",
+              phoneNumber: selectedUser.phoneNumber || "",
+              role: selectedUser.role || "student",
+              department: selectedUser.department || "",
+              yearOfStudy: selectedUser.yearOfStudy || "",
+            });
+          }}
+          onSave={handleSave}
+          onFieldChange={handleFieldChange}
+        />
+      )}
     </div>
   );
 };
 
 
+/* ─── User Detail Modal ─── */
+
+const UserDetailModal = ({
+  user,
+  editForm,
+  isEditing,
+  saving,
+  onClose,
+  onEdit,
+  onCancel,
+  onSave,
+  onFieldChange,
+}) => {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+
+        {/* Header */}
+        <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 rounded-t-2xl flex items-center justify-between z-10">
+          <h2 className="text-lg font-bold text-gray-900">User Details</h2>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+          >
+            <X size={18} className="text-gray-500" />
+          </button>
+        </div>
+
+        {/* User avatar & basic info */}
+        <div className="px-6 pt-5 pb-4 border-b border-gray-100">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-full bg-gray-900 text-white flex items-center justify-center text-lg font-bold shrink-0">
+              {user.profilePicture ? (
+                <img
+                  src={user.profilePicture}
+                  alt=""
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : (
+                user.fullName?.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
+              )}
+            </div>
+            <div>
+              <p className="text-lg font-semibold text-gray-900">{user.fullName}</p>
+              <span
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium mt-1 ${
+                  user.role === "admin"
+                    ? "bg-purple-100 text-purple-700"
+                    : user.role === "organizer"
+                    ? "bg-blue-100 text-blue-700"
+                    : "bg-gray-100 text-gray-600"
+                }`}
+              >
+                <Shield size={10} />
+                {user.role}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Fields */}
+        <div className="px-6 py-5 space-y-4">
+
+          <ModalField
+            icon={<User size={15} />}
+            label="Full Name"
+            value={editForm.fullName}
+            isEditing={isEditing}
+            onChange={(val) => onFieldChange("fullName", val)}
+          />
+
+          <ModalField
+            icon={<Mail size={15} />}
+            label="Email"
+            value={editForm.email}
+            isEditing={isEditing}
+            onChange={(val) => onFieldChange("email", val)}
+            type="email"
+          />
+
+          <ModalField
+            icon={<Phone size={15} />}
+            label="Phone Number"
+            value={editForm.phoneNumber}
+            isEditing={isEditing}
+            onChange={(val) => onFieldChange("phoneNumber", val)}
+          />
+
+          {/* Role selector */}
+          <div className="flex items-start gap-3">
+            <div className="mt-2.5 text-gray-400">
+              <Shield size={15} />
+            </div>
+            <div className="flex-1">
+              <label className="text-xs text-gray-400 uppercase tracking-wider font-medium">
+                Role
+              </label>
+              {isEditing ? (
+                <select
+                  value={editForm.role}
+                  onChange={(e) => onFieldChange("role", e.target.value)}
+                  className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg
+                             focus:outline-none focus:ring-2 focus:ring-gray-200 bg-white"
+                >
+                  {ROLES.map((r) => (
+                    <option key={r} value={r}>
+                      {r.charAt(0).toUpperCase() + r.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <p className="text-sm text-gray-800 mt-1 capitalize">{editForm.role}</p>
+              )}
+            </div>
+          </div>
+
+          <ModalField
+            icon={<BookOpen size={15} />}
+            label="Department"
+            value={editForm.department}
+            isEditing={isEditing}
+            onChange={(val) => onFieldChange("department", val)}
+            placeholder="e.g. Computer Science"
+          />
+
+          <ModalField
+            icon={<Calendar size={15} />}
+            label="Year of Study"
+            value={editForm.yearOfStudy}
+            isEditing={isEditing}
+            onChange={(val) => onFieldChange("yearOfStudy", val)}
+            placeholder="e.g. 2026"
+          />
+
+          {/* Read-only info */}
+          <div className="pt-3 border-t border-gray-100 space-y-2">
+            <ReadOnlyField label="User ID" value={user._id} />
+            <ReadOnlyField label="Email Verified" value={user.isEmailVerified ? "Yes" : "No"} />
+            <ReadOnlyField label="Status" value={user.isDeleted ? "Deleted" : "Active"} />
+            <ReadOnlyField
+              label="Joined"
+              value={
+                user.createdAt
+                  ? new Date(user.createdAt).toLocaleDateString("en-IN", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })
+                  : "—"
+              }
+            />
+            {user.clubId && (
+              <ReadOnlyField
+                label="Club"
+                value={typeof user.clubId === "object" ? user.clubId.name : user.clubId}
+              />
+            )}
+            {user.stats && (
+              <>
+                <ReadOnlyField label="Events Created" value={user.stats.eventsCreated} />
+                <ReadOnlyField label="Total Participants" value={user.stats.totalParticipants} />
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Footer actions */}
+        <div className="sticky bottom-0 bg-white border-t border-gray-100 px-6 py-4 rounded-b-2xl flex items-center justify-end gap-3">
+          {isEditing ? (
+            <>
+              <button
+                onClick={onCancel}
+                className="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200
+                           transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={onSave}
+                disabled={saving}
+                className="px-4 py-2 text-sm text-white bg-gray-900 rounded-lg hover:bg-gray-800
+                           transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-2"
+              >
+                {saving ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <Save size={14} />
+                )}
+                {saving ? "Saving..." : "Save Changes"}
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={onEdit}
+              className="px-4 py-2 text-sm text-white bg-gray-900 rounded-lg hover:bg-gray-800
+                         transition-colors cursor-pointer"
+            >
+              Edit User
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+/* ─── Small Helper Components ─── */
+
+const ModalField = ({ icon, label, value, isEditing, onChange, type = "text", placeholder = "" }) => (
+  <div className="flex items-start gap-3">
+    <div className="mt-2.5 text-gray-400">{icon}</div>
+    <div className="flex-1">
+      <label className="text-xs text-gray-400 uppercase tracking-wider font-medium">
+        {label}
+      </label>
+      {isEditing ? (
+        <input
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg
+                     focus:outline-none focus:ring-2 focus:ring-gray-200 bg-white"
+        />
+      ) : (
+        <p className="text-sm text-gray-800 mt-1">{value || "—"}</p>
+      )}
+    </div>
+  </div>
+);
+
+const ReadOnlyField = ({ label, value }) => (
+  <div className="flex items-center justify-between text-sm">
+    <span className="text-gray-400">{label}</span>
+    <span className="text-gray-700 font-medium text-right break-all max-w-[60%]">
+      {value ?? "—"}
+    </span>
+  </div>
+);
 
 const StatCard = ({ label, value }) => (
   <div className="bg-gray-50 rounded-lg px-4 py-3 text-center">
