@@ -35,6 +35,7 @@ import SuperAdminDashboard from "./pages/superadmin/Dashboard";
 import StudentProfile from "./pages/student/Profile";
 import Notification from "./pages/student/Notification";
 import Registrations from "./pages/student/Registrations";
+import ViewInstitutions from "./pages/superadmin/ViewInstitutions";
 
 function App() {
   return (
@@ -55,6 +56,7 @@ function App() {
             <Route index element={<Navigate to="dashboard" />} />
             <Route path="dashboard" element={<SuperAdminDashboard />} />
             <Route path="admins" element={<div>Manage Admins</div>} />
+            <Route path="institutions" element={<ViewInstitutions/>} />
           </Route>
 
           {/* admin route */}

@@ -6,19 +6,21 @@ import {
   Users,
   UserCircle,
   Clock,
-  Bell
+  Bell,
+  GraduationCapIcon
 } from "lucide-react";
 import AdminSidebar from "../components/AdminSidebar";
 import AdminHeader from "../components/AdminHeader";
 
 // Sidebar Menu items to match the screenshot "Admin Theme"
 const adminMenuItems = [
-  { name: "Overview", path: "/admin/dashboard", icon: LayoutDashboard },
-  { name: "Events", path: "/admin/events", icon: CalendarDays },
-  { name: "Users", path: "/admin/users", icon: Users },
-  { name: "Organizers", path: "/admin/organizers", icon: UserCircle },
-  { name: "Approvals", path: "/admin/approvals", icon: Clock },
-  { name: "Notify", path: "/admin/notify", icon: Bell },
+  { name: "Overview", path: "/superadmin/dashboard", icon: LayoutDashboard },
+  { name: "Events", path: "/superadmin/events", icon: CalendarDays },
+  { name: "Users", path: "/superadmin/users", icon: Users },
+  { name: "Organizers", path: "/superadmin/organizers", icon: UserCircle },
+  { name: "Approvals", path: "/superadmin/approvals", icon: Clock },
+  { name: "Notify", path: "/superadmin/notify", icon: Bell },
+  { name: "Institutions", path: "/superadmin/institutions", icon: GraduationCapIcon },
 ];
 
 const AdminLayout = () => {
