@@ -162,6 +162,45 @@ const getPlatformAnalytics = async (req, res) => {
   }
 };
 
+// get full details of a single college by ID
+const getCollegeDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const college = await CollegeModel.findById(id);
+    if (!college) return res.status(404).json({ message: "College not found" });
+
+    const [admins, organizers, students, events] = await Promise.all([
+      UserModel.find({ collegeId: id, role: "admin", isDeleted: false })
+        .select("-password"),
+      UserModel.find({ collegeId: id, role: "organizer", isDeleted: false })
+        .select("-password")
+        .populate("clubId", "name category"),
+      UserModel.find({ collegeId: id, role: "student", isDeleted: false })
+        .select("-password"),
+      EventModel.find({ collegeId: id })
+        .populate("createdBy", "fullName email")
+        .sort({ createdAt: -1 }),
+    ]);
+
+    res.status(200).json({
+      college,
+      stats: {
+        totalAdmins: admins.length,
+        totalOrganizers: organizers.length,
+        totalStudents: students.length,
+        totalEvents: events.length,
+      },
+      admins,
+      organizers,
+      students,
+      events,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch college details", error: err.message });
+  }
+};
+
 module.exports = {
   createCollege,
   getAllColleges,
@@ -171,4 +210,5 @@ module.exports = {
   getAllAdmins,
   removeAdmin,
   getPlatformAnalytics,
+  getCollegeDetails,
 };

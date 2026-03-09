@@ -1,68 +1,49 @@
-import React from "react";
-import { GraduationCap, MapPin, CheckCircle } from "lucide-react";
+import React, { useState, useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
+import { GraduationCap, MapPin, CheckCircle, Loader2 } from "lucide-react";
+import api from "../../api";
 
 const ViewInstitutions = () => {
-  const data = {
-    count: 2,
-    colleges: [
-      {
-        _id: "69ac5ff0340489f1b90b9af0",
-        name: "Global Engineering College",
-        location: "Pune",
-        logo: null,
-        isVerified: true,
-      },
-      {
-        _id: "69ac5ff0340489f1b90b9af1",
-        name: "National Institute of Technology",
-        location: "Mumbai",
-        logo: null,
-        isVerified: true,
-      },
-      {
-        _id: "69ac5ff0340489f1b90b9af0",
-        name: "Global Engineering College",
-        location: "Pune",
-        logo: null,
-        isVerified: true,
-      },
-      {
-        _id: "69ac5ff0340489f1b90b9af1",
-        name: "National Institute of Technology",
-        location: "Mumbai",
-        logo: null,
-        isVerified: true,
-      },
-      {
-        _id: "69ac5ff0340489f1b90b9af0",
-        name: "Global Engineering College",
-        location: "Pune",
-        logo: null,
-        isVerified: true,
-      },
-      {
-        _id: "69ac5ff0340489f1b90b9af1",
-        name: "National Institute of Technology",
-        location: "Mumbai",
-        logo: null,
-        isVerified: true,
-      },
-      {
-        _id: "69ac5ff0340489f1b90b9af0",
-        name: "Global Engineering College",
-        location: "Pune",
-        logo: null,
-        isVerified: true,
-      },
-      {
-        _id: "69ac5ff0340489f1b90b9af1",
-        name: "National Institute of Technology",
-        location: "Mumbai",
-        logo: null,
-        isVerified: true,
-      },
-    ],
-  };
+  const [colleges, setColleges] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch colleges from the API
+  useEffect(() => {
+    const fetchColleges = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get("/superadmin/colleges");
+        setColleges(res.data.colleges || []);
+      } catch (err) {
+        console.error("Failed to fetch colleges:", err);
+        setError(err.response?.data?.message || "Failed to fetch colleges");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchColleges();
+  }, []);
+
+  // Memoize colleges to avoid unnecessary re-renders
+  const memoizedColleges = useMemo(() => colleges, [colleges]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <Loader2 size={32} className="animate-spin text-gray-400" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-[60vh]">
+        <p className="text-red-500 text-lg">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -75,17 +56,18 @@ const ViewInstitutions = () => {
           Registered Colleges
         </h1>
         <p className="text-gray-400 text-sm mt-1">
-          Total Colleges: {data.count}
+          Total Colleges: {memoizedColleges.length}
         </p>
       </header>
 
       <main className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 
-        {data.colleges.map((c) => (
-          <div
-            key={c._id}
+        {memoizedColleges.map((c, index) => (
+          <Link
+            to={`/superadmin/institutions/${c._id}`}
+            key={`${c._id}-${index}`}
             className="group bg-white border border-gray-200 rounded-xl p-5
-            hover:shadow-md hover:-translate-y-1 transition-all duration-300"
+            hover:shadow-md hover:-translate-y-1 transition-all duration-300 no-underline"
           >
 
             <div className="flex items-center gap-4 mb-4">
@@ -123,7 +105,7 @@ const ViewInstitutions = () => {
               <span>{c.isVerified ? "Verified Institution" : "Not Verified"}</span>
             </div>
 
-          </div>
+          </Link>
         ))}
 
       </main>
