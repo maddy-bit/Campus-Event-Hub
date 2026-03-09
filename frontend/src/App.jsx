@@ -24,6 +24,7 @@ import SuperAdminLayout from "./layouts/SuperAdminLayout";
 // Importing dashboards for different roles
 import CreateEvent from "./pages/organizer/CreateEvent";
 import AdminDashboard from "./pages/admin/Dashboard";
+import AdminEvents from "./pages/admin/Events";
 import OrganizerDashboard from "./pages/organizer/Dashboard";
 import SendNotification from "./pages/organizer/SendNotification";
 import OrganizerMyEvents from "./pages/organizer/MyEvents";
@@ -77,8 +78,9 @@ function App() {
           <Route path="analytics" element={<div>Analytics Page</div>} />
         </Route>
 
-        {/* Standalone Dashboard Page (No Sidebar/Header) */}
+        {/* Standalone Admin Pages (No Sidebar/Header) */}
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/events" element={<AdminEvents />} />
 
         {/* organizer route */}
         <Route
