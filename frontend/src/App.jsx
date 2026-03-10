@@ -26,6 +26,7 @@ import CreateEvent from "./pages/organizer/CreateEvent";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminEvents from "./pages/admin/Events";
 import AdminUsers from "./pages/admin/Users";
+import NotifyHub from "./pages/admin/NotifyHub";
 import OrganizerDashboard from "./pages/organizer/Dashboard";
 import SendNotification from "./pages/organizer/SendNotification";
 import OrganizerMyEvents from "./pages/organizer/MyEvents";
@@ -82,6 +83,7 @@ function App() {
 
         {/* Standalone Admin Pages (No Sidebar/Header) */}
         <Route path="/admin/users" element={<AdminUsers />} />
+        <Route path="/admin/notify" element={<NotifyHub />} />
 
         {/* Standalone Admin Pages (No Sidebar/Header) */}
 
