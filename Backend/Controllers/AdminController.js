@@ -245,6 +245,196 @@ const getCollegeAnalytics = async (req, res) => {
   }
 };
 
+// promote student to organizer
+const promoteUserToOrganizer = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { clubId } = req.body;
+
+    const user = await UserModel.findById(id);
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (user.collegeId.toString() !== req.user.collegeId.toString()) {
+      return res.status(403).json({ message: "You can only promote users from your college" });
+    }
+
+    if (user.role !== "student") {
+      return res.status(400).json({ message: "Only students can be promoted to organizer" });
+    }
+
+    user.role = "organizer";
+    if (clubId) user.clubId = clubId;
+    await user.save();
+
+    res.status(200).json({ message: "User promoted to organizer", user });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to promote user", error: err.message });
+  }
+};
+
+// send notification to entire college
+const sendCollegeNotification = async (req, res) => {
+  try {
+    const { title, message, type } = req.body;
+
+    const students = await UserModel.find({
+      collegeId: req.user.collegeId,
+      role: { $in: ["student", "organizer"] },
+      isDeleted: false,
+    });
+
+    const notification = await NotificationModel.create({
+      title,
+      message,
+      type: type || "General",
+      sender: req.user._id,
+      status: "Sent",
+      reachCount: students.length,
+    });
+
+    res.status(201).json({ message: "Notification sent", notification, reachCount: students.length });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to send notification", error: err.message });
+  }
+};
+
+// soft delete user
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await UserModel.findById(id);
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (user.collegeId.toString() !== req.user.collegeId.toString()) {
+      return res.status(403).json({ message: "You can only delete users from your college" });
+    }
+
+    if (user.role === "admin" || user.role === "superadmin") {
+      return res.status(403).json({ message: "Cannot delete admin or superadmin users" });
+    }
+
+    user.isDeleted = true;
+    await user.save();
+
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to delete user", error: err.message });
+  }
+};
+
+// edit user details
+const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    const user = await UserModel.findById(id);
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (user.collegeId.toString() !== req.user.collegeId.toString()) {
+      return res.status(403).json({ message: "You can only edit users from your college" });
+    }
+
+    // prevent role and sensitive field changes
+    delete updates.password;
+    delete updates.role;
+    delete updates.collegeId;
+    delete updates.isDeleted;
+
+    Object.assign(user, updates);
+    await user.save();
+
+    res.status(200).json({ message: "User updated successfully", user });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update user", error: err.message });
+  }
+};
+
+// weekly registration trend
+const getRegistrationTrend = async (req, res) => {
+  try {
+    const collegeId = req.user.collegeId;
+    const events = await EventModel.find({ collegeId }).select("_id");
+    const eventIds = events.map(e => e._id);
+
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const registrations = await ERegistrationModel.find({
+      eventId: { $in: eventIds },
+      createdAt: { $gte: sevenDaysAgo }
+    }).select("createdAt");
+
+    // group by day
+    const trend = {};
+    for (let i = 0; i < 7; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const key = date.toISOString().split('T')[0];
+      trend[key] = 0;
+    }
+
+    registrations.forEach(reg => {
+      const key = reg.createdAt.toISOString().split('T')[0];
+      if (trend[key] !== undefined) trend[key]++;
+    });
+
+    const trendData = Object.keys(trend).sort().map(date => ({
+      date,
+      count: trend[date]
+    }));
+
+    res.status(200).json({ trend: trendData });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch registration trend", error: err.message });
+  }
+};
+
+// organizers grouped by club with event counts
+const getOrganizersByClub = async (req, res) => {
+  try {
+    const organizers = await UserModel.find({
+      collegeId: req.user.collegeId,
+      role: "organizer",
+      isDeleted: false,
+    })
+      .select("-password")
+      .populate("clubId", "name category");
+
+    // get event counts for each organizer
+    const organizersWithCounts = await Promise.all(
+      organizers.map(async (org) => {
+        const eventCount = await EventModel.countDocuments({ createdBy: org._id });
+        return {
+          ...org.toObject(),
+          eventCount
+        };
+      })
+    );
+
+    // group by club
+    const grouped = organizersWithCounts.reduce((acc, org) => {
+      const clubName = org.clubId?.name || "No Club";
+      if (!acc[clubName]) {
+        acc[clubName] = {
+          club: org.clubId,
+          organizers: []
+        };
+      }
+      acc[clubName].organizers.push(org);
+      return acc;
+    }, {});
+
+    res.status(200).json({ data: Object.values(grouped) });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch organizers by club", error: err.message });
+  }
+};
+
 module.exports = {
   getPendingEvents,
   approveEvent,
@@ -256,4 +446,10 @@ module.exports = {
   getPendingCrossCollegeRegistrations,
   reviewCrossCollegeRegistration,
   getCollegeAnalytics,
+  promoteUserToOrganizer,
+  sendCollegeNotification,
+  deleteUser,
+  updateUser,
+  getRegistrationTrend,
+  getOrganizersByClub,
 };
