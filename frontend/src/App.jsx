@@ -25,6 +25,7 @@ import SuperAdminLayout from "./layouts/SuperAdminLayout";
 import CreateEvent from "./pages/organizer/CreateEvent";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminEvents from "./pages/admin/Events";
+import AdminUsers from "./pages/admin/Users";
 import OrganizerDashboard from "./pages/organizer/Dashboard";
 import SendNotification from "./pages/organizer/SendNotification";
 import OrganizerMyEvents from "./pages/organizer/MyEvents";
@@ -74,13 +75,15 @@ function App() {
           element={<AdminLayout />}
         >
           <Route index element={<Navigate to="dashboard" />} />
-          <Route path="users" element={<div>Users Page</div>} />
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="events" element={<AdminEvents />} />
           <Route path="analytics" element={<div>Analytics Page</div>} />
         </Route>
 
         {/* Standalone Admin Pages (No Sidebar/Header) */}
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/events" element={<AdminEvents />} />
+        <Route path="/admin/users" element={<AdminUsers />} />
+
+        {/* Standalone Admin Pages (No Sidebar/Header) */}
 
         {/* organizer route */}
         <Route
