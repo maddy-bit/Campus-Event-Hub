@@ -10,7 +10,10 @@ import {
   Music,
   Tent,
   X,
-  Check
+  Check,
+  Edit2,
+  Upload,
+  Image as ImageIcon
 } from "lucide-react";
 import api from "../../api";
 import { toast } from "sonner";
@@ -26,7 +29,7 @@ const CATEGORY_ICONS = {
   Other: Box,
 };
 
-const ActionMenu = ({ show, onClose, onEditStatus, currentStatus }) => {
+const ActionMenu = ({ show, onClose, onEditStatus, onEditEvent, currentStatus }) => {
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -41,7 +44,19 @@ const ActionMenu = ({ show, onClose, onEditStatus, currentStatus }) => {
 
   return (
     <div ref={menuRef} className="events-dropdown-menu">
-      <div className="dropdown-label">Change Status:</div>
+      <button
+        className="dropdown-item"
+        style={{ color: "#3b82f6", marginBottom: "0.5rem" }}
+        onClick={() => {
+          onEditEvent();
+          onClose();
+        }}
+      >
+        <Edit2 size={14} />
+        <span style={{ marginLeft: "8px" }}>Edit Event</span>
+      </button>
+      
+      <div className="dropdown-label" style={{ borderTop: "1px solid #e5e7eb", paddingTop: "0.5rem" }}>Change Status:</div>
       {["Approved", "Submitted", "Draft", "Rejected"].map(status => (
         <button
           key={status}
@@ -61,7 +76,7 @@ const ActionMenu = ({ show, onClose, onEditStatus, currentStatus }) => {
   );
 };
 
-const EventCard = ({ event, onStatusChange }) => {
+const EventCard = ({ event, onStatusChange, onEdit }) => {
   const [showMenu, setShowMenu] = useState(false);
   const Icon = CATEGORY_ICONS[event.category] || Box;
 
@@ -81,8 +96,8 @@ const EventCard = ({ event, onStatusChange }) => {
 
   return (
     <div className="event-card">
-      <div className="card-image-area">
-        <Icon size={48} />
+      <div className="card-image-area" style={{ backgroundImage: event.posterUrl ? `url(${event.posterUrl})` : 'none', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+        {!event.posterUrl && <Icon size={48} />}
         <span className={`status-badge ${getStatusClass(event.status)}`}>
           {event.status}
         </span>
@@ -102,7 +117,6 @@ const EventCard = ({ event, onStatusChange }) => {
 
         <div className="card-footer">
           <div className="participant-avatars">
-            {/* If we had participants array we'd map it here. For now just show who created it */}
             <div className="avatar-circle" style={{ width: "auto", padding: "0 8px", borderRadius: "8px" }}>
               By {event.createdBy?.fullName?.split(" ")[0] || "Admin"}
             </div>
@@ -116,6 +130,7 @@ const EventCard = ({ event, onStatusChange }) => {
               onClose={() => setShowMenu(false)}
               currentStatus={event.status}
               onEditStatus={(status) => onStatusChange(event._id, status)}
+              onEditEvent={() => onEdit(event)}
             />
           </div>
         </div>
@@ -124,7 +139,8 @@ const EventCard = ({ event, onStatusChange }) => {
   );
 };
 
-const EventModal = ({ show, onClose, onSuccess }) => {
+const EventModal = ({ show, onClose, onSuccess, initialData }) => {
+  const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({
     title: "",
     category: "Competition",
@@ -139,7 +155,48 @@ const EventModal = ({ show, onClose, onSuccess }) => {
     ticketPrice: 0,
     isPublic: true
   });
+  const [posterFile, setPosterFile] = useState(null);
+  const [posterPreview, setPosterPreview] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (show) {
+      if (initialData) {
+        setFormData({
+          title: initialData.title || "",
+          category: initialData.category || "Competition",
+          location: initialData.location || "",
+          description: initialData.description || "",
+          eventDate: initialData.eventDate ? new Date(initialData.eventDate).toISOString().split('T')[0] : "",
+          startTime: initialData.startTime || "",
+          endTime: initialData.endTime || "",
+          registrationDeadline: initialData.registrationDeadline ? new Date(initialData.registrationDeadline).toISOString().split('T')[0] : "",
+          maxSeats: initialData.maxSeats || 100,
+          isPaidEvent: initialData.isPaidEvent || false,
+          ticketPrice: initialData.ticketPrice || 0,
+          isPublic: initialData.isPublic !== false
+        });
+        setPosterPreview(initialData.posterUrl || null);
+      } else {
+        setFormData({
+          title: "",
+          category: "Competition",
+          location: "",
+          description: "",
+          eventDate: "",
+          startTime: "",
+          endTime: "",
+          registrationDeadline: "",
+          maxSeats: 100,
+          isPaidEvent: false,
+          ticketPrice: 0,
+          isPublic: true
+        });
+        setPosterPreview(null);
+      }
+      setPosterFile(null);
+    }
+  }, [show, initialData]);
 
   if (!show) return null;
 
@@ -148,29 +205,84 @@ const EventModal = ({ show, onClose, onSuccess }) => {
     setFormData(prev => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size must be under 5 MB");
+      return;
+    }
+    setPosterFile(file);
+    setPosterPreview(URL.createObjectURL(file));
+  };
+
+  const removePoster = () => {
+    setPosterFile(null);
+    setPosterPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
-      await api.post("/admin/events", formData);
-      toast.success("Event created successfully");
+      
+      const payload = new FormData();
+      Object.keys(formData).forEach(key => {
+        payload.append(key, formData[key]);
+      });
+      if (posterFile) {
+        payload.append("poster", posterFile);
+      }
+
+      if (initialData) {
+        await api.put(`/admin/events/${initialData._id}`, payload, {
+          headers: { "Content-Type": "multipart/form-data" }
+        });
+        toast.success("Event updated successfully");
+      } else {
+        await api.post("/admin/events", payload, {
+          headers: { "Content-Type": "multipart/form-data" }
+        });
+        toast.success("Event created successfully");
+      }
       onSuccess();
       onClose();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to create event");
+      toast.error(err.response?.data?.message || "Failed to save event");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="admin-modal-overlay" onClick={onClose}>
-      <div className="admin-modal-content" onClick={e => e.stopPropagation()}>
+    <div className="admin-modal-overlay" onClick={onClose} style={{ overflowY: "auto", padding: "2rem 0" }}>
+      <div className="admin-modal-content" onClick={e => e.stopPropagation()} style={{ margin: "auto" }}>
         <div className="admin-modal-header">
-          <h3>Create New Event</h3>
+          <h3>{initialData ? "Edit Event" : "Create New Event"}</h3>
           <button className="close-btn" onClick={onClose}><X size={20} /></button>
         </div>
         <form onSubmit={handleSubmit} className="admin-modal-form">
+          
+          <div className="input-group" style={{ marginBottom: "1.5rem" }}>
+            <label style={{display: "block", marginBottom: "0.5rem", fontWeight: "600"}}>Event Poster</label>
+            {posterPreview ? (
+              <div style={{ position: "relative", display: "inline-block", border: "1px solid #e5e7eb", borderRadius: "8px", overflow: "hidden" }}>
+                <img src={posterPreview} alt="Preview" style={{ maxWidth: "100%", maxHeight: "200px", display: "block", objectFit: "cover" }} />
+                <button type="button" onClick={removePoster} className="close-btn" style={{ position: "absolute", top: "8px", right: "8px", background: "rgba(255,255,255,0.8)", borderRadius: "4px", padding: "4px" }}>
+                  <X size={16} color="#000" />
+                </button>
+              </div>
+            ) : (
+              <div onClick={() => fileInputRef.current?.click()} style={{ border: "2px dashed #cbd5e1", borderRadius: "8px", padding: "2rem", textAlign: "center", cursor: "pointer", background: "#f8fafc" }}>
+                <Upload size={24} color="#64748b" style={{ margin: "0 auto 0.5rem" }} />
+                <div style={{ color: "#64748b", fontSize: "0.875rem" }}>Click to upload poster (Max 5MB)</div>
+              </div>
+            )}
+            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} style={{ display: "none" }} />
+          </div>
+
           <div className="form-group">
             <label>Event Title</label>
             <input type="text" name="title" value={formData.title} onChange={handleChange} required />
@@ -217,10 +329,29 @@ const EventModal = ({ show, onClose, onSuccess }) => {
               <input type="number" name="maxSeats" value={formData.maxSeats} onChange={handleChange} required />
             </div>
           </div>
+
+          <div className="form-row" style={{ marginTop: "1rem", gap: "2rem" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer", fontSize: "0.875rem", fontWeight: "600" }}>
+              <input type="checkbox" name="isPaidEvent" checked={formData.isPaidEvent} onChange={handleChange} />
+              Paid Event
+            </label>
+            <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer", fontSize: "0.875rem", fontWeight: "600" }}>
+              <input type="checkbox" name="isPublic" checked={formData.isPublic} onChange={handleChange} />
+              Open to Other Colleges
+            </label>
+          </div>
+
+          {formData.isPaidEvent && (
+            <div className="form-group" style={{ marginTop: "1rem" }}>
+              <label>Ticket Price (₹)</label>
+              <input type="number" name="ticketPrice" value={formData.ticketPrice} onChange={handleChange} min="0" required />
+            </div>
+          )}
+
           <div className="form-actions">
             <button type="button" className="btn-secondary" onClick={onClose}>Cancel</button>
             <button type="submit" className="btn-primary" disabled={loading}>
-              {loading ? "Creating..." : "Create & Approve Event"}
+              {loading ? "Saving..." : initialData ? "Update Event" : "Create & Approve"}
             </button>
           </div>
         </form>
@@ -235,6 +366,7 @@ const Events = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [editingEvent, setEditingEvent] = useState(null);
 
   const fetchEvents = async () => {
     try {
@@ -262,6 +394,11 @@ const Events = () => {
     }
   };
 
+  const handleEdit = (event) => {
+    setEditingEvent(event);
+    setShowModal(true);
+  };
+
   const categories = ["All", "Competition", "Conference", "Workshop", "Seminar", "Sports", "Cultural", "Other"];
 
   // Filtering
@@ -280,7 +417,7 @@ const Events = () => {
           <div className="management-label">Event Management</div>
           <h1>Explore Events</h1>
         </div>
-        <button className="create-event-btn" onClick={() => setShowModal(true)}>
+        <button className="create-event-btn" onClick={() => { setEditingEvent(null); setShowModal(true); }}>
           <Plus size={18} />
           Create Event
         </button>
@@ -320,15 +457,21 @@ const Events = () => {
       ) : (
         <div className="events-grid">
           {filteredEvents.map((event) => (
-            <EventCard key={event._id} event={event} onStatusChange={handleStatusChange} />
+            <EventCard 
+              key={event._id} 
+              event={event} 
+              onStatusChange={handleStatusChange} 
+              onEdit={handleEdit}
+            />
           ))}
         </div>
       )}
 
       <EventModal
         show={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={() => { setShowModal(false); setEditingEvent(null); }}
         onSuccess={fetchEvents}
+        initialData={editingEvent}
       />
     </div>
   );

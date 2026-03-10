@@ -3,6 +3,18 @@ const { UserModel } = require("../Models/users");
 const { ERegistrationModel } = require("../Models/ERegistration");
 const { ClubModel } = require("../Models/club");
 const { NotificationModel } = require("../Models/Notification");
+const cloudinary = require("../Config/cloudinary");
+
+// Helper: upload buffer to Cloudinary using upload_stream
+const uploadToCloudinary = (fileBuffer, options) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(options, (error, result) => {
+      if (error) return reject(error);
+      resolve(result);
+    });
+    stream.end(fileBuffer);
+  });
+};
 
 // get events pending approval for admin's college
 const getPendingEvents = async (req, res) => {
@@ -125,6 +137,23 @@ const createEvent = async (req, res) => {
   try {
     const { title, category, location, description, eventDate, startTime, endTime, registrationDeadline, maxSeats, isPaidEvent, ticketPrice, isPublic } = req.body;
     
+    let posterUrl = "";
+    if (req.file) {
+      try {
+        const result = await uploadToCloudinary(req.file.buffer, {
+          folder: "campuseventhub/events",
+          transformation: [
+            { width: 1200, height: 630, crop: "limit" },
+            { quality: "auto", fetch_format: "auto" },
+          ],
+        });
+        posterUrl = result.secure_url;
+      } catch (uploadErr) {
+        console.error("Cloudinary upload error:", uploadErr);
+        return res.status(500).json({ message: "Image upload failed", error: uploadErr.message });
+      }
+    }
+
     const newEvent = new EventModel({
       title,
       category,
@@ -135,9 +164,10 @@ const createEvent = async (req, res) => {
       endTime,
       registrationDeadline,
       maxSeats,
-      isPaidEvent,
-      ticketPrice,
-      isPublic,
+      isPaidEvent: isPaidEvent === "true" || isPaidEvent === true,
+      ticketPrice: ticketPrice || 0,
+      isPublic: isPublic === "false" || isPublic === false ? false : true,
+      posterUrl,
       createdBy: req.user._id,
       collegeId: req.user.collegeId,
       status: "Approved", // Auto-approved
@@ -164,6 +194,25 @@ const updateEvent = async (req, res) => {
     if (!event) return res.status(404).json({ message: "Event not found" });
     if (event.collegeId.toString() !== req.user.collegeId.toString()) {
       return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    // handle boolean parsing due to FormData
+    if (updateData.isPaidEvent !== undefined) updateData.isPaidEvent = updateData.isPaidEvent === "true" || updateData.isPaidEvent === true;
+    if (updateData.isPublic !== undefined) updateData.isPublic = updateData.isPublic !== "false" && updateData.isPublic !== false;
+
+    if (req.file) {
+      try {
+        const result = await uploadToCloudinary(req.file.buffer, {
+          folder: "campuseventhub/events",
+          transformation: [
+            { width: 1200, height: 630, crop: "limit" },
+            { quality: "auto", fetch_format: "auto" },
+          ],
+        });
+        updateData.posterUrl = result.secure_url;
+      } catch (uploadErr) {
+        console.error("Cloudinary upload error:", uploadErr);
+      }
     }
 
     const updatedEvent = await EventModel.findByIdAndUpdate(id, updateData, { new: true });
