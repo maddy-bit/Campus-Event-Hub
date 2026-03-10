@@ -6,6 +6,8 @@ const {
   approveEvent,
   rejectEvent,
   getCollegeEvents,
+  createEvent,
+  updateEvent,
   getCollegeOrganizers,
   getCollegeStudents,
   getCollegeClubs,
@@ -20,6 +22,7 @@ const {
   grantAccessRequest,
   rejectAccessRequest,
 } = require("../Controllers/AdminController");
+const upload = require("../utils/uploadConfig");
 
 // all routes require admin role
 router.use(verifyToken, checkRole("admin"));
@@ -32,8 +35,10 @@ router.get("/events/pending", getPendingEvents);
 router.patch("/events/:id/approve", approveEvent);
 router.patch("/events/:id/reject", rejectEvent);
 
-// college data
+// college data (including events)
 router.get("/events", getCollegeEvents);
+router.post("/events", upload.single("poster"), createEvent);
+router.put("/events/:id", upload.single("poster"), updateEvent);
 router.get("/organizers", getCollegeOrganizers);
 router.get("/students", getCollegeStudents);
 router.get("/clubs", getCollegeClubs);

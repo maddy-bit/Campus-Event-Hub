@@ -120,6 +120,59 @@ const getCollegeEvents = async (req, res) => {
   }
 };
 
+// Create an event directly by admin (auto-approved)
+const createEvent = async (req, res) => {
+  try {
+    const { title, category, location, description, eventDate, startTime, endTime, registrationDeadline, maxSeats, isPaidEvent, ticketPrice, isPublic } = req.body;
+    
+    const newEvent = new EventModel({
+      title,
+      category,
+      location,
+      description,
+      eventDate,
+      startTime,
+      endTime,
+      registrationDeadline,
+      maxSeats,
+      isPaidEvent,
+      ticketPrice,
+      isPublic,
+      createdBy: req.user._id,
+      collegeId: req.user.collegeId,
+      status: "Approved", // Auto-approved
+      moderation: {
+        reviewedBy: req.user._id,
+        reviewedAt: new Date(),
+      }
+    });
+
+    await newEvent.save();
+    res.status(201).json({ message: "Event created successfully", event: newEvent });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to create event", error: err.message });
+  }
+};
+
+// Update an existing event, including status
+const updateEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    
+    const event = await EventModel.findById(id);
+    if (!event) return res.status(404).json({ message: "Event not found" });
+    if (event.collegeId.toString() !== req.user.collegeId.toString()) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    const updatedEvent = await EventModel.findByIdAndUpdate(id, updateData, { new: true });
+    res.status(200).json({ message: "Event updated successfully", event: updatedEvent });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update event", error: err.message });
+  }
+};
+
 // get all organizers in admin's college
 const getCollegeOrganizers = async (req, res) => {
   try {
@@ -538,6 +591,8 @@ module.exports = {
   approveEvent,
   rejectEvent,
   getCollegeEvents,
+  createEvent,
+  updateEvent,
   getCollegeOrganizers,
   getCollegeStudents,
   getCollegeClubs,
