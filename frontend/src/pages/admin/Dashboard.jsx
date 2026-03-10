@@ -1,18 +1,44 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   CalendarDays,
   Users,
-  UserCircle,
   Clock,
+  Activity,
   MoreHorizontal,
-  Plus
+  Check,
+  X,
+  ChevronRight,
+  TrendingUp,
 } from "lucide-react";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  Cell,
+} from "recharts";
+import api from "../../api";
 import "../../styles/AdminDashboard.css";
+
+const CATEGORY_COLORS = {
+  Competition: "#111827",
+  Conference: "#374151",
+  Workshop: "#4b5563",
+  Seminar: "#6b7280",
+  Sports: "#9ca3af",
+  Cultural: "#d1d5db",
+  Other: "#e5e7eb",
+};
 
 const StatCard = ({ title, value, trend, icon: Icon, dark = false }) => (
   <div className={`stat-card ${dark ? "dark" : ""}`}>
     <div className="stat-icon">
-      <Icon size={20} />
+      <Icon size={18} strokeWidth={2} />
     </div>
     <div className="stat-info">
       <div className="label">{title}</div>
@@ -22,26 +48,162 @@ const StatCard = ({ title, value, trend, icon: Icon, dark = false }) => (
   </div>
 );
 
+const ActionMenu = ({ show, onClose, onApprove, onReject, type = "event" }) => {
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        onClose();
+      }
+    };
+    if (show) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [show, onClose]);
+
+  if (!show) return null;
+
+  const approveLabel = type === "promotion" ? "Promote to Organizer" : type === "access" ? "Grant Access" : "Approve Event";
+  const rejectLabel = type === "promotion" ? "Deny Request" : type === "access" ? "Reject Request" : "Reject Event";
+
+  return (
+    <div ref={menuRef} className="action-dropdown">
+      <button className="dropdown-item approve" onClick={onApprove}>
+        <Check size={14} />
+        {approveLabel}
+      </button>
+      <button className="dropdown-item reject" onClick={onReject}>
+        <X size={14} />
+        {rejectLabel}
+      </button>
+    </div>
+  );
+};
+
+const RejectModal = ({ show, onClose, onSubmit, title }) => {
+  const [reason, setReason] = useState("");
+
+  if (!show) return null;
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <h3>{title || "Rejection Reason"}</h3>
+        <p className="modal-description">Please provide a reason. This will be sent to the organizer.</p>
+        <textarea
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          placeholder="Enter the reason for rejection..."
+          rows={4}
+          className="modal-textarea"
+        />
+        <div className="modal-actions">
+          <button className="modal-btn-cancel" onClick={onClose}>Cancel</button>
+          <button
+            className="modal-btn-submit"
+            onClick={() => { onSubmit(reason); setReason(""); }}
+            disabled={!reason.trim()}
+          >
+            Send & Reject
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="chart-tooltip">
+        <p className="tooltip-label">{label}</p>
+        <p className="tooltip-value">{payload[0].value} registrations</p>
+      </div>
+    );
+  }
+  return null;
+};
+
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const [dashData, setDashData] = useState(null);
+  const [pendingEvents, setPendingEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeMenu, setActiveMenu] = useState(null);
+  const [rejectModal, setRejectModal] = useState({ show: false, id: null, type: null });
+
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
+
+  const fetchDashboard = async () => {
+    try {
+      setLoading(true);
+      const [statsRes, pendingRes] = await Promise.all([
+        api.get("/admin/dashboard-stats"),
+        api.get("/admin/events/pending"),
+      ]);
+      setDashData(statsRes.data);
+      setPendingEvents(pendingRes.data.events || []);
+    } catch (err) {
+      console.error("Dashboard fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApproveEvent = async (id) => {
+    try {
+      await api.patch(`/admin/events/${id}/approve`);
+      setActiveMenu(null);
+      fetchDashboard();
+    } catch (err) {
+      console.error("Approve error:", err);
+    }
+  };
+
+  const handleRejectEvent = async (reason) => {
+    try {
+      await api.patch(`/admin/events/${rejectModal.id}/reject`, { reason });
+      setRejectModal({ show: false, id: null, type: null });
+      setActiveMenu(null);
+      fetchDashboard();
+    } catch (err) {
+      console.error("Reject error:", err);
+    }
+  };
+
+  const formatDate = (dateStr) => {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  };
+
+  const getInitials = (name) => {
+    if (!name) return "??";
+    return name.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2);
+  };
+
+  if (loading) {
+    return (
+      <div className="admin-dashboard">
+        <div className="dashboard-loading">
+          <div className="loading-spinner" />
+          <span>Loading dashboard...</span>
+        </div>
+      </div>
+    );
+  }
+
   const stats = [
-    { title: "Total Events", value: "842", trend: "↑ +18% active", icon: CalendarDays },
-    { title: "Total Students", value: "4,285", trend: "↑ +12.5%", icon: Users },
-    { title: "Organizers", value: "156", trend: "↑ +4 new", icon: UserCircle },
-    { title: "Pending Review", value: "24", trend: "ACTION REQ", icon: Clock, dark: true },
+    { title: "Total Events", value: dashData?.totalEvents || 0, trend: "All time", icon: CalendarDays },
+    { title: "Total Students", value: dashData?.totalStudents?.toLocaleString() || "0", trend: "Enrolled", icon: Users },
+    { title: "Ongoing Events", value: dashData?.ongoingCount || 0, trend: "Currently active", icon: Activity },
+    { title: "Pending Review", value: dashData?.pendingReviewCount || 0, trend: "ACTION REQ", icon: Clock, dark: true },
   ];
 
-  const organizers = [
-    { name: "Coding Club", events: 12, status: "green", initials: "CC" },
-    { name: "Sports Dept", events: 8, status: "orange", initials: "SD" },
-    { name: "Music Council", events: 5, status: "green", initials: "MC" },
-  ];
-
-  const submissions = [
-    { id: 1, name: "Tech Fiesta 2024", organizer: "Coding Club", date: "Oct 15, 2024", status: "APPROVED" },
-    { id: 2, name: "Annual Sports Meet", organizer: "Sports Dept", date: "Oct 20, 2024", status: "PENDING" },
-    { id: 3, name: "AI Seminar", organizer: "IEEE Branch", date: "Oct 12, 2024", status: "APPROVED" },
-    { id: 4, name: "Gala Nights", organizer: "Music Council", date: "Oct 22, 2024", status: "REJECTED" },
-  ];
+  const chartData = dashData?.registrationChartData || [];
+  const ongoingByCategory = dashData?.ongoingByCategory || [];
+  const top5Submissions = pendingEvents.slice(0, 5);
 
   return (
     <div className="admin-dashboard">
@@ -50,10 +212,6 @@ const Dashboard = () => {
           <div className="terminal-label">Event Hub Terminal</div>
           <h1>Dashboard Overview</h1>
         </div>
-        <button className="add-event-btn flex items-center gap-2">
-          <Plus size={18} />
-          Add New Event
-        </button>
       </div>
 
       <div className="stat-cards-grid">
@@ -65,95 +223,161 @@ const Dashboard = () => {
       <div className="middle-row">
         <div className="chart-container">
           <div className="chart-header">
-            <h3>Registration Trend</h3>
-            <span>Oct 2024</span>
+            <div>
+              <h3>Registration Trend</h3>
+              <span className="chart-subtitle">Last 7 months</span>
+            </div>
+            <div className="chart-legend">
+              <TrendingUp size={16} />
+              <span>Registrations</span>
+            </div>
           </div>
-          <svg viewBox="0 0 800 240" className="sparkline-svg">
-            <defs>
-              <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#000" stopOpacity={0.08} />
-                <stop offset="95%" stopColor="#000" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <path
-              d="M 20,180 C 100,180 120,100 180,100 C 240,100 280,150 340,150 C 400,150 420,40 500,40 C 580,40 600,180 680,180 C 720,180 740,70 800,70"
-              fill="none"
-              stroke="#000"
-              strokeWidth="6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M 20,180 C 100,180 120,100 180,100 C 240,100 280,150 340,150 C 400,150 420,40 500,40 C 580,40 600,180 680,180 C 720,180 740,70 800,70 L 800,240 L 20,240 Z"
-              fill="url(#chartGradient)"
-            />
-          </svg>
-          <div className="days-labels">
-            <span className="day-label">MON</span>
-            <span className="day-label">TUE</span>
-            <span className="day-label">WED</span>
-            <span className="day-label">THU</span>
-            <span className="day-label">FRI</span>
-            <span className="day-label">SAT</span>
-            <span className="day-label">SUN</span>
-          </div>
+          <ResponsiveContainer width="100%" height={220}>
+            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="registrationGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#000000" stopOpacity={0.15} />
+                  <stop offset="95%" stopColor="#000000" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#adb5bd", fontWeight: 600 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: "#adb5bd" }} axisLine={false} tickLine={false} allowDecimals={false} />
+              <Tooltip content={<CustomTooltip />} />
+              <Area
+                type="monotone"
+                dataKey="registrations"
+                stroke="#000000"
+                strokeWidth={4}
+                fill="url(#registrationGradient)"
+                dot={false}
+                activeDot={{ r: 6, fill: "#000000", stroke: "#fff", strokeWidth: 3 }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
 
-        <div className="organizer-status-card">
-          <h3>Organizer Status</h3>
-          <div className="organizer-list">
-            {organizers.map((org, index) => (
-              <div key={index} className="organizer-item">
-                <div className="org-avatar">{org.initials}</div>
-                <div className="org-details">
-                  <span className="org-name">{org.name}</span>
-                  <span className="org-events">{org.events} Events</span>
-                </div>
-                <div className={`status-dot ${org.status}`}></div>
-              </div>
-            ))}
+        <div className="ongoing-events-card">
+          <div className="card-header-row">
+            <h3>Ongoing Events</h3>
+            <span className="ongoing-count">{dashData?.ongoingCount || 0}</span>
           </div>
+          {ongoingByCategory.length > 0 ? (
+            <ResponsiveContainer width="100%" height={160}>
+              <BarChart data={ongoingByCategory} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <XAxis dataKey="_id" tick={{ fontSize: 10, fill: "#adb5bd", fontWeight: 600 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: "#adb5bd" }} axisLine={false} tickLine={false} allowDecimals={false} />
+                <Tooltip
+                  contentStyle={{ background: "#1a1a2e", border: "none", borderRadius: "12px", color: "#fff", fontSize: "12px" }}
+                  itemStyle={{ color: "#fff" }}
+                  labelStyle={{ color: "#adb5bd" }}
+                />
+                <Bar dataKey="count" radius={[6, 6, 0, 0]} barSize={28}>
+                  {ongoingByCategory.map((entry, index) => (
+                    <Cell key={index} fill={CATEGORY_COLORS[entry._id] || "#111827"} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="empty-chart-message">
+              <Activity size={32} strokeWidth={1.5} />
+              <p>No ongoing events</p>
+            </div>
+          )}
+          {dashData?.ongoingEvents?.length > 0 && (
+            <div className="ongoing-list">
+              {dashData.ongoingEvents.slice(0, 3).map((ev, i) => (
+                <div key={i} className="ongoing-item">
+                  <div className="ongoing-dot" style={{ background: CATEGORY_COLORS[ev.category] || "#111827" }} />
+                  <div className="ongoing-info">
+                    <span className="ongoing-name">{ev.title}</span>
+                    <span className="ongoing-date">{formatDate(ev.eventDate)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
       <div className="submissions-section">
         <div className="section-header">
           <h3>Recent Submissions</h3>
-          <span className="review-all">Review All Requests</span>
+          <span className="review-all" onClick={() => navigate("/admin/approvals")}>
+            Review All Requests
+            <ChevronRight size={16} />
+          </span>
         </div>
         <div className="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Event Name</th>
-                <th>Organizer</th>
-                <th>Submission Date</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {submissions.map((sub) => (
-                <tr key={sub.id}>
-                  <td className="event-name">{sub.name}</td>
-                  <td className="organizer-cell">{sub.organizer}</td>
-                  <td className="date-cell">{sub.date}</td>
-                  <td>
-                    <span className={`status-badge ${sub.status.toLowerCase()}`}>
-                      {sub.status}
-                    </span>
-                  </td>
-                  <td>
-                    <button className="actions-btn">
-                      <MoreHorizontal size={18} />
-                    </button>
-                  </td>
+          {top5Submissions.length > 0 ? (
+            <table>
+              <thead>
+                <tr>
+                  <th>Event Name</th>
+                  <th>Organizer</th>
+                  <th>Submission Date</th>
+                  <th>Status</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {top5Submissions.map((sub) => (
+                  <tr key={sub._id}>
+                    <td className="event-name">{sub.title}</td>
+                    <td className="organizer-cell">
+                      <div className="organizer-badge">
+                        <span className="org-initials">{getInitials(sub.createdBy?.fullName)}</span>
+                        {sub.createdBy?.fullName || "Unknown"}
+                      </div>
+                    </td>
+                    <td className="date-cell">{formatDate(sub.createdAt)}</td>
+                    <td>
+                      <span className={`status-badge ${sub.status.toLowerCase()}`}>
+                        {sub.status}
+                      </span>
+                    </td>
+                    <td className="actions-cell">
+                      <button
+                        className="actions-btn"
+                        onClick={() => setActiveMenu(activeMenu === sub._id ? null : sub._id)}
+                      >
+                        <MoreHorizontal size={18} />
+                      </button>
+                      <ActionMenu
+                        show={activeMenu === sub._id}
+                        onClose={() => setActiveMenu(null)}
+                        onApprove={() => handleApproveEvent(sub._id)}
+                        onReject={() => {
+                          setRejectModal({ show: true, id: sub._id, type: "event" });
+                          setActiveMenu(null);
+                        }}
+                        type="event"
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="empty-table-message">
+              <Check size={32} />
+              <p>No pending submissions. You're all caught up!</p>
+            </div>
+          )}
         </div>
+        {pendingEvents.length > 0 && (
+          <div className="table-footer">
+            <span className="footer-count">{pendingEvents.length} total items awaiting your review.</span>
+          </div>
+        )}
       </div>
+
+      <RejectModal
+        show={rejectModal.show}
+        onClose={() => setRejectModal({ show: false, id: null, type: null })}
+        onSubmit={handleRejectEvent}
+        title="Reject Event"
+      />
     </div>
   );
 };
