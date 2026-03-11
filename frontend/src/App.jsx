@@ -24,6 +24,10 @@ import SuperAdminLayout from "./layouts/SuperAdminLayout";
 // Importing dashboards for different roles
 import CreateEvent from "./pages/organizer/CreateEvent";
 import AdminDashboard from "./pages/admin/Dashboard";
+import AdminEvents from "./pages/admin/Events";
+import AdminUsers from "./pages/admin/Users";
+import NotifyHub from "./pages/admin/NotifyHub";
+import AdminApprovals from "./pages/admin/Approvals";
 import OrganizerDashboard from "./pages/organizer/Dashboard";
 import SendNotification from "./pages/organizer/SendNotification";
 import OrganizerMyEvents from "./pages/organizer/MyEvents";
@@ -43,7 +47,8 @@ function App() {
     <>
       <Toaster position="top-center" richColors />
 
-        <Routes>
+      <Routes>
+
 
           {/* super admin route */}
           <Route
@@ -60,9 +65,9 @@ function App() {
             <Route path="institutions" element={<ViewInstitutions/>} />
             <Route path="institutions/:id" element={<CollegeDetail />} />
           </Route>
-
-          {/* admin route */}
-          <Route
+          
+        {/* admin route */}
+        { /*  <Route
             path="/admin"
             element={
               <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
@@ -70,57 +75,72 @@ function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<Navigate to="dashboard" />} />
-            <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="users" element={<div>Users Page</div>} />
-            <Route path="analytics" element={<div>Analytics Page</div>} />
-          </Route>
+          */}
+        {/* Standard Admin Pages with Sidebar/Header */}
+        <Route
+          path="/admin"
+          element={<AdminLayout />}
+        >
+          <Route index element={<Navigate to="dashboard" />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="events" element={<AdminEvents />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="notify" element={<NotifyHub />} />
+          <Route path="approvals" element={<AdminApprovals />} />
+          <Route path="analytics" element={<div>Analytics Page</div>} />
+        </Route>
 
-          {/* organizer route */}
-          <Route
-            path="/organizer"
-            element={
-              //<ProtectedRoute allowedRoles={["organizer"]}>
-                <OrganizerLayout />
-              //</ProtectedRoute>
-            }
-          >
-            <Route index element={<Navigate to="dashboard" />} />
-            <Route path="dashboard" element={<OrganizerDashboard />} />
-            <Route path="create-event" element={<CreateEvent />} />
-            <Route path="myevents" element={<OrganizerMyEvents />} />
-            <Route path="view-participants" element={<ViewParticipants />} />
-            <Route path="profile" element={<OrganizerProfile />} />
-            <Route path="inbox" element={<OrganizerNotification />} />
-            <Route path="notifications" element={<SendNotification />} />
-          </Route>
+        {/* Standalone Admin Pages (No Sidebar/Header) */}
+        <Route path="/admin/users" element={<AdminUsers />} />
+        <Route path="/admin/notify" element={<NotifyHub />} />
 
-          {/* student route */}
-          <Route
-            path="/student"
-            element={
-              <ProtectedRoute allowedRoles={["student"]}>
-                <StudentLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Navigate to="events" />} />
-            <Route path="events" element={<StudentEvents />} />
-            <Route path="profile" element={<StudentProfile />} />
-            <Route path="notification" element={<Notification />} />
-            <Route path="registrations" element={<Registrations />} />
-          </Route>
+        {/* Standalone Admin Pages (No Sidebar/Header) */}
 
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<RegistrationPage />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/verify-otp" element={<VerifyOtp />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/create-event" element={<CreateEvent />} />
+        {/* organizer route */}
+        <Route
+          path="/organizer"
+          element={
+            //<ProtectedRoute allowedRoles={["organizer"]}>
+            <OrganizerLayout />
+            //</ProtectedRoute>
+          }
+        >
+          <Route index element={<Navigate to="dashboard" />} />
+          <Route path="dashboard" element={<OrganizerDashboard />} />
+          <Route path="create-event" element={<CreateEvent />} />
+          <Route path="myevents" element={<OrganizerMyEvents />} />
+          <Route path="view-participants" element={<ViewParticipants />} />
+          <Route path="profile" element={<OrganizerProfile />} />
+          <Route path="inbox" element={<OrganizerNotification />} />
+          <Route path="notifications" element={<SendNotification />} />
+        </Route>
 
-        </Routes>
+        {/* student route */}
+        <Route
+          path="/student"
+          element={
+            <ProtectedRoute allowedRoles={["student"]}>
+              <StudentLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Navigate to="events" />} />
+          <Route path="events" element={<StudentEvents />} />
+          <Route path="profile" element={<StudentProfile />} />
+          <Route path="notification" element={<Notification />} />
+          <Route path="registrations" element={<Registrations />} />
+        </Route>
+
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<RegistrationPage />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/verify-otp" element={<VerifyOtp />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/create-event" element={<CreateEvent />} />
+
+      </Routes>
 
     </>
   );

@@ -6,30 +6,40 @@ const {
   approveEvent,
   rejectEvent,
   getCollegeEvents,
+  createEvent,
+  updateEvent,
   getCollegeOrganizers,
   getCollegeStudents,
   getCollegeClubs,
   getPendingCrossCollegeRegistrations,
   reviewCrossCollegeRegistration,
   getCollegeAnalytics,
-  promoteUserToOrganizer,
-  sendCollegeNotification,
-  deleteUser,
-  updateUser,
-  getRegistrationTrend,
-  getOrganizersByClub,
+  getDashboardStats,
+  getPendingPromotions,
+  promoteToOrganizer,
+  denyPromotion,
+  getPendingAccessRequests,
+  grantAccessRequest,
+  rejectAccessRequest,
+
 } = require("../Controllers/AdminController");
+const upload = require("../utils/uploadConfig");
 
 // all routes require admin role
 router.use(verifyToken, checkRole("admin"));
+
+// dashboard
+router.get("/dashboard-stats", getDashboardStats);
 
 // event approval
 router.get("/events/pending", getPendingEvents);
 router.patch("/events/:id/approve", approveEvent);
 router.patch("/events/:id/reject", rejectEvent);
 
-// college data
+// college data (including events)
 router.get("/events", getCollegeEvents);
+router.post("/events", upload.single("poster"), createEvent);
+router.put("/events/:id", upload.single("poster"), updateEvent);
 router.get("/organizers", getCollegeOrganizers);
 router.get("/students", getCollegeStudents);
 router.get("/clubs", getCollegeClubs);
@@ -39,16 +49,15 @@ router.get("/analytics", getCollegeAnalytics);
 router.get("/registrations/pending", getPendingCrossCollegeRegistrations);
 router.patch("/registrations/:id/review", reviewCrossCollegeRegistration);
 
-// user management
-router.patch("/users/:id/promote", promoteUserToOrganizer);
-router.delete("/users/:id", deleteUser);
-router.put("/users/:id", updateUser);
+<<<<<<< HEAD
+// student-to-organizer promotion
+router.get("/promotions/pending", getPendingPromotions);
+router.patch("/promotions/:id/approve", promoteToOrganizer);
+router.patch("/promotions/:id/deny", denyPromotion);
 
-// notifications
-router.post("/notifications/send", sendCollegeNotification);
-
-// analytics
-router.get("/analytics/trend", getRegistrationTrend);
-router.get("/organizers/status", getOrganizersByClub);
+// event access requests
+router.get("/access-requests/pending", getPendingAccessRequests);
+router.patch("/access-requests/:id/grant", grantAccessRequest);
+router.patch("/access-requests/:id/reject", rejectAccessRequest);
 
 module.exports = router;

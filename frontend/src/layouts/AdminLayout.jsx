@@ -16,7 +16,6 @@ const adminMenuItems = [
   { name: "Overview", path: "/admin/dashboard", icon: LayoutDashboard },
   { name: "Events", path: "/admin/events", icon: CalendarDays },
   { name: "Users", path: "/admin/users", icon: Users },
-  { name: "Organizers", path: "/admin/organizers", icon: UserCircle },
   { name: "Approvals", path: "/admin/approvals", icon: Clock },
   { name: "Notify", path: "/admin/notify", icon: Bell },
 ];

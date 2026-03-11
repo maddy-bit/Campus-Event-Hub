@@ -3,6 +3,18 @@ const { UserModel } = require("../Models/users");
 const { ERegistrationModel } = require("../Models/ERegistration");
 const { ClubModel } = require("../Models/club");
 const { NotificationModel } = require("../Models/Notification");
+const cloudinary = require("../Config/cloudinary");
+
+// Helper: upload buffer to Cloudinary using upload_stream
+const uploadToCloudinary = (fileBuffer, options) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(options, (error, result) => {
+      if (error) return reject(error);
+      resolve(result);
+    });
+    stream.end(fileBuffer);
+  });
+};
 
 // get events pending approval for admin's college
 const getPendingEvents = async (req, res) => {
@@ -60,13 +72,17 @@ const approveEvent = async (req, res) => {
   }
 };
 
-// reject event with reason
+// reject event with reason — sends rejection reason as notification to organizer
 const rejectEvent = async (req, res) => {
   try {
     const { id } = req.params;
     const { reason } = req.body;
 
-    const event = await EventModel.findById(id);
+    if (!reason || !reason.trim()) {
+      return res.status(400).json({ message: "Rejection reason is required" });
+    }
+
+    const event = await EventModel.findById(id).populate("createdBy", "fullName email");
 
     if (!event) return res.status(404).json({ message: "Event not found" });
 
@@ -82,14 +98,14 @@ const rejectEvent = async (req, res) => {
     event.moderation = {
       reviewedBy: req.user._id,
       reviewedAt: new Date(),
-      rejectionReason: reason || "No reason provided",
+      rejectionReason: reason,
     };
     await event.save();
 
-    // notify organizer
+    // Notify the organizer with rejection reason
     await NotificationModel.create({
       title: "Event Rejected",
-      message: `Your event "${event.title}" was rejected. Reason: ${reason || "No reason provided"}`,
+      message: `Your event "${event.title}" was rejected. Reason: ${reason}`,
       event: event._id,
       type: "Submission_Update",
       sender: req.user._id,
@@ -113,6 +129,96 @@ const getCollegeEvents = async (req, res) => {
     res.status(200).json({ count: events.length, events });
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch college events", error: err.message });
+  }
+};
+
+// Create an event directly by admin (auto-approved)
+const createEvent = async (req, res) => {
+  try {
+    const { title, category, location, description, eventDate, startTime, endTime, registrationDeadline, maxSeats, isPaidEvent, ticketPrice, isPublic } = req.body;
+    
+    let posterUrl = "";
+    if (req.file) {
+      try {
+        const result = await uploadToCloudinary(req.file.buffer, {
+          folder: "campuseventhub/events",
+          transformation: [
+            { width: 1200, height: 630, crop: "limit" },
+            { quality: "auto", fetch_format: "auto" },
+          ],
+        });
+        posterUrl = result.secure_url;
+      } catch (uploadErr) {
+        console.error("Cloudinary upload error:", uploadErr);
+        return res.status(500).json({ message: "Image upload failed", error: uploadErr.message });
+      }
+    }
+
+    const newEvent = new EventModel({
+      title,
+      category,
+      location,
+      description,
+      eventDate,
+      startTime,
+      endTime,
+      registrationDeadline,
+      maxSeats,
+      isPaidEvent: isPaidEvent === "true" || isPaidEvent === true,
+      ticketPrice: ticketPrice || 0,
+      isPublic: isPublic === "false" || isPublic === false ? false : true,
+      posterUrl,
+      createdBy: req.user._id,
+      collegeId: req.user.collegeId,
+      status: "Approved", // Auto-approved
+      moderation: {
+        reviewedBy: req.user._id,
+        reviewedAt: new Date(),
+      }
+    });
+
+    await newEvent.save();
+    res.status(201).json({ message: "Event created successfully", event: newEvent });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to create event", error: err.message });
+  }
+};
+
+// Update an existing event, including status
+const updateEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    
+    const event = await EventModel.findById(id);
+    if (!event) return res.status(404).json({ message: "Event not found" });
+    if (event.collegeId.toString() !== req.user.collegeId.toString()) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    // handle boolean parsing due to FormData
+    if (updateData.isPaidEvent !== undefined) updateData.isPaidEvent = updateData.isPaidEvent === "true" || updateData.isPaidEvent === true;
+    if (updateData.isPublic !== undefined) updateData.isPublic = updateData.isPublic !== "false" && updateData.isPublic !== false;
+
+    if (req.file) {
+      try {
+        const result = await uploadToCloudinary(req.file.buffer, {
+          folder: "campuseventhub/events",
+          transformation: [
+            { width: 1200, height: 630, crop: "limit" },
+            { quality: "auto", fetch_format: "auto" },
+          ],
+        });
+        updateData.posterUrl = result.secure_url;
+      } catch (uploadErr) {
+        console.error("Cloudinary upload error:", uploadErr);
+      }
+    }
+
+    const updatedEvent = await EventModel.findByIdAndUpdate(id, updateData, { new: true });
+    res.status(200).json({ message: "Event updated successfully", event: updatedEvent });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update event", error: err.message });
   }
 };
 
@@ -188,9 +294,11 @@ const getPendingCrossCollegeRegistrations = async (req, res) => {
 const reviewCrossCollegeRegistration = async (req, res) => {
   try {
     const { id } = req.params;
-    const { action } = req.body; // "approve" or "reject"
+    const { action, reason } = req.body; // "approve" or "reject"
 
-    const registration = await ERegistrationModel.findById(id).populate("userId", "collegeId");
+    const registration = await ERegistrationModel.findById(id)
+      .populate("userId", "fullName collegeId")
+      .populate("eventId", "title createdBy");
 
     if (!registration) return res.status(404).json({ message: "Registration not found" });
 
@@ -202,8 +310,25 @@ const reviewCrossCollegeRegistration = async (req, res) => {
       return res.status(400).json({ message: "Registration is not pending approval" });
     }
 
+    if (action === "reject" && (!reason || !reason.trim())) {
+      return res.status(400).json({ message: "Rejection reason is required" });
+    }
+
     registration.status = action === "approve" ? "Registered" : "Cancelled";
     await registration.save();
+
+    // Notify the event organizer about the decision
+    if (action === "reject" && registration.eventId?.createdBy) {
+      await NotificationModel.create({
+        title: "Access Request Rejected",
+        message: `Access request by "${registration.userId.fullName}" for "${registration.eventId.title}" was rejected. Reason: ${reason}`,
+        event: registration.eventId._id,
+        type: "Submission_Update",
+        sender: req.user._id,
+        status: "Sent",
+        reachCount: 1,
+      });
+    }
 
     res.status(200).json({
       message: `Registration ${action === "approve" ? "approved" : "rejected"}`,
@@ -245,193 +370,269 @@ const getCollegeAnalytics = async (req, res) => {
   }
 };
 
-// promote student to organizer
-const promoteUserToOrganizer = async (req, res) => {
+// Dashboard stats — ongoing events, registration trend chart data, pending counts
+const getDashboardStats = async (req, res) => {
+  try {
+    const collegeId = req.user.collegeId;
+    const now = new Date();
+
+    // Ongoing events = Approved events where eventDate is today or in the future
+    const ongoingEvents = await EventModel.find({
+      collegeId,
+      status: "Approved",
+      eventDate: { $gte: new Date(now.getFullYear(), now.getMonth(), now.getDate()) }
+    }).populate("createdBy", "fullName").sort({ eventDate: 1 });
+
+    // Count stats
+    const [totalEvents, totalStudents, pendingReviewCount, ongoingCount] = await Promise.all([
+      EventModel.countDocuments({ collegeId }),
+      UserModel.countDocuments({ collegeId, role: "student", isDeleted: false }),
+      EventModel.countDocuments({ collegeId, status: "Submitted" }),
+      EventModel.countDocuments({
+        collegeId,
+        status: "Approved",
+        eventDate: { $gte: new Date(now.getFullYear(), now.getMonth(), now.getDate()) }
+      }),
+    ]);
+
+    // Registration trend — last 7 months of registration counts for college events
+    const collegeEventIds = await EventModel.find({ collegeId }).select("_id");
+    const eventIds = collegeEventIds.map(e => e._id);
+
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    const registrationTrend = await ERegistrationModel.aggregate([
+      {
+        $match: {
+          eventId: { $in: eventIds },
+          registrationDate: { $gte: sixMonthsAgo }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$registrationDate" },
+            month: { $month: "$registrationDate" }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } }
+    ]);
+
+    // Build chart data for last 7 months
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const chartData = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const monthNum = d.getMonth() + 1;
+      const year = d.getFullYear();
+      const found = registrationTrend.find(r => r._id.month === monthNum && r._id.year === year);
+      chartData.push({
+        month: months[d.getMonth()],
+        registrations: found ? found.count : 0
+      });
+    }
+
+    // Ongoing events chart data (events per category that are ongoing)
+    const ongoingByCategory = await EventModel.aggregate([
+      {
+        $match: {
+          collegeId: req.user.collegeId,
+          status: "Approved",
+          eventDate: { $gte: new Date(now.getFullYear(), now.getMonth(), now.getDate()) }
+        }
+      },
+      {
+        $group: {
+          _id: "$category",
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    res.status(200).json({
+      totalEvents,
+      totalStudents,
+      pendingReviewCount,
+      ongoingCount,
+      ongoingEvents: ongoingEvents.slice(0, 5),
+      registrationChartData: chartData,
+      ongoingByCategory,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch dashboard stats", error: err.message });
+  }
+};
+
+// Get pending student-to-organizer promotion requests
+const getPendingPromotions = async (req, res) => {
+  try {
+    const promotions = await UserModel.find({
+      collegeId: req.user.collegeId,
+      role: "student",
+      isDeleted: false,
+      promotionRequest: { $exists: true, $ne: null },
+      "promotionRequest.status": "pending"
+    }).select("-password").sort({ "promotionRequest.requestedAt": -1 });
+
+    res.status(200).json({ count: promotions.length, promotions });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch promotion requests", error: err.message });
+  }
+};
+
+// Promote student to organizer
+const promoteToOrganizer = async (req, res) => {
   try {
     const { id } = req.params;
-    const { clubId } = req.body;
-
     const user = await UserModel.findById(id);
 
     if (!user) return res.status(404).json({ message: "User not found" });
-
     if (user.collegeId.toString() !== req.user.collegeId.toString()) {
-      return res.status(403).json({ message: "You can only promote users from your college" });
-    }
-
-    if (user.role !== "student") {
-      return res.status(400).json({ message: "Only students can be promoted to organizer" });
+      return res.status(403).json({ message: "Can only promote students from your college" });
     }
 
     user.role = "organizer";
-    if (clubId) user.clubId = clubId;
+    user.promotionRequest = { ...user.promotionRequest, status: "approved", reviewedAt: new Date(), reviewedBy: req.user._id };
     await user.save();
 
-    res.status(200).json({ message: "User promoted to organizer", user });
-  } catch (err) {
-    res.status(500).json({ message: "Failed to promote user", error: err.message });
-  }
-};
-
-// send notification to entire college
-const sendCollegeNotification = async (req, res) => {
-  try {
-    const { title, message, type } = req.body;
-
-    const students = await UserModel.find({
-      collegeId: req.user.collegeId,
-      role: { $in: ["student", "organizer"] },
-      isDeleted: false,
-    });
-
-    const notification = await NotificationModel.create({
-      title,
-      message,
-      type: type || "General",
+    await NotificationModel.create({
+      title: "Promotion Approved",
+      message: `Congratulations! You have been promoted to Organizer role.`,
+      type: "Submission_Update",
       sender: req.user._id,
       status: "Sent",
-      reachCount: students.length,
+      reachCount: 1,
     });
 
-    res.status(201).json({ message: "Notification sent", notification, reachCount: students.length });
+    res.status(200).json({ message: "Student promoted to organizer", user });
   } catch (err) {
-    res.status(500).json({ message: "Failed to send notification", error: err.message });
+    res.status(500).json({ message: "Failed to promote student", error: err.message });
   }
 };
 
-// soft delete user
-const deleteUser = async (req, res) => {
+// Deny promotion request with reason
+const denyPromotion = async (req, res) => {
   try {
     const { id } = req.params;
+    const { reason } = req.body;
+
+    if (!reason || !reason.trim()) {
+      return res.status(400).json({ message: "Denial reason is required" });
+    }
 
     const user = await UserModel.findById(id);
 
     if (!user) return res.status(404).json({ message: "User not found" });
-
     if (user.collegeId.toString() !== req.user.collegeId.toString()) {
-      return res.status(403).json({ message: "You can only delete users from your college" });
+      return res.status(403).json({ message: "Can only review students from your college" });
     }
 
-    if (user.role === "admin" || user.role === "superadmin") {
-      return res.status(403).json({ message: "Cannot delete admin or superadmin users" });
-    }
-
-    user.isDeleted = true;
+    user.promotionRequest = { ...user.promotionRequest, status: "denied", denialReason: reason, reviewedAt: new Date(), reviewedBy: req.user._id };
     await user.save();
 
-    res.status(200).json({ message: "User deleted successfully" });
+    await NotificationModel.create({
+      title: "Promotion Request Denied",
+      message: `Your request to become an organizer was denied. Reason: ${reason}`,
+      type: "Submission_Update",
+      sender: req.user._id,
+      status: "Sent",
+      reachCount: 1,
+    });
+
+    res.status(200).json({ message: "Promotion request denied", user });
   } catch (err) {
-    res.status(500).json({ message: "Failed to delete user", error: err.message });
+    res.status(500).json({ message: "Failed to deny promotion", error: err.message });
   }
 };
 
-// edit user details
-const updateUser = async (req, res) => {
+// Get pending event access requests (for invite-only or restricted events)
+const getPendingAccessRequests = async (req, res) => {
   try {
-    const { id } = req.params;
-    const updates = req.body;
+    const collegeEventIds = await EventModel.find({ collegeId: req.user.collegeId }).select("_id");
+    const eventIds = collegeEventIds.map(e => e._id);
 
-    const user = await UserModel.findById(id);
-
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    if (user.collegeId.toString() !== req.user.collegeId.toString()) {
-      return res.status(403).json({ message: "You can only edit users from your college" });
-    }
-
-    // prevent role and sensitive field changes
-    delete updates.password;
-    delete updates.role;
-    delete updates.collegeId;
-    delete updates.isDeleted;
-
-    Object.assign(user, updates);
-    await user.save();
-
-    res.status(200).json({ message: "User updated successfully", user });
-  } catch (err) {
-    res.status(500).json({ message: "Failed to update user", error: err.message });
-  }
-};
-
-// weekly registration trend
-const getRegistrationTrend = async (req, res) => {
-  try {
-    const collegeId = req.user.collegeId;
-    const events = await EventModel.find({ collegeId }).select("_id");
-    const eventIds = events.map(e => e._id);
-
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-
-    const registrations = await ERegistrationModel.find({
+    const accessRequests = await ERegistrationModel.find({
       eventId: { $in: eventIds },
-      createdAt: { $gte: sevenDaysAgo }
-    }).select("createdAt");
+      status: "Pending_Approval",
+      isCrossCollege: false,
+    })
+      .populate("userId", "fullName email department yearOfStudy")
+      .populate("eventId", "title category eventDate location isPublic")
+      .sort({ createdAt: -1 });
 
-    // group by day
-    const trend = {};
-    for (let i = 0; i < 7; i++) {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      const key = date.toISOString().split('T')[0];
-      trend[key] = 0;
-    }
-
-    registrations.forEach(reg => {
-      const key = reg.createdAt.toISOString().split('T')[0];
-      if (trend[key] !== undefined) trend[key]++;
-    });
-
-    const trendData = Object.keys(trend).sort().map(date => ({
-      date,
-      count: trend[date]
-    }));
-
-    res.status(200).json({ trend: trendData });
+    res.status(200).json({ count: accessRequests.length, accessRequests });
   } catch (err) {
-    res.status(500).json({ message: "Failed to fetch registration trend", error: err.message });
+    res.status(500).json({ message: "Failed to fetch access requests", error: err.message });
   }
 };
 
-// organizers grouped by club with event counts
-const getOrganizersByClub = async (req, res) => {
+// Grant event access request
+const grantAccessRequest = async (req, res) => {
   try {
-    const organizers = await UserModel.find({
-      collegeId: req.user.collegeId,
-      role: "organizer",
-      isDeleted: false,
-    })
-      .select("-password")
-      .populate("clubId", "name category");
+    const { id } = req.params;
+    const registration = await ERegistrationModel.findById(id)
+      .populate("userId", "fullName")
+      .populate("eventId", "title createdBy collegeId");
 
-    // get event counts for each organizer
-    const organizersWithCounts = await Promise.all(
-      organizers.map(async (org) => {
-        const eventCount = await EventModel.countDocuments({ createdBy: org._id });
-        return {
-          ...org.toObject(),
-          eventCount
-        };
-      })
-    );
+    if (!registration) return res.status(404).json({ message: "Registration not found" });
 
-    // group by club
-    const grouped = organizersWithCounts.reduce((acc, org) => {
-      const clubName = org.clubId?.name || "No Club";
-      if (!acc[clubName]) {
-        acc[clubName] = {
-          club: org.clubId,
-          organizers: []
-        };
-      }
-      acc[clubName].organizers.push(org);
-      return acc;
-    }, {});
+    if (registration.eventId.collegeId.toString() !== req.user.collegeId.toString()) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
 
-    res.status(200).json({ data: Object.values(grouped) });
+    registration.status = "Registered";
+    await registration.save();
+
+    res.status(200).json({ message: "Access granted", registration });
   } catch (err) {
-    res.status(500).json({ message: "Failed to fetch organizers by club", error: err.message });
+    res.status(500).json({ message: "Failed to grant access", error: err.message });
+  }
+};
+
+// Reject event access request with reason
+const rejectAccessRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+
+    if (!reason || !reason.trim()) {
+      return res.status(400).json({ message: "Rejection reason is required" });
+    }
+
+    const registration = await ERegistrationModel.findById(id)
+      .populate("userId", "fullName")
+      .populate("eventId", "title createdBy collegeId");
+
+    if (!registration) return res.status(404).json({ message: "Registration not found" });
+
+    if (registration.eventId.collegeId.toString() !== req.user.collegeId.toString()) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    registration.status = "Cancelled";
+    await registration.save();
+
+    // Notify organizer about the rejected access request
+    if (registration.eventId.createdBy) {
+      await NotificationModel.create({
+        title: "Event Access Request Rejected",
+        message: `Access request by "${registration.userId.fullName}" for "${registration.eventId.title}" was rejected. Reason: ${reason}`,
+        event: registration.eventId._id,
+        type: "Submission_Update",
+        sender: req.user._id,
+        status: "Sent",
+        reachCount: 1,
+      });
+    }
+
+    res.status(200).json({ message: "Access request rejected", registration });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to reject access request", error: err.message });
+
   }
 };
 
@@ -440,16 +641,20 @@ module.exports = {
   approveEvent,
   rejectEvent,
   getCollegeEvents,
+  createEvent,
+  updateEvent,
   getCollegeOrganizers,
   getCollegeStudents,
   getCollegeClubs,
   getPendingCrossCollegeRegistrations,
   reviewCrossCollegeRegistration,
   getCollegeAnalytics,
-  promoteUserToOrganizer,
-  sendCollegeNotification,
-  deleteUser,
-  updateUser,
-  getRegistrationTrend,
-  getOrganizersByClub,
+  getDashboardStats,
+  getPendingPromotions,
+  promoteToOrganizer,
+  denyPromotion,
+  getPendingAccessRequests,
+  grantAccessRequest,
+  rejectAccessRequest,
+
 };
