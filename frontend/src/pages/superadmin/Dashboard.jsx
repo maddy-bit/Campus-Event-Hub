@@ -19,12 +19,17 @@ const Dashboard = () => {
       </header>
 
       <div className="metrics-grid">
-        {/* Metrics cards will go here */}
+
+        {metrics.map((m, i) => (
+          <div key={i} className="metric-card">
+            <p className="metric-label">{m.label}</p>
+            <h3>{m.value}</h3>
+          </div>
+        ))}
+
       </div>
 
-      <div className="dashboard-main">
-        {/* Graph + system panels */}
-      </div>
+      <div className="dashboard-main"></div>
 
     </div>
   );
