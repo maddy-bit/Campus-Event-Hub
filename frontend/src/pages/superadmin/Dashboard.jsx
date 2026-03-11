@@ -42,9 +42,37 @@ const Dashboard = () => {
 
         {/* System Panel */}
 
-        <div className="system-panel">
-          <h3>System Core Status</h3>
-        </div>
+        {/* System Panel */}
+
+<div className="system-panel">
+
+  <h3>System Core Status</h3>
+
+  <div className="system-status-list">
+
+    <div className="status-row">
+      <span>Database Cluster</span>
+      <span className="status-active">ACTIVE</span>
+    </div>
+
+    <div className="status-row">
+      <span>Auth Services</span>
+      <span className="status-active">ACTIVE</span>
+    </div>
+
+    <div className="status-row">
+      <span>File Storage</span>
+      <span className="status-active">ACTIVE</span>
+    </div>
+
+    <div className="status-row">
+      <span>API Gateway</span>
+      <span className="status-active">ACTIVE</span>
+    </div>
+
+  </div>
+
+</div>
 
       </div>
 

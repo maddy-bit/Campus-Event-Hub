@@ -112,3 +112,34 @@
   padding: 20px;
   border: 1px solid #eee;
 }
+/* System Status Section */
+
+.system-panel h3 {
+  font-size: 16px;
+  margin-bottom: 18px;
+}
+
+.system-status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  font-size: 14px;
+  color: #444;
+}
+
+.status-active {
+  background: #e6f9ec;
+  color: #1a7f37;
+  font-size: 12px;
+
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+}
