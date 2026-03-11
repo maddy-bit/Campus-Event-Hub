@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const { EventModel } = require("../Models/event");
 const { UserModel } = require("../Models/users");
 const { ERegistrationModel } = require("../Models/ERegistration");
@@ -440,7 +441,7 @@ const getDashboardStats = async (req, res) => {
     const ongoingByCategory = await EventModel.aggregate([
       {
         $match: {
-          collegeId: req.user.collegeId,
+          collegeId: new mongoose.Types.ObjectId(req.user.collegeId),
           status: "Approved",
           eventDate: { $gte: new Date(now.getFullYear(), now.getMonth(), now.getDate()) }
         }
