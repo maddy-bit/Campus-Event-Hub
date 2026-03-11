@@ -4,45 +4,49 @@ const { EventModel } = require("../Models/event");
 const { UserModel } = require("../Models/users");
 const sendEmail = require("../utils/sendEmail");
 
-//sending notification to students
 const sendNotification = async (req, res) => {
   try {
-    const {
-      eventId,
-      title,
-      message,
-      type,
-      channel,
-      recipientType,
-      isScheduled,
-      scheduledAt,
-    } = req.body;
+    const { eventId, clubId, title, message, type, channel, recipientType, isScheduled, scheduledAt } = req.body;
 
-    if (!eventId || !title || !message) {
-      return res.status(400).json({ message: "Event, title, and message are required" });
+    if (!title || !message) {
+      return res.status(400).json({ message: "Title and message are required" });
+    }
+    if (!eventId && !clubId) {
+      return res.status(400).json({ message: "Either eventId or clubId is required" });
     }
 
-    const event = await EventModel.findById(eventId);
-    if (!event) {
-      return res.status(404).json({ message: "Event not found" });
-    }
+    let recipients = [];
+    let eventRef = null;
+    let contextTitle = "";
 
-    let regFilter = { eventId };
-    if (recipientType === "Paid Only") {
-      regFilter["payment.status"] = "Completed";
-    } else if (recipientType === "Pending Payment") {
-      regFilter["payment.status"] = "Pending";
-    } else if (recipientType === "Waitlisted") {
-      regFilter.status = "Waitlisted";
-    }
+    if (eventId) {
+      const event = await EventModel.findById(eventId);
+      if (!event) return res.status(404).json({ message: "Event not found" });
+      eventRef = eventId;
+      contextTitle = event.title;
 
-    const registrations = await ERegistrationModel.find(regFilter).populate("userId", "fullName email");
-    const recipients = registrations.filter((r) => r.userId).map((r) => r.userId);
+      let regFilter = { eventId };
+      if (recipientType === "Paid Only") regFilter["payment.status"] = "Completed";
+      else if (recipientType === "Pending Payment") regFilter["payment.status"] = "Pending";
+      else if (recipientType === "Waitlisted") regFilter.status = "Waitlisted";
+
+      const registrations = await ERegistrationModel.find(regFilter).populate("userId", "fullName email");
+      recipients = registrations.filter(r => r.userId).map(r => r.userId);
+    } else if (clubId) {
+      const { ClubModel } = require("../Models/club");
+      const club = await ClubModel.findById(clubId);
+      if (!club) return res.status(404).json({ message: "Club not found" });
+      contextTitle = club.name;
+
+      const organizers = await UserModel.find({ clubId, role: "organizer", isDeleted: { $ne: true } }).select("fullName email");
+      recipients = organizers;
+    }
 
     const notification = new NotificationModel({
       title,
       message,
-      event: eventId,
+      event: eventRef,
+      club: clubId || undefined,
       type: type || "Announcement",
       channel: channel || "In-App",
       recipientType: recipientType || "All Participants",
@@ -55,40 +59,34 @@ const sendNotification = async (req, res) => {
 
     await notification.save();
 
-    // if Email, send emails to all recipients
     if (channel === "Email" && recipients.length > 0) {
-      const emailPromises = recipients.map((user) =>
+      const emailPromises = recipients.map(user =>
         sendEmail({
           to: user.email,
-          subject: `[${event.title}] ${title}`,
+          subject: `[${contextTitle}] ${title}`,
           text: message,
           html: `
             <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-              <div style="background: #000; color: #b4ff39; padding: 16px 24px; font-weight: 900; font-size: 12px; text-transform: uppercase; letter-spacing: 2px;">
+              <div style="background: #000; color: #fff; padding: 16px 24px; font-weight: 900; font-size: 12px; text-transform: uppercase; letter-spacing: 2px;">
                 Campus Event Hub — Notification
               </div>
-              <div style="border: 2px solid #000; padding: 24px;">
-                <div style="background: #b4ff39; display: inline-block; padding: 4px 12px; font-weight: 800; font-size: 11px; text-transform: uppercase; margin-bottom: 16px; border: 2px solid #000;">
+              <div style="border: 1px solid #e2e8f0; padding: 24px;">
+                <div style="background: #f1f5f9; display: inline-block; padding: 4px 12px; font-weight: 800; font-size: 11px; text-transform: uppercase; margin-bottom: 16px; border-radius: 6px;">
                   ${type || "Announcement"}
                 </div>
-                <h2 style="font-size: 22px; font-weight: 900; margin: 0 0 8px 0; text-transform: uppercase;">${title}</h2>
-                <p style="font-size: 11px; color: #666; margin: 0 0 16px 0;">Event: ${event.title}</p>
+                <h2 style="font-size: 20px; font-weight: 900; margin: 0 0 8px 0;">${title}</h2>
+                <p style="font-size: 12px; color: #666; margin: 0 0 16px 0;">${contextTitle}</p>
                 <p style="font-size: 14px; line-height: 1.6; color: #333;">${message}</p>
-                <hr style="border: 1px solid #eee; margin: 24px 0;" />
-                <p style="font-size: 11px; color: #999;">This email was sent to you because you are registered for "${event.title}" on Campus Event Hub.</p>
               </div>
             </div>
           `,
-        }).catch((err) => {
-          console.error(`Failed to send email to ${user.email}:`, err.message);
-        })
+        }).catch(err => console.error(`Email failed for ${user.email}:`, err.message))
       );
-
       await Promise.allSettled(emailPromises);
     }
 
     res.status(201).json({
-      message: `Notification sent successfully to ${recipients.length} recipients`,
+      message: `Notification sent to ${recipients.length} recipients`,
       notification,
       recipientCount: recipients.length,
     });
@@ -103,6 +101,7 @@ const getSentNotifications = async (req, res) => {
   try {
     const notifications = await NotificationModel.find({ sender: req.user._id })
       .populate("event", "title eventDate")
+      .populate("club", "name")
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -116,20 +115,34 @@ const getSentNotifications = async (req, res) => {
   }
 };
 
-// gett notifications for the current student 
 const getMyNotifications = async (req, res) => {
   try {
     const userId = req.user._id;
+    const userRole = req.user.role;
     const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
+    // find event-based notifications (for students and any registered user)
     const registrations = await ERegistrationModel.find({ userId }).select("eventId");
-    const eventIds = registrations.map((r) => r.eventId);
+    const eventIds = registrations.map(r => r.eventId);
 
-    const notifications = await NotificationModel.find({
-      event: { $in: eventIds },
-      channel: "In-App",
-    })
+    let query = { channel: "In-App", $or: [] };
+
+    if (eventIds.length > 0) {
+      query.$or.push({ event: { $in: eventIds } });
+    }
+
+    // for organizers, also find notifications sent to their club
+    if (userRole === "organizer" && req.user.clubId) {
+      query.$or.push({ club: req.user.clubId });
+    }
+
+    if (query.$or.length === 0) {
+      return res.status(200).json({ message: "No notifications", count: 0, notifications: [] });
+    }
+
+    const notifications = await NotificationModel.find(query)
       .populate("event", "title eventDate category")
+      .populate("club", "name")
       .populate("sender", "fullName")
       .sort({ createdAt: -1 });
 
@@ -137,20 +150,18 @@ const getMyNotifications = async (req, res) => {
     const result = [];
 
     for (const n of notifications) {
-      const readEntry = n.readBy.find((r) => r.user.toString() === userId.toString());
+      const readEntry = n.readBy.find(r => r.user.toString() === userId.toString());
       const isRead = !!readEntry;
       const readAt = readEntry?.readAt || null;
 
-      // soft-delete: if read more than 1 day ago, skip
-      if (isRead && readAt && now - new Date(readAt) > ONE_DAY_MS) {
-        continue;
-      }
+      if (isRead && readAt && now - new Date(readAt) > ONE_DAY_MS) continue;
 
       result.push({
         _id: n._id,
         title: n.title,
         message: n.message,
         event: n.event,
+        club: n.club,
         type: n.type,
         sender: n.sender,
         createdAt: n.createdAt,
@@ -159,11 +170,7 @@ const getMyNotifications = async (req, res) => {
       });
     }
 
-    res.status(200).json({
-      message: "Notifications retrieved",
-      count: result.length,
-      notifications: result,
-    });
+    res.status(200).json({ message: "Notifications retrieved", count: result.length, notifications: result });
   } catch (err) {
     console.error("Get my notifications error:", err);
     res.status(500).json({ message: "Failed to retrieve notifications", error: err.message });
