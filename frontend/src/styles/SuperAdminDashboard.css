@@ -162,3 +162,67 @@
   font-size: 13px;
   margin-bottom: 8px;
 }
+/* Card Hover Enhancement */
+
+.metric-card {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+}
+
+
+/* Chart Panel Polish */
+
+.chart-panel {
+  transition: box-shadow 0.2s ease;
+}
+
+.chart-panel:hover {
+  box-shadow: 0 10px 22px rgba(0,0,0,0.06);
+}
+
+
+/* System Panel Polish */
+
+.system-panel {
+  transition: box-shadow 0.2s ease;
+}
+
+.system-panel:hover {
+  box-shadow: 0 10px 22px rgba(0,0,0,0.06);
+}
+
+
+/* Responsive Dashboard */
+
+@media (max-width: 1200px) {
+
+  .metrics-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+}
+
+@media (max-width: 768px) {
+
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dashboard-main {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+@media (max-width: 500px) {
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
