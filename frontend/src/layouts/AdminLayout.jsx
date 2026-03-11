@@ -18,6 +18,7 @@ const adminMenuItems = [
   { name: "Users", path: "/admin/users", icon: Users },
   { name: "Approvals", path: "/admin/approvals", icon: Clock },
   { name: "Notify", path: "/admin/notify", icon: Bell },
+  { name: "Profile", path: "/admin/profile", icon: UserCircle }
 ];
 
 const AdminLayout = () => {
