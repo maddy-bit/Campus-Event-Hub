@@ -49,7 +49,6 @@ router.get("/analytics", getCollegeAnalytics);
 router.get("/registrations/pending", getPendingCrossCollegeRegistrations);
 router.patch("/registrations/:id/review", reviewCrossCollegeRegistration);
 
-<<<<<<< HEAD
 // student-to-organizer promotion
 router.get("/promotions/pending", getPendingPromotions);
 router.patch("/promotions/:id/approve", promoteToOrganizer);
