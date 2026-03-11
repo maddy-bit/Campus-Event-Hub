@@ -72,6 +72,23 @@ const Dashboard = () => {
 
   </div>
 
+
+  {/* Critical Alerts */}
+
+  <div className="alerts-section">
+
+    <h4>Critical Alerts</h4>
+
+    <div className="alert-item">
+      New Institution onboarded (ID: #42)
+    </div>
+
+    <div className="alert-item">
+      Global Security patch applied (v2.1)
+    </div>
+
+  </div>
+
 </div>
 
       </div>
