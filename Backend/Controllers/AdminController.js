@@ -708,7 +708,16 @@ const deleteUser = async (req, res) => {
   }
 };
 
-
+const Profiledata = async (req, res) => {
+  try {
+    const id= req.user._id    
+    const data= await UserModel.findById(id).select("-password").populate("collegeId");
+    
+    res.status(200).json({message:"Profile data fetched successfully", data})
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch profile data", error: error.message });
+  }
+}
 
 module.exports = {
   getPendingEvents,
