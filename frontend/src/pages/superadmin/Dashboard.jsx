@@ -29,9 +29,18 @@ const Dashboard = () => {
 
       <div className="dashboard-main">
 
+        {/* Chart Section */}
+
         <div className="chart-panel">
           <h3>Event Creation Over Time</h3>
+
+          <div className="chart-placeholder">
+            Chart will appear here after backend integration
+          </div>
+
         </div>
+
+        {/* System Panel */}
 
         <div className="system-panel">
           <h3>System Core Status</h3>
