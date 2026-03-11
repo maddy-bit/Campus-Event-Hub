@@ -67,7 +67,7 @@ function App() {
           </Route>
           
         {/* admin route */}
-        { /*  <Route
+        <Route
             path="/admin"
             element={
               <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
@@ -75,12 +75,8 @@ function App() {
               </ProtectedRoute>
             }
           >
-          */}
         {/* Standard Admin Pages with Sidebar/Header */}
-        <Route
-          path="/admin"
-          element={<AdminLayout />}
-        >
+
           <Route index element={<Navigate to="dashboard" />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="events" element={<AdminEvents />} />
@@ -90,11 +86,7 @@ function App() {
           <Route path="analytics" element={<div>Analytics Page</div>} />
         </Route>
 
-        {/* Standalone Admin Pages (No Sidebar/Header) */}
-        <Route path="/admin/users" element={<AdminUsers />} />
-        <Route path="/admin/notify" element={<NotifyHub />} />
-
-        {/* Standalone Admin Pages (No Sidebar/Header) */}
+        {/* Admin pages are handled inside the nested /admin route above */}
 
         {/* organizer route */}
         <Route
