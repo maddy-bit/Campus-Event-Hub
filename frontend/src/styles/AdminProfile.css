@@ -294,3 +294,91 @@ textarea {
   text-align: center;
   font-size: 16px;
 }
+/* ============================= */
+/* PROFILE PAGE RESPONSIVENESS */
+/* ============================= */
+
+/* Tablet */
+
+@media (max-width: 1024px) {
+
+  .profile-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .profile-card {
+    max-width: 420px;
+    margin: auto;
+  }
+
+}
+
+
+/* Small Tablet / Large Phone */
+
+@media (max-width: 768px) {
+
+  .admin-profile-page {
+    padding: 20px;
+  }
+
+  .profile-header h1 {
+    font-size: 26px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .profile-card {
+    padding: 24px;
+  }
+
+  .profile-form-card {
+    padding: 24px;
+  }
+
+}
+
+
+/* Mobile */
+
+@media (max-width: 480px) {
+
+  .admin-profile-page {
+    padding: 16px;
+  }
+
+  .profile-header h1 {
+    font-size: 22px;
+  }
+
+  .avatar-circle {
+    width: 70px;
+    height: 70px;
+    font-size: 22px;
+  }
+
+  .stats {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .tabs-container {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tab-btn {
+    flex: 1;
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  .btn-primary {
+    width: 100%;
+  }
+
+}
