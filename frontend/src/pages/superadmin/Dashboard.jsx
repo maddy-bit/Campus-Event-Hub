@@ -19,17 +19,25 @@ const Dashboard = () => {
       </header>
 
       <div className="metrics-grid">
-
         {metrics.map((m, i) => (
           <div key={i} className="metric-card">
             <p className="metric-label">{m.label}</p>
             <h3>{m.value}</h3>
           </div>
         ))}
-
       </div>
 
-      <div className="dashboard-main"></div>
+      <div className="dashboard-main">
+
+        <div className="chart-panel">
+          <h3>Event Creation Over Time</h3>
+        </div>
+
+        <div className="system-panel">
+          <h3>System Core Status</h3>
+        </div>
+
+      </div>
 
     </div>
   );
