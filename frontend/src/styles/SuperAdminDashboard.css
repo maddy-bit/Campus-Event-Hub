@@ -1,0 +1,114 @@
+/* Dashboard Container */
+
+.superadmin-dashboard {
+  padding: 32px;
+  background: #fafafa;
+  min-height: 100vh;
+}
+
+
+/* Header */
+
+.dashboard-header {
+  margin-bottom: 28px;
+}
+
+.dashboard-label {
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #888;
+  margin-bottom: 6px;
+}
+
+.dashboard-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #000;
+}
+
+
+/* Metrics Grid */
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 18px;
+  margin-bottom: 32px;
+}
+
+
+/* Metric Card */
+
+.metric-card {
+  background: white;
+  border-radius: 12px;
+  padding: 18px;
+  border: 1px solid #eee;
+  transition: all 0.2s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+}
+
+.metric-label {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 6px;
+}
+
+.metric-card h3 {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+
+/* Main Dashboard Section */
+
+.dashboard-main {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+}
+
+
+/* Chart Panel */
+
+.chart-panel {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #eee;
+}
+
+.chart-panel h3 {
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+
+/* Chart Placeholder */
+
+.chart-placeholder {
+  height: 250px;
+  border: 2px dashed #ddd;
+  border-radius: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #999;
+  font-size: 14px;
+}
+
+
+/* System Panel (empty for now) */
+
+.system-panel {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #eee;
+}
