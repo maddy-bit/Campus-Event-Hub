@@ -185,7 +185,35 @@ const AdminUsers = () => {
                 </div>
             </div>
 
-            <div className="filters-bar" style={{ flexWrap: "wrap" }}>
+            {/* Admins Overview Card */}
+            <div className="admins-overview-section">
+                <div className="admins-card-header">
+                    <h2>College Administrators</h2>
+                </div>
+                <div className="admins-list-container">
+                    {users.filter(u => u.role === 'admin' && !u.isDeleted).map(admin => (
+                        <div className="admin-profile-card" key={admin._id}>
+                            <div className="admin-avatar">
+                                {getInitials(admin.fullName)}
+                            </div>
+                            <div className="admin-profile-info">
+                                <span className="admin-name">{admin.fullName}</span>
+                                <span className="admin-email">{admin.email}</span>
+                            </div>
+                            <span className="role-badge admin" style={{ textTransform: "capitalize", marginLeft: "auto" }}>
+                                {admin.role}
+                            </span>
+                        </div>
+                    ))}
+                    {users.filter(u => u.role === 'admin' && !u.isDeleted).length === 0 && (
+                        <div style={{ padding: "16px 24px", color: "#64748b", fontSize: "14px" }}>
+                            No active administrators found.
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <div className="filters-bar" style={{ flexWrap: "wrap", gap: "12px" }}>
                 <div className="search-container" style={{ position: "relative", marginRight: "auto", display: "flex", alignItems: "center" }}>
                     <Search size={18} style={{ position: "absolute", left: "12px", color: "#94a3b8" }} />
                     <input 

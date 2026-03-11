@@ -334,3 +334,114 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+/* Admins Overview Card */
+.admins-overview-section {
+    background: #fff;
+    border: 1.5px solid #f1f3f5;
+    border-radius: 20px;
+    margin-bottom: 30px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+}
+
+.admins-card-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid #f1f3f5;
+    background-color: #fafafa;
+}
+
+.admins-card-header h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0;
+}
+
+.admins-list-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-profile-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 24px;
+    border-bottom: 1px solid #f1f3f5;
+    transition: background-color 0.2s ease;
+}
+
+.admin-profile-card:last-child {
+    border-bottom: none;
+}
+
+.admin-profile-card:hover {
+    background-color: #f8fafc;
+}
+
+.admin-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background-color: #fee2e2;
+    color: #b91c1c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.admin-profile-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0; 
+}
+
+.admin-name {
+    font-weight: 700;
+    color: #1a1a1a;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.admin-email {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .users-stats-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .admin-profile-card {
+        padding: 12px 16px;
+    }
+    
+    .admin-email {
+        display: none; /* Hide email on small screens to save space */
+    }
+    
+    .filters-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-container {
+        margin-right: 0 !important;
+        width: 100%;
+    }
+    
+    .search-container input {
+        width: 100%;
+    }
+}
