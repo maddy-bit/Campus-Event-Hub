@@ -632,6 +632,7 @@ const rejectAccessRequest = async (req, res) => {
     res.status(200).json({ message: "Access request rejected", registration });
   } catch (err) {
     res.status(500).json({ message: "Failed to reject access request", error: err.message });
+
   }
 };
 
@@ -655,4 +656,5 @@ module.exports = {
   getPendingAccessRequests,
   grantAccessRequest,
   rejectAccessRequest,
+
 };

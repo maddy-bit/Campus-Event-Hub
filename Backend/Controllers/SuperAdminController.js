@@ -162,6 +162,103 @@ const getPlatformAnalytics = async (req, res) => {
   }
 };
 
+// get full details of a single college by ID
+const getCollegeDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const college = await CollegeModel.findById(id);
+    if (!college) return res.status(404).json({ message: "College not found" });
+
+    const [admins, organizers, students, events] = await Promise.all([
+      UserModel.find({ collegeId: id, role: "admin", isDeleted: false })
+        .select("-password")
+        .lean(),
+      UserModel.find({ collegeId: id, role: "organizer", isDeleted: false })
+        .select("-password")
+        .populate("clubId", "name category")
+        .lean(),
+      UserModel.find({ collegeId: id, role: "student", isDeleted: false })
+        .select("-password")
+        .lean(),
+      EventModel.find({ collegeId: id })
+        .populate("createdBy", "fullName email")
+        .sort({ createdAt: -1 })
+        .lean(),
+    ]);
+
+    const eventsCreatedMap = {};
+    events.forEach((event) => {
+      const creatorId = event.createdBy?._id?.toString() || event.createdBy?.toString();
+      if (creatorId) {
+        eventsCreatedMap[creatorId] = (eventsCreatedMap[creatorId] || 0) + 1;
+      }
+    });
+
+    const enrichUser = (user) => ({
+      ...user,
+      stats: {
+        ...user.stats,
+        eventsCreated: eventsCreatedMap[user._id.toString()] || 0,
+      },
+    });
+
+    res.status(200).json({
+      college,
+      stats: {
+        totalAdmins: admins.length,
+        totalOrganizers: organizers.length,
+        totalStudents: students.length,
+        totalEvents: events.length,
+      },
+      admins: admins.map(enrichUser),
+      organizers: organizers.map(enrichUser),
+      students: students.map(enrichUser),
+      events,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch college details", error: err.message });
+  }
+};
+
+// superadmin can update any user's details
+const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { fullName, email, phoneNumber, role, department, yearOfStudy, isDeleted } = req.body;
+
+    const user = await UserModel.findById(id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (user.role === "superadmin") {
+      return res.status(403).json({ message: "Cannot modify a superadmin user" });
+    }
+
+    // check for email uniqueness if email is being changed
+    if (email && email !== user.email) {
+      const existing = await UserModel.findOne({ email });
+      if (existing) return res.status(400).json({ message: "Email already in use" });
+    }
+
+    if (fullName !== undefined) user.fullName = fullName;
+    if (email !== undefined) user.email = email;
+    if (phoneNumber !== undefined) user.phoneNumber = phoneNumber;
+    if (role !== undefined) user.role = role;
+    if (department !== undefined) user.department = department;
+    if (yearOfStudy !== undefined) user.yearOfStudy = yearOfStudy;
+    if (isDeleted !== undefined) user.isDeleted = isDeleted;
+
+    await user.save();
+
+    const updated = user.toObject();
+    delete updated.password;
+
+    res.status(200).json({ message: "User updated", user: updated });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update user", error: err.message });
+  }
+};
+
 module.exports = {
   createCollege,
   getAllColleges,
@@ -171,4 +268,7 @@ module.exports = {
   getAllAdmins,
   removeAdmin,
   getPlatformAnalytics,
+  getCollegeDetails,
+  updateUser,
 };
+

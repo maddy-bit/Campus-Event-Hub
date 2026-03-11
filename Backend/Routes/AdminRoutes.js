@@ -21,6 +21,7 @@ const {
   getPendingAccessRequests,
   grantAccessRequest,
   rejectAccessRequest,
+
 } = require("../Controllers/AdminController");
 const upload = require("../utils/uploadConfig");
 
@@ -48,6 +49,7 @@ router.get("/analytics", getCollegeAnalytics);
 router.get("/registrations/pending", getPendingCrossCollegeRegistrations);
 router.patch("/registrations/:id/review", reviewCrossCollegeRegistration);
 
+<<<<<<< HEAD
 // student-to-organizer promotion
 router.get("/promotions/pending", getPendingPromotions);
 router.patch("/promotions/:id/approve", promoteToOrganizer);

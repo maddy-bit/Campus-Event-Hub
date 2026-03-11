@@ -39,6 +39,8 @@ import SuperAdminDashboard from "./pages/superadmin/Dashboard";
 import StudentProfile from "./pages/student/Profile";
 import Notification from "./pages/student/Notification";
 import Registrations from "./pages/student/Registrations";
+import ViewInstitutions from "./pages/superadmin/ViewInstitutions";
+import CollegeDetail from "./pages/superadmin/CollegeDetail";
 
 function App() {
   return (
@@ -47,20 +49,23 @@ function App() {
 
       <Routes>
 
-        {/* super admin route */}
-        <Route
-          path="/superadmin"
-          element={
-            <ProtectedRoute allowedRoles={["superadmin"]}>
-              <SuperAdminLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Navigate to="dashboard" />} />
-          <Route path="dashboard" element={<SuperAdminDashboard />} />
-          <Route path="admins" element={<div>Manage Admins</div>} />
-        </Route>
 
+          {/* super admin route */}
+          <Route
+            path="/superadmin"
+            element={
+              <ProtectedRoute allowedRoles={["superadmin"]}>
+                <SuperAdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Navigate to="dashboard" />} />
+            <Route path="dashboard" element={<SuperAdminDashboard />} />
+            <Route path="admins" element={<div>Manage Admins</div>} />
+            <Route path="institutions" element={<ViewInstitutions/>} />
+            <Route path="institutions/:id" element={<CollegeDetail />} />
+          </Route>
+          
         {/* admin route */}
         { /*  <Route
             path="/admin"
