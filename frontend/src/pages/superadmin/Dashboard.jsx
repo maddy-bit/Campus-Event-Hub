@@ -1,6 +1,14 @@
 import React from "react";
 import "../../styles/SuperAdminDashboard.css";
 
+const metrics = [
+  { label: "Colleges", value: 42 },
+  { label: "Total Users", value: "124.5k" },
+  { label: "Admins", value: 156 },
+  { label: "Organizers", value: 890 },
+  { label: "Students", value: "123k" }
+];
+
 const Dashboard = () => {
   return (
     <div className="superadmin-dashboard">
