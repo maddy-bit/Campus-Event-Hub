@@ -31,6 +31,7 @@ const Profile = () => {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [collegeClubs, setCollegeClubs] = useState([]);
 
   // Form data for profile fields
   const [formData, setFormData] = useState({
@@ -61,7 +62,17 @@ const Profile = () => {
   // ── Fetch Profile ──
   useEffect(() => {
     fetchProfile();
+    fetchCollegeClubs();
   }, []);
+
+  const fetchCollegeClubs = async () => {
+    try {
+      const res = await api.get("/profile/college-clubs");
+      setCollegeClubs(res.data.clubs || []);
+    } catch (err) {
+      console.error("failed to fetch clubs:", err);
+    }
+  };
 
   const fetchProfile = async () => {
     try {
@@ -446,12 +457,42 @@ const Profile = () => {
               <div className="nb-form-grid">
                 <div className="nb-form-group">
                   <label className="nb-form-label">Club Name <span className="red-star">*</span></label>
-                  <input
-                    type="text"
-                    className="nb-input-field"
-                    value={formData.clubName}
-                    onChange={(e) => handleFormChange("clubName", e.target.value)}
-                  />
+                  {!user.clubId && collegeClubs.length > 0 ? (
+                    <>
+                      <select
+                        className="nb-select-field"
+                        value={formData.clubName}
+                        onChange={(e) => {
+                          const selected = collegeClubs.find(c => c.name === e.target.value);
+                          if (selected) {
+                            handleFormChange("clubName", selected.name);
+                            handleFormChange("clubCategory", selected.category || "Other");
+                            handleFormChange("clubDescription", selected.description || "");
+                          } else {
+                            handleFormChange("clubName", e.target.value);
+                          }
+                        }}
+                      >
+                        <option value="">Select existing club or type new name below</option>
+                        {collegeClubs.map(c => <option key={c._id} value={c.name}>{c.name} ({c.category})</option>)}
+                      </select>
+                      <input
+                        type="text"
+                        className="nb-input-field"
+                        style={{ marginTop: "8px" }}
+                        placeholder="Or type a new club name"
+                        value={formData.clubName}
+                        onChange={(e) => handleFormChange("clubName", e.target.value)}
+                      />
+                    </>
+                  ) : (
+                    <input
+                      type="text"
+                      className="nb-input-field"
+                      value={formData.clubName}
+                      onChange={(e) => handleFormChange("clubName", e.target.value)}
+                    />
+                  )}
                 </div>
 
                 <div className="nb-form-group">

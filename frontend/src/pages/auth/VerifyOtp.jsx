@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useNavigate, useLocation } from "react-router-dom";
 import "../../styles/auth.css";
@@ -9,6 +9,13 @@ function VerifyOtp() {
   const navigate = useNavigate();
   const location = useLocation();
   const email = location.state?.email;
+
+  useEffect(() => {
+    if (!email) {
+      toast.error("Session expired. Please try again.");
+      navigate("/forgot-password");
+    }
+  }, [email, navigate]);
 
   const handleResend = async () => {
     if (!email) {

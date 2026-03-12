@@ -306,6 +306,17 @@ const changePassword = async (req, res) => {
     return res.status(500).json({ success: false, message: "Error changing password", error: error.message });
   }
 };
+const getCollegeClubs = async (req, res) => {
+  try {
+    const user = await UserModel.findById(req.user._id);
+    if (!user || !user.collegeId) return res.status(400).json({ message: "No college found for this user" });
+
+    const clubs = await ClubModel.find({ collegeId: user.collegeId }).lean();
+    res.status(200).json({ clubs });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch clubs", error: err.message });
+  }
+};
 
 module.exports = {
   getProfile,
@@ -315,5 +326,6 @@ module.exports = {
   uploadClubLogo,
   deleteProfilePicture,
   deleteClubLogo,
-  changePassword
+  changePassword,
+  getCollegeClubs,
 };
