@@ -30,7 +30,7 @@ const AdminSidebar = ({ menuItems, isOpen, setIsOpen }) => {
   };
 
   const NavContent = ({ onNavClick }) => (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col h-full  overflow-hidden ">
       <nav className="flex-1 px-4 space-y-2 overflow-y-auto no-scrollbar">
         {menuItems.map((item, index) => {
           const Icon = item.icon;
@@ -56,13 +56,13 @@ const AdminSidebar = ({ menuItems, isOpen, setIsOpen }) => {
         })}
       </nav>
 
-      <div className="px-4 pb-6 mt-4">
+      <div className="px-4 pb-6 mt-4 ">
         <button
           onClick={() => {
             onNavClick?.();
             handleLogout();
           }}
-          className="flex items-center gap-3.5 px-4 py-3.5 rounded-2xl text-red-500 hover:bg-red-50 transition-all font-bold text-[14px] w-full text-left group leading-none"
+          className="flex items-center  gap-3.5 px-4 py-3.5 rounded-2xl text-red-500 hover:bg-red-50 transition-all font-bold text-[14px] w-full text-left group leading-none"
         >
           <LogOut size={18} strokeWidth={2.5} className="group-hover:scale-110 transition-transform" />
           <span>Logout</span>
