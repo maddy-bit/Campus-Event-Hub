@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../../styles/auth.css";
 import api from "../../api";
 
 function ResetPassword() {
-  const [otp, setOtp] = useState("");
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [otp, setOtp] = useState(location.state?.otp || "");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-
-  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,7 +26,7 @@ function ResetPassword() {
       });
 
       toast.success("Password updated");
-      navigate("/");
+      navigate("/login");
     } catch {
       toast.error("Reset failed");
     }
@@ -39,13 +39,15 @@ function ResetPassword() {
         <p className="auth-subtitle">Create a new password</p>
 
         <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            placeholder="OTP"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-            required
-          />
+          {!location.state?.otp && (
+            <input
+              type="text"
+              placeholder="OTP"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              required
+            />
+          )}
 
           <input
             type="password"
