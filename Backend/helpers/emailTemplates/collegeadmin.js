@@ -1,4 +1,4 @@
-const sendAdminCreationEmail = (Adminname, CollegeName, AdminEmail, Password, LoginURL) => `
+const sendAdminCreationEmail = (AdminName, CollegeName, AdminEmail, Password, LoginURL) => `
 <!DOCTYPE html>
 <html>
 <head>
@@ -48,7 +48,7 @@ const sendAdminCreationEmail = (Adminname, CollegeName, AdminEmail, Password, Lo
                 </tr>
                 <tr>
                   <td style="font-weight:bold;">Temporary Password</td>
-                  <td>${Password}$</td>
+                  <td>${Password}</td>
                 </tr>
               </table>
             </td>
@@ -57,7 +57,7 @@ const sendAdminCreationEmail = (Adminname, CollegeName, AdminEmail, Password, Lo
           <!-- Login Button -->
           <tr>
             <td align="center" style="padding:30px 0;">
-              <a href="${LoginURL}$" 
+              <a href="${LoginURL}" 
                  style="background:#000;color:#fff;text-decoration:none;padding:12px 25px;border-radius:6px;font-size:14px;font-weight:bold;">
                 Login to Infy Event Hub
               </a>

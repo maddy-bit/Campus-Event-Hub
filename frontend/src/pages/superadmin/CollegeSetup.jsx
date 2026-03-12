@@ -30,6 +30,14 @@ const handleSubmit = async (e) => {
     return toast.error("Please fill in all required fields.");
   }
   
+  if (!/^\d{10}$/.test(formdata.phoneNumber)) {
+    return toast.error("Phone number must be exactly 10 digits.");
+  }
+  
+  if (formdata.password.length < 8) {
+    return toast.error("Password must be at least 8 characters long.");
+  }
+  
   try {
     setLoading(true);
     

@@ -5,6 +5,7 @@ const { EventModel } = require("../Models/event");
 const bcrypt = require("bcryptjs");
 const cloudinary = require("../Config/cloudinary");
 const sendAdminCreationEmail = require("../helpers/emailTemplates/collegeadmin");
+const sendEmail = require("../utils/sendEmail");
 
 // Helper: upload buffer to Cloudinary using upload_stream
 const uploadToCloudinary = (fileBuffer, options) => {
@@ -105,18 +106,23 @@ const createAdmin = async (req, res) => {
       isEmailVerified: true,
     });
 
-    await sendEmail({
-      to: email,
-      subject: "Welcome to Infy Event Hub – Your Admin Account Details",
-      text: `Greetings from Infy Event Hub!`,
-      html: sendAdminCreationEmail(fullName, college.name, email, password, `${process.env.FRONTEND_URL}/login`),
-    });
+    try {
+      await sendEmail({
+        to: email,
+        subject: "Welcome to Infy Event Hub – Your Admin Account Details",
+        text: `Greetings from Infy Event Hub!`,
+        html: sendAdminCreationEmail(fullName, college.name, email, password, `${process.env.FRONTEND_URL || 'http://localhost:5173'}/login`),
+      });
+    } catch (emailError) {
+      console.error("Failed to send admin creation email. Admin was created but email was not sent:", emailError);
+    }
 
     res.status(201).json({
       message: "Admin created",
       admin: { _id: admin._id, fullName: admin.fullName, email: admin.email, collegeId: admin.collegeId }
     });
   } catch (err) {
+    console.error("Error creating admin:", err);
     res.status(500).json({ message: "Failed to create admin", error: err.message });
   }
 };
