@@ -87,7 +87,7 @@ const LoginPage = () => {
             />
           </div>
 
-          <div className="form-group">
+          <div className="form-group" style={{ marginBottom: "0.5rem" }}>
             <label>Password</label>
             <input
               type="password"
@@ -98,11 +98,28 @@ const LoginPage = () => {
               required
             />
           </div>
-
-          <button type="submit" className="submit-btn">
+          <div style={{ textAlign: "right", marginBottom: "1.2rem" }}>
+            <span
+              style={{ fontSize: "0.85rem", color: "#2563eb", cursor: "pointer", fontWeight: "600" }}
+              onClick={() => navigate("/forgot-password")}
+            >
+              Forgot Password?
+            </span>
+          </div>
+          <button type="submit" className="submit-btn" style={{ marginBottom: "1rem" }}>
             Login
           </button>
         </form>
+
+        <div className="footer-text" style={{ textAlign: "center", fontSize: "0.9rem", color: "#64748b" }}>
+          Don't have an account?{" "}
+          <span 
+            style={{ color: "#2563eb", cursor: "pointer", fontWeight: "600" }} 
+            onClick={() => navigate("/register")}
+          >
+            Sign up
+          </span>
+        </div>
       </div>
     </div>
   );

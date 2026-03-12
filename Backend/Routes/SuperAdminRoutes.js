@@ -12,7 +12,10 @@ const {
   getPlatformAnalytics,
   getCollegeDetails,
   updateUser,
+  getAllEvents,
+  updateEvent,
 } = require("../Controllers/SuperAdminController");
+const upload = require("../utils/uploadConfig");
 
 // all routes require superadmin role
 router.use(verifyToken, checkRole("superadmin"));
@@ -35,5 +38,10 @@ router.put("/users/:id", updateUser);
 
 // platform analytics
 router.get("/analytics", getPlatformAnalytics);
+
+// event management (sadmin)
+router.get("/events", getAllEvents);
+router.put("/events/:id", upload.single("poster"), updateEvent);
+
 
 module.exports = router;

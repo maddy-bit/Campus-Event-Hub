@@ -192,7 +192,13 @@ const RegistrationPage = () => {
         </form>
 
         <div className="footer-text">
-          Already have an account? <a href="#">Login</a>
+          Already have an account?{" "}
+          <span 
+            style={{ color: "#2563eb", cursor: "pointer", fontWeight: "600" }} 
+            onClick={() => navigate("/login")}
+          >
+            Login
+          </span>
         </div>
       </div>
     </div>

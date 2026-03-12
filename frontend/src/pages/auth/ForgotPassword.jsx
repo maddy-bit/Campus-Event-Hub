@@ -17,7 +17,7 @@ function ForgotPassword() {
       });
 
       toast.success("OTP sent to your email");
-      navigate("/verify-otp");
+      navigate("/verify-otp", { state: { email } });
     } catch {
       toast.error("User not found");
     }
@@ -44,7 +44,7 @@ function ForgotPassword() {
         </form>
 
         <div className="auth-link">
-          Back to <span onClick={() => navigate("/")}>Login</span>
+          Back to <span onClick={() => navigate("/login")}>Login</span>
         </div>
       </div>
     </div>

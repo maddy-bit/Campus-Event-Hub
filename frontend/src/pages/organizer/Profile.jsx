@@ -31,6 +31,7 @@ const Profile = () => {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [collegeClubs, setCollegeClubs] = useState([]);
 
   // Form data for profile fields
   const [formData, setFormData] = useState({
@@ -61,7 +62,17 @@ const Profile = () => {
   // ── Fetch Profile ──
   useEffect(() => {
     fetchProfile();
+    fetchCollegeClubs();
   }, []);
+
+  const fetchCollegeClubs = async () => {
+    try {
+      const res = await api.get("/profile/college-clubs");
+      setCollegeClubs(res.data.clubs || []);
+    } catch (err) {
+      console.error("failed to fetch clubs:", err);
+    }
+  };
 
   const fetchProfile = async () => {
     try {
@@ -445,29 +456,82 @@ const Profile = () => {
             <div className="panel-body">
               <div className="nb-form-grid">
                 <div className="nb-form-group">
-                  <label className="nb-form-label">Club Name <span className="red-star">*</span></label>
-                  <input
-                    type="text"
-                    className="nb-input-field"
-                    value={formData.clubName}
-                    onChange={(e) => handleFormChange("clubName", e.target.value)}
-                  />
+                  <div className="label-with-tag">
+                    <label className="nb-form-label">Club Name <span className="red-star">*</span></label>
+                    {user.clubId && <span className="readonly-pips">ASSIGNED</span>}
+                  </div>
+                  {user.clubId ? (
+                    <input
+                      type="text"
+                      className="nb-input-field readonly"
+                      value={formData.clubName}
+                      readOnly
+                    />
+                  ) : collegeClubs.length > 0 ? (
+                    <>
+                      <select
+                        className="nb-select-field"
+                        value={formData.clubName}
+                        onChange={(e) => {
+                          const selected = collegeClubs.find(c => c.name === e.target.value);
+                          if (selected) {
+                            handleFormChange("clubName", selected.name);
+                            handleFormChange("clubCategory", selected.category || "Other");
+                            handleFormChange("clubDescription", selected.description || "");
+                          } else {
+                            handleFormChange("clubName", e.target.value);
+                          }
+                        }}
+                      >
+                        <option value="">Select existing club or type new name below</option>
+                        {collegeClubs.map(c => <option key={c._id} value={c.name}>{c.name} ({c.category})</option>)}
+                      </select>
+                      <input
+                        type="text"
+                        className="nb-input-field"
+                        style={{ marginTop: "8px" }}
+                        placeholder="Or type a new club name"
+                        value={formData.clubName}
+                        onChange={(e) => handleFormChange("clubName", e.target.value)}
+                      />
+                    </>
+                  ) : (
+                    <input
+                      type="text"
+                      className="nb-input-field"
+                      value={formData.clubName}
+                      onChange={(e) => handleFormChange("clubName", e.target.value)}
+                      placeholder="Enter club name"
+                    />
+                  )}
                 </div>
 
                 <div className="nb-form-group">
-                  <label className="nb-form-label">Club Category</label>
-                  <select
-                    className="nb-select-field"
-                    value={formData.clubCategory}
-                    onChange={(e) => handleFormChange("clubCategory", e.target.value)}
-                  >
-                    <option value="Technical">Technical</option>
-                    <option value="Cultural">Cultural</option>
-                    <option value="Sports">Sports</option>
-                    <option value="Literary">Literary</option>
-                    <option value="Social Service">Social Service</option>
-                    <option value="Other">Other</option>
-                  </select>
+                  <div className="label-with-tag">
+                    <label className="nb-form-label">Club Category</label>
+                    {user.clubId && <span className="readonly-pips">ASSIGNED</span>}
+                  </div>
+                  {user.clubId ? (
+                    <input
+                      type="text"
+                      className="nb-input-field readonly"
+                      value={formData.clubCategory}
+                      readOnly
+                    />
+                  ) : (
+                    <select
+                      className="nb-select-field"
+                      value={formData.clubCategory}
+                      onChange={(e) => handleFormChange("clubCategory", e.target.value)}
+                    >
+                      <option value="Technical">Technical</option>
+                      <option value="Cultural">Cultural</option>
+                      <option value="Sports">Sports</option>
+                      <option value="Literary">Literary</option>
+                      <option value="Social Service">Social Service</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  )}
                 </div>
 
                 <div className="nb-form-group">
@@ -527,13 +591,25 @@ const Profile = () => {
                 </div>
 
                 <div className="nb-form-group nb-full-width">
-                  <label className="nb-form-label">Club Description</label>
-                  <textarea
-                    className="nb-textarea-field"
-                    rows="4"
-                    value={formData.clubDescription}
-                    onChange={(e) => handleFormChange("clubDescription", e.target.value)}
-                  ></textarea>
+                  <div className="label-with-tag">
+                    <label className="nb-form-label">Club Description</label>
+                    {user.clubId && <span className="readonly-pips">ASSIGNED</span>}
+                  </div>
+                  {user.clubId ? (
+                    <textarea
+                      className="nb-textarea-field readonly"
+                      rows="4"
+                      value={formData.clubDescription}
+                      readOnly
+                    ></textarea>
+                  ) : (
+                    <textarea
+                      className="nb-textarea-field"
+                      rows="4"
+                      value={formData.clubDescription}
+                      onChange={(e) => handleFormChange("clubDescription", e.target.value)}
+                    ></textarea>
+                  )}
                 </div>
               </div>
             </div>

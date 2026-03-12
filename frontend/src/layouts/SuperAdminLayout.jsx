@@ -14,12 +14,9 @@ import AdminHeader from "../components/AdminHeader";
 
 // Sidebar Menu items to match the screenshot "Admin Theme"
 const adminMenuItems = [
-  { name: "Overview", path: "/superadmin/dashboard", icon: LayoutDashboard },
+  { name: "Dashboard", path: "/superadmin/dashboard", icon: LayoutDashboard },
   { name: "Events", path: "/superadmin/events", icon: CalendarDays },
-  { name: "Users", path: "/superadmin/users", icon: Users },
-  { name: "Organizers", path: "/superadmin/organizers", icon: UserCircle },
-  { name: "Approvals", path: "/superadmin/approvals", icon: Clock },
-  { name: "Notify", path: "/superadmin/notify", icon: Bell },
+  { name: "College Setup", path: "/superadmin/setup", icon: CalendarDays },
   { name: "Institutions", path: "/superadmin/institutions", icon: GraduationCapIcon },
 ];
 

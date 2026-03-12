@@ -3,18 +3,30 @@ const { UserModel } = require("../Models/users");
 const { ClubModel } = require("../Models/club");
 const { EventModel } = require("../Models/event");
 const bcrypt = require("bcryptjs");
+const cloudinary = require("../Config/cloudinary");
+const sendAdminCreationEmail = require("../helpers/emailTemplates/collegeadmin");
+const sendEmail = require("../utils/sendEmail");
 
-// create a new college
+// Helper: upload buffer to Cloudinary using upload_stream
+const uploadToCloudinary = (fileBuffer, options) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(options, (error, result) => {
+      if (error) return reject(error);
+      resolve(result);
+    });
+    stream.end(fileBuffer);
+  });
+};
 const createCollege = async (req, res) => {
   try {
-    const { name, location, logo, domain } = req.body;
+    const { name, location, domain } = req.body;
 
     if (!name) return res.status(400).json({ message: "College name is required" });
 
     const existing = await CollegeModel.findOne({ name });
     if (existing) return res.status(400).json({ message: "College already exists" });
 
-    const college = await CollegeModel.create({ name, location, logo, domain, isVerified: true });
+    const college = await CollegeModel.create({ name, location, domain, isVerified: true });
 
     res.status(201).json({ message: "College created", college });
   } catch (err) {
@@ -94,11 +106,23 @@ const createAdmin = async (req, res) => {
       isEmailVerified: true,
     });
 
+    try {
+      await sendEmail({
+        to: email,
+        subject: "Welcome to Infy Event Hub – Your Admin Account Details",
+        text: `Greetings from Infy Event Hub!`,
+        html: sendAdminCreationEmail(fullName, college.name, email, password, `${process.env.FRONTEND_URL || 'http://localhost:5173'}/login`),
+      });
+    } catch (emailError) {
+      console.error("Failed to send admin creation email. Admin was created but email was not sent:", emailError);
+    }
+
     res.status(201).json({
       message: "Admin created",
       admin: { _id: admin._id, fullName: admin.fullName, email: admin.email, collegeId: admin.collegeId }
     });
   } catch (err) {
+    console.error("Error creating admin:", err);
     res.status(500).json({ message: "Failed to create admin", error: err.message });
   }
 };
@@ -134,7 +158,6 @@ const removeAdmin = async (req, res) => {
   }
 };
 
-// platform analytics
 const getPlatformAnalytics = async (req, res) => {
   try {
     const [totalColleges, totalUsers, totalEvents, totalStudents, totalOrganizers, totalAdmins, totalClubs] =
@@ -148,6 +171,63 @@ const getPlatformAnalytics = async (req, res) => {
         ClubModel.countDocuments(),
       ]);
 
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+
+    const eventCreationTrend = await EventModel.aggregate([
+      { $match: { createdAt: { $gte: sixMonthsAgo } } },
+      { $group: { _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } }, count: { $sum: 1 } } },
+      { $sort: { "_id.year": 1, "_id.month": 1 } }
+    ]);
+
+    const userRegistrationTrend = await UserModel.aggregate([
+      { $match: { createdAt: { $gte: sixMonthsAgo }, isDeleted: false } },
+      { $group: { _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } }, count: { $sum: 1 } } },
+      { $sort: { "_id.year": 1, "_id.month": 1 } }
+    ]);
+
+    const chartData = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const m = d.getMonth() + 1;
+      const y = d.getFullYear();
+      const evtFound = eventCreationTrend.find(r => r._id.month === m && r._id.year === y);
+      const usrFound = userRegistrationTrend.find(r => r._id.month === m && r._id.year === y);
+      chartData.push({
+        month: months[d.getMonth()],
+        events: evtFound ? evtFound.count : 0,
+        users: usrFound ? usrFound.count : 0,
+      });
+    }
+
+    const [approvedEvents, submittedEvents, rejectedEvents, draftEvents] = await Promise.all([
+      EventModel.countDocuments({ status: "Approved" }),
+      EventModel.countDocuments({ status: "Submitted" }),
+      EventModel.countDocuments({ status: "Rejected" }),
+      EventModel.countDocuments({ status: "Draft" }),
+    ]);
+
+    const eventsByCategory = await EventModel.aggregate([
+      { $group: { _id: "$category", count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]);
+
+    const recentEvents = await EventModel.find()
+      .populate("collegeId", "name")
+      .populate("createdBy", "fullName")
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .lean();
+
+    const recentUsers = await UserModel.find({ isDeleted: false })
+      .populate("collegeId", "name")
+      .select("-password")
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .lean();
+
     res.status(200).json({
       totalColleges,
       totalUsers,
@@ -156,13 +236,17 @@ const getPlatformAnalytics = async (req, res) => {
       totalOrganizers,
       totalAdmins,
       totalClubs,
+      chartData,
+      eventsByStatus: { approved: approvedEvents, submitted: submittedEvents, rejected: rejectedEvents, draft: draftEvents },
+      eventsByCategory,
+      recentEvents,
+      recentUsers,
     });
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch analytics", error: err.message });
   }
 };
 
-// get full details of a single college by ID
 const getCollegeDetails = async (req, res) => {
   try {
     const { id } = req.params;
@@ -170,7 +254,7 @@ const getCollegeDetails = async (req, res) => {
     const college = await CollegeModel.findById(id);
     if (!college) return res.status(404).json({ message: "College not found" });
 
-    const [admins, organizers, students, events] = await Promise.all([
+    const [admins, organizers, students, events, clubs] = await Promise.all([
       UserModel.find({ collegeId: id, role: "admin", isDeleted: false })
         .select("-password")
         .lean(),
@@ -185,6 +269,7 @@ const getCollegeDetails = async (req, res) => {
         .populate("createdBy", "fullName email")
         .sort({ createdAt: -1 })
         .lean(),
+      ClubModel.find({ collegeId: id }).lean(),
     ]);
 
     const eventsCreatedMap = {};
@@ -210,11 +295,13 @@ const getCollegeDetails = async (req, res) => {
         totalOrganizers: organizers.length,
         totalStudents: students.length,
         totalEvents: events.length,
+        totalClubs: clubs.length,
       },
       admins: admins.map(enrichUser),
       organizers: organizers.map(enrichUser),
       students: students.map(enrichUser),
       events,
+      clubs,
     });
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch college details", error: err.message });
@@ -259,6 +346,56 @@ const updateUser = async (req, res) => {
   }
 };
 
+// get all events across all colleges
+const getAllEvents = async (req, res) => {
+  try {
+    const events = await EventModel.find()
+      .populate("createdBy", "fullName email")
+      .populate("collegeId", "name")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ count: events.length, events });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch events", error: err.message });
+  }
+};
+
+// update an existing event, including status (superadmin)
+const updateEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    
+    const event = await EventModel.findById(id);
+    if (!event) return res.status(404).json({ message: "Event not found" });
+
+    // handle boolean parsing due to FormData
+    if (updateData.isPaidEvent !== undefined) updateData.isPaidEvent = updateData.isPaidEvent === "true" || updateData.isPaidEvent === true;
+    if (updateData.isPublic !== undefined) updateData.isPublic = updateData.isPublic !== "false" && updateData.isPublic !== false;
+
+    if (req.file) {
+      try {
+        const result = await uploadToCloudinary(req.file.buffer, {
+          folder: "campuseventhub/events",
+          transformation: [
+            { width: 1200, height: 630, crop: "limit" },
+            { quality: "auto", fetch_format: "auto" },
+          ],
+        });
+        updateData.posterUrl = result.secure_url;
+      } catch (uploadErr) {
+        console.error("Cloudinary upload error:", uploadErr);
+      }
+    }
+
+    const updatedEvent = await EventModel.findByIdAndUpdate(id, updateData, { new: true });
+    res.status(200).json({ message: "Event updated successfully", event: updatedEvent });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update event", error: err.message });
+  }
+};
+
+
 module.exports = {
   createCollege,
   getAllColleges,
@@ -270,5 +407,7 @@ module.exports = {
   getPlatformAnalytics,
   getCollegeDetails,
   updateUser,
+  getAllEvents,
+  updateEvent,
 };
 

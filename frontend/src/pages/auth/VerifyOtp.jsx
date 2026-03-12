@@ -1,12 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../../styles/auth.css";
 import api from "../../api";
 
 function VerifyOtp() {
   const [otp, setOtp] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+  const email = location.state?.email;
+
+  useEffect(() => {
+    if (!email) {
+      toast.error("Session expired. Please try again.");
+      navigate("/forgot-password");
+    }
+  }, [email, navigate]);
+
+  const handleResend = async () => {
+    if (!email) {
+      toast.error("Email missing. Start over.");
+      navigate("/forgot-password");
+      return;
+    }
+    try {
+      await api.post("/auth/forgot-password", { email });
+      toast.success("OTP resent to your email");
+    } catch {
+      toast.error("Failed to resend OTP");
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,7 +40,7 @@ function VerifyOtp() {
       });
 
       toast.success("OTP verified");
-      navigate("/reset-password");
+      navigate("/reset-password", { state: { otp } });
     } catch {
       toast.error("Invalid OTP");
     }
@@ -43,7 +66,7 @@ function VerifyOtp() {
         </form>
 
         <div className="auth-link">
-          Didn't receive? <span>Resend</span>
+          Didn't receive? <span onClick={handleResend} style={{ cursor: "pointer", color: "#2563eb" }}>Resend</span>
         </div>
       </div>
     </div>

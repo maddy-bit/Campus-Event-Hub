@@ -25,6 +25,10 @@ const {
   updateUser,
   deleteUser,
   Profiledata,
+  createClub,
+  getClubDetails,
+  assignOrganizerToClub,
+  removeOrganizerFromClub,
 } = require("../Controllers/AdminController");
 const upload = require("../utils/uploadConfig");
 
@@ -46,6 +50,10 @@ router.put("/events/:id", upload.single("poster"), updateEvent);
 router.get("/organizers", getCollegeOrganizers);
 router.get("/students", getCollegeStudents);
 router.get("/clubs", getCollegeClubs);
+router.post("/clubs", createClub);
+router.get("/clubs/:id", getClubDetails);
+router.post("/clubs/assign-organizer", assignOrganizerToClub);
+router.post("/clubs/remove-organizer", removeOrganizerFromClub);
 router.get("/analytics", getCollegeAnalytics);
 
 // cross-college registration approval
