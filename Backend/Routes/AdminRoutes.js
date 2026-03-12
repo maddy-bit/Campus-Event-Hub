@@ -21,7 +21,10 @@ const {
   getPendingAccessRequests,
   grantAccessRequest,
   rejectAccessRequest,
-
+  getCollegeDetails,
+  updateUser,
+  deleteUser,
+  Profiledata,
 } = require("../Controllers/AdminController");
 const upload = require("../utils/uploadConfig");
 
@@ -58,5 +61,13 @@ router.patch("/promotions/:id/deny", denyPromotion);
 router.get("/access-requests/pending", getPendingAccessRequests);
 router.patch("/access-requests/:id/grant", grantAccessRequest);
 router.patch("/access-requests/:id/reject", rejectAccessRequest);
+
+// viewing all users of the college 
+router.get("/users", getCollegeDetails)
+router.put("/users/:id", updateUser)
+router.patch("/users/:id/delete", deleteUser)
+
+//profle
+router.get("/profile", Profiledata)
 
 module.exports = router;

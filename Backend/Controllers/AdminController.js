@@ -133,7 +133,7 @@ const getCollegeEvents = async (req, res) => {
   }
 };
 
-// Create an event directly by admin (auto-approved)
+// create an event directly by admin (auto-approved)
 const createEvent = async (req, res) => {
   try {
     const { title, category, location, description, eventDate, startTime, endTime, registrationDeadline, maxSeats, isPaidEvent, ticketPrice, isPublic } = req.body;
@@ -185,7 +185,7 @@ const createEvent = async (req, res) => {
   }
 };
 
-// Update an existing event, including status
+// update an existing event, including status
 const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
@@ -485,7 +485,7 @@ const getPendingPromotions = async (req, res) => {
   }
 };
 
-// Promote student to organizer
+// promote student to organizer
 const promoteToOrganizer = async (req, res) => {
   try {
     const { id } = req.params;
@@ -515,7 +515,7 @@ const promoteToOrganizer = async (req, res) => {
   }
 };
 
-// Deny promotion request with reason
+// deny promotion request with reason
 const denyPromotion = async (req, res) => {
   try {
     const { id } = req.params;
@@ -637,6 +637,88 @@ const rejectAccessRequest = async (req, res) => {
   }
 };
 
+const getCollegeDetails = async (req, res) => {
+  try {
+    const collegeId = req.user.collegeId;
+
+    const users = await UserModel.find({ 
+      collegeId: collegeId,
+      role: { $ne: "superadmin" }
+    })
+    .select("fullName email role department yearOfStudy createdAt isDeleted")
+    .sort({ createdAt: -1 });
+
+    const totalUsers = users.length;
+    const studentsCount = users.filter(u => u.role === "student").length;
+    const organizersCount = users.filter(u => u.role === "organizer").length;
+
+    res.status(200).json({ 
+      stats: {
+        totalUsers,
+        studentsCount,
+        organizersCount
+      },
+      users 
+    });
+    
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch college details", error: err.message });
+  }
+};
+
+const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { fullName, email, role, department, yearOfStudy } = req.body;
+    
+    const user = await UserModel.findById(id);
+    if (!user || user.collegeId.toString() !== req.user.collegeId.toString()) {
+       return res.status(404).json({ message: "User not found or unauthorised" });
+    }
+    
+    user.fullName = fullName || user.fullName;
+    user.email = email || user.email;
+    user.role = role || user.role;
+    if (department) user.department = department;
+    if (yearOfStudy) user.yearOfStudy = yearOfStudy;
+
+    await user.save();
+    
+    res.status(200).json({ message: "User updated successfully", user });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update user", error: err.message });
+  }
+};
+
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await UserModel.findById(id);
+    
+    if (!user || user.collegeId.toString() !== req.user.collegeId.toString()) {
+       return res.status(404).json({ message: "User not found or unauthorised" });
+    }
+    
+    user.isDeleted = true;
+    await user.save();
+    
+    res.status(200).json({ message: "User soft deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to delete user", error: err.message });
+  }
+};
+
+const Profiledata = async (req, res) => {
+  try {
+    const id= req.user._id    
+    const data= await UserModel.findById(id).select("-password").populate("collegeId");
+    
+    res.status(200).json({message:"Profile data fetched successfully", data})
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch profile data", error: error.message });
+  }
+}
+
 module.exports = {
   getPendingEvents,
   approveEvent,
@@ -657,5 +739,8 @@ module.exports = {
   getPendingAccessRequests,
   grantAccessRequest,
   rejectAccessRequest,
-
+  getCollegeDetails,
+  updateUser,
+  deleteUser,
+  Profiledata,
 };

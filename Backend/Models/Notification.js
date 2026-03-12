@@ -18,6 +18,10 @@ const notificationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Event",
     },
+    club: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Club",
+    },
     type: {
       type: String,
       enum: ["Announcement", "Reminder", "Alert", "Update", "Submission_Update"],
@@ -85,6 +89,7 @@ const notificationSchema = new mongoose.Schema(
 );
 
 notificationSchema.index({ event: 1, createdAt: -1 });
+notificationSchema.index({ club: 1, createdAt: -1 });
 notificationSchema.index({ sender: 1 });
 
 const NotificationModel = mongoose.model("Notification", notificationSchema);
