@@ -1,8 +1,73 @@
 import React, { useState } from "react";
-import { GraduationCap, User, Eye, EyeOff, Send } from "lucide-react";
+import { GraduationCap, User, Eye, EyeOff, Send, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import api from "../../api";
 
 const CollegeSetup = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [formdata, setFormdata] = useState({
+  collegeName: "",
+  location: "",
+  domain: "",
+  adminName: "",
+  adminEmail: "",
+  phoneNumber: "",
+  password: ""
+});
+const [loading, setLoading] = useState(false);
+
+const handleChange = (e) => {
+  setFormdata((prev) => ({
+    ...prev,
+    [e.target.name]: e.target.value,
+  }));
+};
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  if (!formdata.collegeName || !formdata.adminName || !formdata.adminEmail || !formdata.phoneNumber || !formdata.password) {
+    return toast.error("Please fill in all required fields.");
+  }
+  
+  try {
+    setLoading(true);
+    
+    const collegeRes = await api.post("/superadmin/colleges", {
+      name: formdata.collegeName,
+      location: formdata.location,
+      domain: formdata.domain
+    });
+    
+    toast.success("College created successfully!");
+    const newCollegeId = collegeRes.data.college._id;
+    
+    await api.post("/superadmin/admins", {
+      fullName: formdata.adminName,
+      email: formdata.adminEmail,
+      phoneNumber: formdata.phoneNumber,
+      password: formdata.password,
+      collegeId: newCollegeId
+    });
+    
+    toast.success("College and Admin created successfully!");
+    
+    setFormdata({
+      collegeName: "",
+      location: "",
+      domain: "",
+      adminName: "",
+      adminEmail: "",
+      phoneNumber: "",
+      password: ""
+    });
+    
+  } catch (err) {
+    toast.error(err.response?.data?.message || "An error occurred during setup.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-full bg-[#f8fafc] p-6 lg:p-10 font-sans pb-20">
@@ -16,7 +81,7 @@ const CollegeSetup = () => {
           </h1>
         </header>
 
-        <form className="space-y-8" onSubmit={(e) => e.preventDefault()}>
+        <form className="space-y-8" onSubmit={handleSubmit}>
           <div className="bg-white rounded-3xl border border-slate-200 p-8 lg:p-10 shadow-sm">
             <h2 className="flex items-center gap-3 font-bold text-lg text-gray-900 mb-8 uppercase tracking-wider pb-4 border-b border-slate-100">
               <GraduationCap size={24} className="text-black" strokeWidth={2.5} />
@@ -30,8 +95,11 @@ const CollegeSetup = () => {
                 </label>
                 <input
                   type="text"
+                  name="collegeName"
+                  value={formdata.collegeName}
+                  onChange={handleChange}
                   className="w-full px-5 py-3.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black placeholder-slate-400 transition-colors"
-                  placeholder="e.g. Birla Institute of Technology & Science"
+                  placeholder="e.g. Aloysius College of Engineering"
                   required
                 />
               </div>
@@ -43,6 +111,9 @@ const CollegeSetup = () => {
                   </label>
                   <input
                     type="text"
+                    name="location"
+                    value={formdata.location}
+                    onChange={handleChange}
                     className="w-full px-5 py-3.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black placeholder-slate-400 transition-colors"
                     placeholder="e.g. Pilani, Rajasthan"
                   />
@@ -53,6 +124,9 @@ const CollegeSetup = () => {
                   </label>
                   <input
                     type="text"
+                    name="domain"
+                    value={formdata.domain}
+                    onChange={handleChange}
                     className="w-full px-5 py-3.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black placeholder-slate-400 transition-colors"
                     placeholder="e.g. bits-pilani.ac.in"
                   />
@@ -76,6 +150,9 @@ const CollegeSetup = () => {
                 </label>
                 <input
                   type="text"
+                  name="adminName"
+                  value={formdata.adminName}
+                  onChange={handleChange}
                   className="w-full px-5 py-3.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black placeholder-slate-400 transition-colors"
                   placeholder="e.g. Prof. Priya Lakshmi"
                   required
@@ -89,6 +166,9 @@ const CollegeSetup = () => {
                   </label>
                   <input
                     type="email"
+                    name="adminEmail"
+                    value={formdata.adminEmail}
+                    onChange={handleChange}
                     className="w-full px-5 py-3.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black placeholder-slate-400 transition-colors"
                     placeholder="admin@college.edu"
                     required
@@ -100,6 +180,9 @@ const CollegeSetup = () => {
                   </label>
                   <input
                     type="tel"
+                    name="phoneNumber"
+                    value={formdata.phoneNumber}
+                    onChange={handleChange}
                     className="w-full px-5 py-3.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black placeholder-slate-400 transition-colors"
                     placeholder="10-digit mobile number"
                     required
@@ -115,6 +198,9 @@ const CollegeSetup = () => {
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={formdata.password}
+                    onChange={handleChange}
                     className="w-full pl-5 pr-12 py-3.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-black focus:ring-1 focus:ring-black placeholder-slate-400 transition-colors"
                     placeholder="Minimum 8 characters"
                     required
@@ -139,10 +225,20 @@ const CollegeSetup = () => {
             
             <button
               type="submit"
-              className="w-full bg-black text-white font-bold text-sm tracking-widest uppercase py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-gray-900 active:scale-[0.99] transition-all shadow-xl shadow-black/10"
+              disabled={loading}
+              className="w-full bg-black text-white font-bold text-sm tracking-widest uppercase py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-gray-900 active:scale-[0.99] transition-all shadow-xl shadow-black/10 disabled:opacity-75 disabled:cursor-not-allowed"
             >
-              <Send size={18} />
-              CREATE INSTANCE & NOTIFY ADMIN
+              {loading ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  PROCESSING...
+                </>
+              ) : (
+                <>
+                  <Send size={18} />
+                  CREATE INSTANCE & NOTIFY ADMIN
+                </>
+              )}
             </button>
           </div>
           

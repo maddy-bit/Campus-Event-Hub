@@ -4,6 +4,7 @@ const { ClubModel } = require("../Models/club");
 const { EventModel } = require("../Models/event");
 const bcrypt = require("bcryptjs");
 const cloudinary = require("../Config/cloudinary");
+const sendAdminCreationEmail = require("../helpers/emailTemplates/collegeadmin");
 
 // Helper: upload buffer to Cloudinary using upload_stream
 const uploadToCloudinary = (fileBuffer, options) => {
@@ -17,14 +18,14 @@ const uploadToCloudinary = (fileBuffer, options) => {
 };
 const createCollege = async (req, res) => {
   try {
-    const { name, location, logo, domain } = req.body;
+    const { name, location, domain } = req.body;
 
     if (!name) return res.status(400).json({ message: "College name is required" });
 
     const existing = await CollegeModel.findOne({ name });
     if (existing) return res.status(400).json({ message: "College already exists" });
 
-    const college = await CollegeModel.create({ name, location, logo, domain, isVerified: true });
+    const college = await CollegeModel.create({ name, location, domain, isVerified: true });
 
     res.status(201).json({ message: "College created", college });
   } catch (err) {
@@ -102,6 +103,13 @@ const createAdmin = async (req, res) => {
       role: "admin",
       collegeId,
       isEmailVerified: true,
+    });
+
+    await sendEmail({
+      to: email,
+      subject: "Welcome to Infy Event Hub – Your Admin Account Details",
+      text: `Greetings from Infy Event Hub!`,
+      html: sendAdminCreationEmail(fullName, college.name, email, password, `${process.env.FRONTEND_URL}/login`),
     });
 
     res.status(201).json({
@@ -317,6 +325,7 @@ const updateEvent = async (req, res) => {
     res.status(500).json({ message: "Failed to update event", error: err.message });
   }
 };
+
 
 module.exports = {
   createCollege,

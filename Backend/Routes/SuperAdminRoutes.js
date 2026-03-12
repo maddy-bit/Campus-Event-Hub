@@ -39,8 +39,9 @@ router.put("/users/:id", updateUser);
 // platform analytics
 router.get("/analytics", getPlatformAnalytics);
 
-// event management (superadmin)
+// event management (sadmin)
 router.get("/events", getAllEvents);
 router.put("/events/:id", upload.single("poster"), updateEvent);
+
 
 module.exports = router;
