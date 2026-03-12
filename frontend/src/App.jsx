@@ -42,6 +42,8 @@ import Notification from "./pages/student/Notification";
 import Registrations from "./pages/student/Registrations";
 import ViewInstitutions from "./pages/superadmin/ViewInstitutions";
 import CollegeDetail from "./pages/superadmin/CollegeDetail";
+import SuperAdminEvents from "./pages/superadmin/Events";
+import CollegeSetup from "./pages/superadmin/CollegeSetup";
 
 function App() {
   return (
@@ -62,7 +64,8 @@ function App() {
           >
             <Route index element={<Navigate to="dashboard" />} />
             <Route path="dashboard" element={<SuperAdminDashboard />} />
-            <Route path="admins" element={<div>Manage Admins</div>} />
+            <Route path="events" element={<SuperAdminEvents />} />
+            <Route path="setup" element={<CollegeSetup />} />
             <Route path="institutions" element={<ViewInstitutions/>} />
             <Route path="institutions/:id" element={<CollegeDetail />} />
           </Route>

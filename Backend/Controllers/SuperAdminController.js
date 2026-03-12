@@ -3,8 +3,18 @@ const { UserModel } = require("../Models/users");
 const { ClubModel } = require("../Models/club");
 const { EventModel } = require("../Models/event");
 const bcrypt = require("bcryptjs");
+const cloudinary = require("../Config/cloudinary");
 
-// create a new college
+// Helper: upload buffer to Cloudinary using upload_stream
+const uploadToCloudinary = (fileBuffer, options) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(options, (error, result) => {
+      if (error) return reject(error);
+      resolve(result);
+    });
+    stream.end(fileBuffer);
+  });
+};
 const createCollege = async (req, res) => {
   try {
     const { name, location, logo, domain } = req.body;
@@ -259,6 +269,55 @@ const updateUser = async (req, res) => {
   }
 };
 
+// get all events across all colleges
+const getAllEvents = async (req, res) => {
+  try {
+    const events = await EventModel.find()
+      .populate("createdBy", "fullName email")
+      .populate("collegeId", "name")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ count: events.length, events });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch events", error: err.message });
+  }
+};
+
+// update an existing event, including status (superadmin)
+const updateEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    
+    const event = await EventModel.findById(id);
+    if (!event) return res.status(404).json({ message: "Event not found" });
+
+    // handle boolean parsing due to FormData
+    if (updateData.isPaidEvent !== undefined) updateData.isPaidEvent = updateData.isPaidEvent === "true" || updateData.isPaidEvent === true;
+    if (updateData.isPublic !== undefined) updateData.isPublic = updateData.isPublic !== "false" && updateData.isPublic !== false;
+
+    if (req.file) {
+      try {
+        const result = await uploadToCloudinary(req.file.buffer, {
+          folder: "campuseventhub/events",
+          transformation: [
+            { width: 1200, height: 630, crop: "limit" },
+            { quality: "auto", fetch_format: "auto" },
+          ],
+        });
+        updateData.posterUrl = result.secure_url;
+      } catch (uploadErr) {
+        console.error("Cloudinary upload error:", uploadErr);
+      }
+    }
+
+    const updatedEvent = await EventModel.findByIdAndUpdate(id, updateData, { new: true });
+    res.status(200).json({ message: "Event updated successfully", event: updatedEvent });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update event", error: err.message });
+  }
+};
+
 module.exports = {
   createCollege,
   getAllColleges,
@@ -270,5 +329,7 @@ module.exports = {
   getPlatformAnalytics,
   getCollegeDetails,
   updateUser,
+  getAllEvents,
+  updateEvent,
 };
 
