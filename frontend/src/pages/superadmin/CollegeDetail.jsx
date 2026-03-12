@@ -18,11 +18,12 @@ import {
   Shield,
   BookOpen,
   Calendar,
+  Layers,
 } from "lucide-react";
 import { toast } from "sonner";
 import api from "../../api";
 
-const TABS = ["Admins", "Organizers", "Students", "Events"];
+const TABS = ["Admins", "Organizers", "Students", "Events", "Clubs"];
 const ROLES = ["admin", "organizer", "student"];
 
 const CollegeDetail = () => {
@@ -73,6 +74,9 @@ const CollegeDetail = () => {
       case "Events":
         list = data.events || [];
         break;
+      case "Clubs":
+        list = data.clubs || [];
+        break;
       default:
         list = [];
     }
@@ -87,6 +91,14 @@ const CollegeDetail = () => {
           item.title?.toLowerCase().includes(q) ||
           item.category?.toLowerCase().includes(q) ||
           item.status?.toLowerCase().includes(q)
+      );
+    }
+
+    if (activeTab === "Clubs") {
+      return list.filter(
+        (item) =>
+          item.name?.toLowerCase().includes(q) ||
+          item.category?.toLowerCase().includes(q)
       );
     }
 
@@ -293,13 +305,15 @@ const CollegeDetail = () => {
             filteredList.map((item) => (
               <div
                 key={item._id}
-                onClick={() => activeTab !== "Events" && handleUserClick(item)}
+                onClick={() => activeTab !== "Events" && activeTab !== "Clubs" && handleUserClick(item)}
                 className={`flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors ${
-                  activeTab !== "Events" ? "cursor-pointer" : ""
+                  activeTab !== "Events" && activeTab !== "Clubs" ? "cursor-pointer" : ""
                 }`}
               >
                 {activeTab === "Events" ? (
                   <EventRow item={item} />
+                ) : activeTab === "Clubs" ? (
+                  <ClubRow item={item} />
                 ) : (
                   <UserRow item={item} role={activeTab} />
                 )}
@@ -611,6 +625,25 @@ const UserRow = ({ item, role }) => (
           {item.clubId.name}
         </span>
       )}
+    </div>
+  </>
+);
+
+const ClubRow = ({ item }) => (
+  <>
+    <div className="flex items-center gap-3">
+      <div className="w-9 h-9 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center shrink-0">
+        <Layers size={16} />
+      </div>
+      <div>
+        <p className="text-sm font-medium text-gray-900">{item.name}</p>
+        <p className="text-xs text-gray-400">
+          {item.category || "uncategorized"} {item.description ? `· ${item.description.slice(0, 40)}...` : ""}
+        </p>
+      </div>
+    </div>
+    <div className="text-xs text-gray-400">
+      {item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "—"}
     </div>
   </>
 );

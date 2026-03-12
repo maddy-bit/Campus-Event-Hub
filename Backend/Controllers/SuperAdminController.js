@@ -247,7 +247,6 @@ const getPlatformAnalytics = async (req, res) => {
   }
 };
 
-// get full details of a single college by ID
 const getCollegeDetails = async (req, res) => {
   try {
     const { id } = req.params;
@@ -255,7 +254,7 @@ const getCollegeDetails = async (req, res) => {
     const college = await CollegeModel.findById(id);
     if (!college) return res.status(404).json({ message: "College not found" });
 
-    const [admins, organizers, students, events] = await Promise.all([
+    const [admins, organizers, students, events, clubs] = await Promise.all([
       UserModel.find({ collegeId: id, role: "admin", isDeleted: false })
         .select("-password")
         .lean(),
@@ -270,6 +269,7 @@ const getCollegeDetails = async (req, res) => {
         .populate("createdBy", "fullName email")
         .sort({ createdAt: -1 })
         .lean(),
+      ClubModel.find({ collegeId: id }).lean(),
     ]);
 
     const eventsCreatedMap = {};
@@ -295,11 +295,13 @@ const getCollegeDetails = async (req, res) => {
         totalOrganizers: organizers.length,
         totalStudents: students.length,
         totalEvents: events.length,
+        totalClubs: clubs.length,
       },
       admins: admins.map(enrichUser),
       organizers: organizers.map(enrichUser),
       students: students.map(enrichUser),
       events,
+      clubs,
     });
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch college details", error: err.message });
