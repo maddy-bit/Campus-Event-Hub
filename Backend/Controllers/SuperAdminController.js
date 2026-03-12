@@ -158,7 +158,6 @@ const removeAdmin = async (req, res) => {
   }
 };
 
-// platform analytics
 const getPlatformAnalytics = async (req, res) => {
   try {
     const [totalColleges, totalUsers, totalEvents, totalStudents, totalOrganizers, totalAdmins, totalClubs] =
@@ -172,6 +171,63 @@ const getPlatformAnalytics = async (req, res) => {
         ClubModel.countDocuments(),
       ]);
 
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+
+    const eventCreationTrend = await EventModel.aggregate([
+      { $match: { createdAt: { $gte: sixMonthsAgo } } },
+      { $group: { _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } }, count: { $sum: 1 } } },
+      { $sort: { "_id.year": 1, "_id.month": 1 } }
+    ]);
+
+    const userRegistrationTrend = await UserModel.aggregate([
+      { $match: { createdAt: { $gte: sixMonthsAgo }, isDeleted: false } },
+      { $group: { _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } }, count: { $sum: 1 } } },
+      { $sort: { "_id.year": 1, "_id.month": 1 } }
+    ]);
+
+    const chartData = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const m = d.getMonth() + 1;
+      const y = d.getFullYear();
+      const evtFound = eventCreationTrend.find(r => r._id.month === m && r._id.year === y);
+      const usrFound = userRegistrationTrend.find(r => r._id.month === m && r._id.year === y);
+      chartData.push({
+        month: months[d.getMonth()],
+        events: evtFound ? evtFound.count : 0,
+        users: usrFound ? usrFound.count : 0,
+      });
+    }
+
+    const [approvedEvents, submittedEvents, rejectedEvents, draftEvents] = await Promise.all([
+      EventModel.countDocuments({ status: "Approved" }),
+      EventModel.countDocuments({ status: "Submitted" }),
+      EventModel.countDocuments({ status: "Rejected" }),
+      EventModel.countDocuments({ status: "Draft" }),
+    ]);
+
+    const eventsByCategory = await EventModel.aggregate([
+      { $group: { _id: "$category", count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]);
+
+    const recentEvents = await EventModel.find()
+      .populate("collegeId", "name")
+      .populate("createdBy", "fullName")
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .lean();
+
+    const recentUsers = await UserModel.find({ isDeleted: false })
+      .populate("collegeId", "name")
+      .select("-password")
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .lean();
+
     res.status(200).json({
       totalColleges,
       totalUsers,
@@ -180,6 +236,11 @@ const getPlatformAnalytics = async (req, res) => {
       totalOrganizers,
       totalAdmins,
       totalClubs,
+      chartData,
+      eventsByStatus: { approved: approvedEvents, submitted: submittedEvents, rejected: rejectedEvents, draft: draftEvents },
+      eventsByCategory,
+      recentEvents,
+      recentUsers,
     });
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch analytics", error: err.message });
