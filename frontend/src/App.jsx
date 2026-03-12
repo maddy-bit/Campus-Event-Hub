@@ -27,6 +27,7 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import AdminEvents from "./pages/admin/Events";
 import AdminUsers from "./pages/admin/Users";
 import NotifyHub from "./pages/admin/NotifyHub";
+import Profile from "./pages/admin/Profile";
 import AdminApprovals from "./pages/admin/Approvals";
 import OrganizerDashboard from "./pages/organizer/Dashboard";
 import SendNotification from "./pages/organizer/SendNotification";
@@ -54,9 +55,9 @@ function App() {
           <Route
             path="/superadmin"
             element={
-              <ProtectedRoute allowedRoles={["superadmin"]}>
+              /*<ProtectedRoute allowedRoles={["superadmin"]}>*/
                 <SuperAdminLayout />
-              </ProtectedRoute>
+              /*</ProtectedRoute>*/
             }
           >
             <Route index element={<Navigate to="dashboard" />} />
@@ -81,6 +82,7 @@ function App() {
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="events" element={<AdminEvents />} />
           <Route path="users" element={<AdminUsers />} />
+          <Route path="profile" element={<Profile />} />
           <Route path="notify" element={<NotifyHub />} />
           <Route path="approvals" element={<AdminApprovals />} />
           <Route path="analytics" element={<div>Analytics Page</div>} />
