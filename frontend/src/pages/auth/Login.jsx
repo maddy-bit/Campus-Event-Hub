@@ -87,16 +87,8 @@ const LoginPage = () => {
             />
           </div>
 
-          <div className="form-group" style={{ marginBottom: "1.5rem" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <label style={{ margin: 0 }}>Password</label>
-              <div 
-                style={{ fontSize: "0.85rem", color: "#2563eb", cursor: "pointer", fontWeight: "600" }} 
-                onClick={() => navigate("/forgot-password")}
-              >
-                Forgot Password?
-              </div>
-            </div>
+          <div className="form-group" style={{ marginBottom: "0.5rem" }}>
+            <label>Password</label>
             <input
               type="password"
               name="password"
@@ -106,7 +98,14 @@ const LoginPage = () => {
               required
             />
           </div>
-
+          <div style={{ textAlign: "right", marginBottom: "1.2rem" }}>
+            <span
+              style={{ fontSize: "0.85rem", color: "#2563eb", cursor: "pointer", fontWeight: "600" }}
+              onClick={() => navigate("/forgot-password")}
+            >
+              Forgot Password?
+            </span>
+          </div>
           <button type="submit" className="submit-btn" style={{ marginBottom: "1rem" }}>
             Login
           </button>
