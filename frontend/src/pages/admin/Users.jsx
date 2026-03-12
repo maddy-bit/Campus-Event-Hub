@@ -87,7 +87,7 @@ const EditUserModal = ({ show, user, onClose, onSuccess }) => {
   );
 };
 
-const ClubDetailModal = ({ show, club, students, onClose, onAssign, assigning }) => {
+const ClubDetailModal = ({ show, club, students, onClose, onAssign, assigning, onRemove, removing }) => {
   const [selectedStudent, setSelectedStudent] = useState("");
   const [studentSearch, setStudentSearch] = useState("");
 
@@ -121,14 +121,30 @@ const ClubDetailModal = ({ show, club, students, onClose, onAssign, assigning })
           {club.organizer && (
             <div>
               <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-1">Current Organizer</p>
-              <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2">
-                <div className="w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs font-bold">
-                  {club.organizer.fullName?.charAt(0).toUpperCase()}
+              <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2 justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs font-bold shrink-0">
+                    {club.organizer.fullName?.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{club.organizer.fullName}</p>
+                    <p className="text-xs text-gray-400 truncate">{club.organizer.email}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-900">{club.organizer.fullName}</p>
-                  <p className="text-xs text-gray-400">{club.organizer.email}</p>
-                </div>
+                {onRemove && (
+                  <button
+                    onClick={() => {
+                      if (window.confirm(`Are you sure you want to remove ${club.organizer.fullName} from this club?`)) {
+                        onRemove(club._id, club.organizer._id);
+                      }
+                    }}
+                    disabled={removing}
+                    className="w-8 h-8 rounded-lg border border-red-200 flex items-center justify-center text-slate-900 hover:bg-red-50 disabled:opacity-40 transition-colors shrink-0 cursor-pointer"
+                    title="Remove Organizer"
+                  >
+                    {removing ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -253,6 +269,7 @@ const AdminUsers = () => {
   const [selectedClub, setSelectedClub] = useState(null);
   const [showCreateClub, setShowCreateClub] = useState(false);
   const [assigning, setAssigning] = useState(false);
+  const [removing, setRemoving] = useState(false);
 
   useEffect(() => { fetchData(); }, []);
 
@@ -300,6 +317,20 @@ const AdminUsers = () => {
       toast.error(err.response?.data?.message || "Failed to assign organizer");
     } finally {
       setAssigning(false);
+    }
+  };
+
+  const handleRemoveOrganizer = async (clubId, userId) => {
+    try {
+      setRemoving(true);
+      const res = await api.post("/admin/clubs/remove-organizer", { clubId, userId });
+      toast.success(res.data.message || "Organizer removed");
+      setShowClubDetail(false);
+      fetchData();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to remove organizer");
+    } finally {
+      setRemoving(false);
     }
   };
 
@@ -586,7 +617,7 @@ const AdminUsers = () => {
       )}
 
       <EditUserModal show={showEditModal} user={editingUser} onClose={() => setShowEditModal(false)} onSuccess={fetchData} />
-      <ClubDetailModal show={showClubDetail} club={selectedClub} students={users} onClose={() => setShowClubDetail(false)} onAssign={handleAssignOrganizer} assigning={assigning} />
+      <ClubDetailModal show={showClubDetail} club={selectedClub} students={users} onClose={() => setShowClubDetail(false)} onAssign={handleAssignOrganizer} assigning={assigning} onRemove={handleRemoveOrganizer} removing={removing} />
       <CreateClubModal show={showCreateClub} onClose={() => setShowCreateClub(false)} onSuccess={fetchData} />
     </div>
   );
