@@ -25,7 +25,7 @@ const ActionMenu = ({ show, onClose, onEditStatus, onEditEvent, currentStatus })
   return (
     <div ref={menuRef} className="absolute right-0 bottom-full mb-2 bg-white rounded-xl p-2 shadow-xl border border-gray-200 w-44 z-50">
       <button
-        className="w-full text-left px-3 py-2 hover:bg-slate-50 rounded-lg text-sm font-semibold text-blue-600 flex items-center gap-2"
+        className="w-full text-left px-3 py-2 hover:bg-slate-50 rounded-lg text-sm font-semibold text-slate-600 flex items-center gap-2"
         onClick={() => { onEditEvent(); onClose(); }}
       >
         <Edit2 size={16} /> Edit Event
@@ -82,7 +82,7 @@ const EventCard = ({ event, onStatusChange, onEdit }) => {
 
       <div className="p-5 flex-1 flex flex-col">
         <div className="flex justify-between items-start mb-3">
-          <span className="text-xs font-bold text-blue-600 uppercase tracking-wider bg-blue-50 px-2 py-1 rounded-md">
+          <span className="text-xs font-bold text-[#110E51] uppercase tracking-wider bg-blue-50 px-2 py-1 rounded-md">
             {event?.category || "General"}
           </span>
           {event?.isPaidEvent && (
@@ -362,7 +362,7 @@ const Events = () => {
     <div className="pb-24 font-sans">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
         <div>
-          <span className="text-sm font-bold text-blue-600 tracking-wider uppercase mb-1 block">Platform Management</span>
+          <span className="text-sm font-bold text-slate-500 tracking-wider uppercase mb-1 block">Platform Management</span>
           <h1 className="text-3xl font-black text-gray-900 tracking-tight">All College Events</h1>
         </div>
       </div>
