@@ -255,13 +255,76 @@ const getCollegeStudents = async (req, res) => {
   }
 };
 
-// get clubs in admin's college
 const getCollegeClubs = async (req, res) => {
   try {
     const clubs = await ClubModel.find({ collegeId: req.user.collegeId });
-    res.status(200).json({ count: clubs.length, clubs });
+    const clubsWithOrganizers = await Promise.all(
+      clubs.map(async (club) => {
+        const organizer = await UserModel.findOne({ clubId: club._id, role: "organizer", isDeleted: false }).select("fullName email").lean();
+        return { ...club.toObject(), organizer: organizer || null };
+      })
+    );
+    res.status(200).json({ count: clubsWithOrganizers.length, clubs: clubsWithOrganizers });
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch clubs", error: err.message });
+  }
+};
+
+const createClub = async (req, res) => {
+  try {
+    const { name, category, description } = req.body;
+    if (!name) return res.status(400).json({ message: "Club name is required" });
+
+    const existing = await ClubModel.findOne({ name, collegeId: req.user.collegeId });
+    if (existing) return res.status(400).json({ message: "A club with this name already exists in your college" });
+
+    const club = await ClubModel.create({ name, category: category || "Other", description, collegeId: req.user.collegeId });
+    res.status(201).json({ message: "Club created", club });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to create club", error: err.message });
+  }
+};
+
+const getClubDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const club = await ClubModel.findById(id).lean();
+    if (!club) return res.status(404).json({ message: "Club not found" });
+
+    const organizers = await UserModel.find({ clubId: id, role: "organizer", isDeleted: false }).select("-password").lean();
+    const members = await UserModel.find({ clubId: id, isDeleted: false }).select("-password").lean();
+
+    res.status(200).json({ club, organizers, members });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch club details", error: err.message });
+  }
+};
+
+const assignOrganizerToClub = async (req, res) => {
+  try {
+    const { clubId, userId } = req.body;
+    if (!clubId || !userId) return res.status(400).json({ message: "clubId and userId are required" });
+
+    const club = await ClubModel.findById(clubId);
+    if (!club) return res.status(404).json({ message: "Club not found" });
+    if (club.collegeId.toString() !== req.user.collegeId.toString()) {
+      return res.status(403).json({ message: "Club does not belong to your college" });
+    }
+
+    const user = await UserModel.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    if (user.isDeleted) return res.status(400).json({ message: "User is deleted" });
+    if (user.collegeId.toString() !== req.user.collegeId.toString()) {
+      return res.status(403).json({ message: "User does not belong to your college" });
+    }
+
+    user.role = "organizer";
+    user.clubId = clubId;
+    await user.save();
+
+    res.status(200).json({ message: `${user.fullName} assigned as organizer of ${club.name}`, user: { _id: user._id, fullName: user.fullName, email: user.email, role: user.role, clubId: user.clubId } });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to assign organizer", error: err.message });
   }
 };
 
@@ -743,4 +806,7 @@ module.exports = {
   updateUser,
   deleteUser,
   Profiledata,
+  createClub,
+  getClubDetails,
+  assignOrganizerToClub,
 };
