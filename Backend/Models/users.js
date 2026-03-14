@@ -58,6 +58,13 @@ const userSchema = new mongoose.Schema(
       },
     },
 
+    interests: {
+      type: [String],
+      default: function () {
+        return this.role === "student" ? [] : undefined;
+      },
+    },
+
     department: {
       type: String,
       required: function () {
