@@ -40,6 +40,7 @@ import SuperAdminDashboard from "./pages/superadmin/Dashboard";
 import StudentProfile from "./pages/student/Profile";
 import Notification from "./pages/student/Notification";
 import Registrations from "./pages/student/Registrations";
+import SearchUsers from "./pages/student/SearchUsers";
 import ViewInstitutions from "./pages/superadmin/ViewInstitutions";
 import CollegeDetail from "./pages/superadmin/CollegeDetail";
 import SuperAdminEvents from "./pages/superadmin/Events";
@@ -53,33 +54,33 @@ function App() {
       <Routes>
 
 
-          {/* super admin route */}
-          <Route
-            path="/superadmin"
-            element={
-              /*<ProtectedRoute allowedRoles={["superadmin"]}>*/
-                <SuperAdminLayout />
-              /*</ProtectedRoute>*/
-            }
-          >
-            <Route index element={<Navigate to="dashboard" />} />
-            <Route path="dashboard" element={<SuperAdminDashboard />} />
-            <Route path="events" element={<SuperAdminEvents />} />
-            <Route path="setup" element={<CollegeSetup />} />
-            <Route path="institutions" element={<ViewInstitutions/>} />
-            <Route path="institutions/:id" element={<CollegeDetail />} />
-          </Route>
-          
+        {/* super admin route */}
+        <Route
+          path="/superadmin"
+          element={
+            /*<ProtectedRoute allowedRoles={["superadmin"]}>*/
+            <SuperAdminLayout />
+            /*</ProtectedRoute>*/
+          }
+        >
+          <Route index element={<Navigate to="dashboard" />} />
+          <Route path="dashboard" element={<SuperAdminDashboard />} />
+          <Route path="events" element={<SuperAdminEvents />} />
+          <Route path="setup" element={<CollegeSetup />} />
+          <Route path="institutions" element={<ViewInstitutions />} />
+          <Route path="institutions/:id" element={<CollegeDetail />} />
+        </Route>
+
         {/* admin route */}
         <Route
-            path="/admin"
-            element={
-              <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
-                <AdminLayout />
-              </ProtectedRoute>
-            }
-          >
-        {/* Standard Admin Pages with Sidebar/Header */}
+          path="/admin"
+          element={
+            <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
+          {/* Standard Admin Pages with Sidebar/Header */}
 
           <Route index element={<Navigate to="dashboard" />} />
           <Route path="dashboard" element={<AdminDashboard />} />
@@ -97,9 +98,9 @@ function App() {
         <Route
           path="/organizer"
           element={
-            //<ProtectedRoute allowedRoles={["organizer"]}>
-            <OrganizerLayout />
-            //</ProtectedRoute>
+            <ProtectedRoute allowedRoles={["organizer"]}>
+              <OrganizerLayout />
+            </ProtectedRoute>
           }
         >
           <Route index element={<Navigate to="dashboard" />} />
@@ -127,6 +128,9 @@ function App() {
           <Route path="notification" element={<Notification />} />
           <Route path="registrations" element={<Registrations />} />
         </Route>
+
+        {/* Standalone student pages without layout */}
+        <Route path="/student/search" element={<SearchUsers />} />
 
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
