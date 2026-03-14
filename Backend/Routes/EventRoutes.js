@@ -14,6 +14,7 @@ const {
   getMyCollegeEvents,
   getExternalEvents,
 } = require("../Controllers/EventController");
+const { postCommentsForEvent } = require("../Controllers/ERegistrationController");
 
 router.post("/create", verifyToken, checkRole("admin", "organizer"), upload.single("poster"), createEvent);
 
@@ -40,6 +41,7 @@ router.delete("/:id", verifyToken, checkRole("admin", "organizer"), deleteEvent)
 
 //updatig the payment status of the participant
 router.patch("/:id/payment", verifyToken, updatePaymentStatus);
+
 
 module.exports = router;
 
