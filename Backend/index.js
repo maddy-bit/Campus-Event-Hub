@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+require('./config/db');
 const cookieParser = require('cookie-parser');
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
