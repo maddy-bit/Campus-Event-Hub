@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
+
 const { verifyToken, checkRole } = require("../Middleware/AuthMiddleware");
+
 const {
   registerForEvent,
   getAllRegistrations,
@@ -9,23 +11,31 @@ const {
   cancelRegistration,
   postCommentsForEvent,
 } = require("../Controllers/ERegistrationController");
-const { getParticipantsByEventId } = require("../Controllers/EventController");
 
-// Route to register for an event
+const { getParticipantsByEventId, updatePaymentStatus } = require("../Controllers/EventController");
+
+// register for event
 router.post("/register", verifyToken, checkRole("student"), registerForEvent);
 
+// get all registrations
 router.get("/", verifyToken, getAllRegistrations);
 
+// my registrations
 router.get("/my", verifyToken, getMyRegistrations);
 
-router.get("/:id", verifyToken, getRegistrationById);
-
-router.delete("/:id", verifyToken, cancelRegistration);
-
-//get all participants of that particular event
+// participants of event
 router.get("/event/:eventId", verifyToken, getParticipantsByEventId);
 
-//posting comments 
-router.post("/comment/:id",verifyToken, postCommentsForEvent)
+// single registration
+router.get("/:id", verifyToken, getRegistrationById);
+
+// cancel registration
+router.delete("/:id", verifyToken, cancelRegistration);
+
+// update payment
+router.patch("/payment/:id", verifyToken, updatePaymentStatus);
+
+// comments
+router.post("/comment/:id", verifyToken, postCommentsForEvent);
 
 module.exports = router;
