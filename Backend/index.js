@@ -2,25 +2,26 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
-require('./config/db');
 const cookieParser = require('cookie-parser');
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 
+// Initialize Database
 require('./config/db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-//  SECURITY MIDDLEWARE 
+/* ---------------- SECURITY MIDDLEWARE ---------------- */
 
+// Helmet helps secure Express apps by setting various HTTP headers
 app.use(helmet());
 
+// Rate limiting to prevent brute-force/DoS attacks
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
 });
-
 app.use(limiter);
 
 app.use(cors({
@@ -28,16 +29,17 @@ app.use(cors({
   credentials: true
 }));
 
+/* ---------------- STANDARD MIDDLEWARE ---------------- */
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-
+/* ---------------- STATIC FILES ---------------- */
 
 app.use('/uploads', express.static('uploads'));
 
-//  ROUTES 
+/* ---------------- ROUTES ---------------- */
 
 const authroutes = require('./Routes/AuthRoutes');
 const eventRoutes = require('./Routes/EventRoutes');
@@ -59,13 +61,13 @@ app.use('/admin', adminRoutes);
 app.use('/superadmin', superAdminRoutes);
 app.use('/colleges', collegeRoutes);
 
-// TEST ROUTE 
+/* ---------------- TEST ROUTE ---------------- */
 
 app.get('/check', (req, res) => {
   res.send(`Server is running in ${process.env.NODE_ENV || 'development'} mode`);
 });
 
-//  ERROR HANDLER LAST
+/* ---------------- ERROR HANDLER ---------------- */
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -76,7 +78,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// SERVER  
+/* ---------------- SERVER ---------------- */
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
