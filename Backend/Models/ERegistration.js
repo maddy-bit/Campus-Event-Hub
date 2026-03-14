@@ -21,7 +21,7 @@ const ERegistrationSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['Registered', 'Waitlisted', 'Cancelled', 'Pending_Approval'],
-    default: 'Registered'
+    default: 'Pending_Approval'
   },
   ticketType: {
     type: String,
@@ -35,9 +35,17 @@ const ERegistrationSchema = new mongoose.Schema({
     status: { type: String, enum: ['Pending', 'Completed', 'Failed'], default: 'Pending' }
   },
   seatNumber: {
-    type: Number
+    type: Number,
+    min:1
   }
 },{ timestamps: true });
-
+ERegistrationSchema.index(
+  { eventId: 1, userId: 1 },
+  { unique: true }
+);
+ERegistrationSchema.index(
+  { eventId: 1, seatNumber: 1 },
+  { unique: true, sparse: true }
+);
 const ERegistrationModel = mongoose.model('ERegistration', ERegistrationSchema);
 module.exports = { ERegistrationModel };
