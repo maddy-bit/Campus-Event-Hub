@@ -10,6 +10,7 @@ const {
   getRegistrationById,
   cancelRegistration,
   postCommentsForEvent,
+  getCommentsForEvent
 } = require("../Controllers/ERegistrationController");
 
 const { getParticipantsByEventId, updatePaymentStatus } = require("../Controllers/EventController");
@@ -37,5 +38,6 @@ router.patch("/payment/:id", verifyToken, updatePaymentStatus);
 
 // comments
 router.post("/comment/:id", verifyToken, postCommentsForEvent);
+router.get("/comment/:id", verifyToken, getCommentsForEvent);
 
 module.exports = router;
