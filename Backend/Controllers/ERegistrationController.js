@@ -249,7 +249,10 @@ const postCommentsForEvent = async (req, res) => {
     const eventId = id;
     console.log(eventId);
     
-
+    const event = await EventModel.findById(eventId);
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
     const newComment = new EventCommentModel({
       eventId,
       userId,
@@ -269,6 +272,52 @@ const postCommentsForEvent = async (req, res) => {
       .json({ message: "Failed to post comment", error: err.message });
   }
 };
+const getCommentsForEvent = async (req, res) => {
+  try {
+
+    const { id } = req.params;
+
+    const comments = await EventCommentModel.find({ eventId: id })
+      .populate("userId", "fullName")
+      .sort({ createdAt: -1 });
+
+    const formattedComments = comments.map((c) => {
+
+      const diff = Date.now() - new Date(c.createdAt);
+      const minutes = Math.floor(diff / (1000 * 60));
+      const hours = Math.floor(minutes / 60);
+      const days = Math.floor(hours / 24);
+
+      let timeAgo = "";
+
+      if (minutes < 60) timeAgo = `${minutes}m ago`;
+      else if (hours < 24) timeAgo = `${hours}h ago`;
+      else timeAgo = `${days}d ago`;
+
+      return {
+        id: c._id,
+        commentText: c.commentText,
+        userName: c.userId.fullName,
+        timeAgo
+      };
+
+    });
+
+    res.status(200).json({
+      comments: formattedComments
+    });
+
+  } catch (err) {
+
+    console.error("Get comments error:", err);
+
+    res.status(500).json({
+      message: "Failed to fetch comments",
+      error: err.message
+    });
+
+  }
+};
 
 module.exports = {
   registerForEvent,
@@ -277,4 +326,5 @@ module.exports = {
   getRegistrationById,
   cancelRegistration,
   postCommentsForEvent,
+  getCommentsForEvent
 };
