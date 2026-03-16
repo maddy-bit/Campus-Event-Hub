@@ -158,6 +158,7 @@ const getUpcomingEvents = async (req, res) => {
 
 const getEventById = async (req, res) => {
   try {
+
     const { id } = req.params;
 
     const event = await EventModel.findById(id)
@@ -168,13 +169,47 @@ const getEventById = async (req, res) => {
       return res.status(404).json({ message: "Event not found" });
     }
 
+    // seats filled
+    const seatsFilled = await ERegistrationModel.countDocuments({
+      eventId: id,
+      status: { $in: ["Registered", "Pending_Approval"] }
+    });
+
+    // check if this user already registered
+    const registration = await ERegistrationModel.findOne({
+      eventId: id,
+      userId: req.user._id
+    });
+
     res.status(200).json({
       message: "Event retrieved successfully",
+
       event,
+
+      seatsFilled,
+      seatsAvailable: event.maxSeats - seatsFilled,
+
+      userRegistration: registration
+        ? {
+            registered: true,
+            paymentStatus: registration.payment.status
+          }
+        : {
+            registered: false,
+            paymentStatus: "Not Registered"
+          }
+
     });
+
   } catch (err) {
+
     console.error("Get event by ID error:", err);
-    res.status(500).json({ message: "Failed to retrieve event", error: err.message });
+
+    res.status(500).json({
+      message: "Failed to retrieve event",
+      error: err.message
+    });
+
   }
 };
 
