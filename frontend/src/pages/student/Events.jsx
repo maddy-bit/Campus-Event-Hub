@@ -354,7 +354,6 @@ const StudentEvents = () => {
     if (USE_DUMMY) {
 
     const dummyEvents = [
-      ,
       {
         _id: "456",
         title: "Robotics Workshop",
@@ -368,29 +367,17 @@ const StudentEvents = () => {
         createdAt: "2026-03-10",
       },
       {
-      _id: "456",
-      title: "Robotics Workshop",
-      category: "Workshop",
-      eventDate: "2026-05-02",
-      startTime: "02:00 PM",
-      location: "Engineering Lab",
-      maxSeats: 60,
-      posterUrl: "https://images.unsplash.com/photo-1581091870622-1e7b3c6b8c5b",
-      registrationDeadline: "2026-04-30",
-      createdAt: "2026-03-10",
-    },
-    {
-      _id: "789",
-      title: "Startup Pitch Competition",
-      category: "Conference",
-      eventDate: "2026-06-01",
-      startTime: "11:00 AM",
-      location: "Innovation Center",
-      maxSeats: 200,
-      posterUrl: "https://images.unsplash.com/photo-1556761175-4b46a572b786",
-      registrationDeadline: "2026-05-28",
-      createdAt: "2026-03-15",
-    },
+        _id: "789",
+        title: "Startup Pitch Competition",
+        category: "Conference",
+        eventDate: "2026-06-01",
+        startTime: "11:00 AM",
+        location: "Innovation Center",
+        maxSeats: 200,
+        posterUrl: "https://images.unsplash.com/photo-1556761175-4b46a572b786",
+        registrationDeadline: "2026-05-28",
+        createdAt: "2026-03-15",
+      },
     ];
 
     setMyCollegeEvents(dummyEvents);
@@ -628,6 +615,7 @@ const StudentEvents = () => {
       ) : (
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {filteredEvents.map((event) => {
+            if (!event) return null; // Protect against undefined elements in the array
             const catConfig =
               CATEGORY_CONFIG[event.category] || CATEGORY_CONFIG.Other;
             const deadlinePassed = isDeadlinePassed(event.registrationDeadline);
