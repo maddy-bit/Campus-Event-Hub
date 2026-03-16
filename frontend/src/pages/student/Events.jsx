@@ -379,6 +379,18 @@ const StudentEvents = () => {
       registrationDeadline: "2026-04-30",
       createdAt: "2026-03-10",
     },
+    {
+      _id: "789",
+      title: "Startup Pitch Competition",
+      category: "Conference",
+      eventDate: "2026-06-01",
+      startTime: "11:00 AM",
+      location: "Innovation Center",
+      maxSeats: 200,
+      posterUrl: "https://images.unsplash.com/photo-1556761175-4b46a572b786",
+      registrationDeadline: "2026-05-28",
+      createdAt: "2026-03-15",
+    },
     ];
 
     setMyCollegeEvents(dummyEvents);
