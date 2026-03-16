@@ -50,6 +50,7 @@ const notificationRoutes = require('./Routes/NotificationRoutes');
 const adminRoutes = require('./Routes/AdminRoutes');
 const superAdminRoutes = require('./Routes/SuperAdminRoutes');
 const collegeRoutes = require('./Routes/CollegeRoutes');
+const feedbackRoutes = require('./Routes/FeedbackRoutes');
 
 app.use('/auth', authroutes);
 app.use('/events', eventRoutes);
@@ -60,6 +61,7 @@ app.use('/notifications', notificationRoutes);
 app.use('/admin', adminRoutes);
 app.use('/superadmin', superAdminRoutes);
 app.use('/colleges', collegeRoutes);
+app.use('/feedback', feedbackRoutes);
 
 /* ---------------- TEST ROUTE ---------------- */
 
