@@ -27,25 +27,25 @@ const seed = async () => {
     // ]);
     // console.log("All collections cleared");
 
-    const hashedPassword = await bcrypt.hash("spring", 10);
+    // const hashedPassword = await bcrypt.hash("spring", 10);
 
-    const college1 = await College.findOne();
-    const club1 = await Club.findOne();
+    // const college1 = await College.findOne();
+    // const club1 = await Club.findOne();
 
-    const user = {
-      fullName: "Organizer User 2",
-      email: "organizer2@g.com",
-      phoneNumber: "9876543212",
-      password: hashedPassword,
-      role: "organizer",
-      collegeId: college1._id,
-      clubId: club1._id,
-      yearOfStudy: "2026",
-      isEmailVerified: true,
-    };
+    // const user = {
+    //   fullName: "Organizer User 2",
+    //   email: "organizer2@g.com",
+    //   phoneNumber: "9876543212",
+    //   password: hashedPassword,
+    //   role: "organizer",
+    //   collegeId: college1._id,
+    //   clubId: club1._id,
+    //   yearOfStudy: "2026",
+    //   isEmailVerified: true,
+    // };
 
-    await User.create(user);
-    console.log("User created");
+    // await User.create(user);
+    // console.log("User created");
 
     // create colleges
     // const [college1, college2] = await College.insertMany([
