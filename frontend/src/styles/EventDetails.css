@@ -1,0 +1,197 @@
+/* Page layout */
+
+.eventPage {
+  width: 100%;
+  min-height: 100vh;
+  padding: 24px;
+  font-family: monospace;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+/* LEFT SIDE EVENT CARD */
+
+.eventContent {
+  background: white;
+  border: 4px solid black;
+  box-shadow: 6px 6px 0px #000;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Poster */
+
+.eventImage {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  border-bottom: 4px solid black;
+}
+
+/* Title */
+
+.eventContent h1 {
+  font-size: 28px;
+  font-weight: 900;
+  text-transform: uppercase;
+  border-bottom: 4px solid black;
+  padding: 20px;
+}
+
+/* Meta grid */
+
+.eventMeta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 20px;
+}
+
+.eventMeta span {
+  border: 2px solid black;
+  padding: 10px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* Description */
+
+.eventContent p {
+  border: 2px solid black;
+  padding: 16px;
+  margin: 0 20px 20px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Register button */
+
+.registerBtn {
+  margin: 0 20px 20px;
+  padding: 12px;
+  border: 4px solid black;
+  background: #B6FF60;
+  font-weight: 900;
+  text-transform: uppercase;
+  box-shadow: 4px 4px 0px #000;
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+.registerBtn:hover {
+  background: black;
+  color: #B6FF60;
+}
+
+/* RIGHT SIDE COMMENTS */
+
+.commentPanel {
+  border: 4px solid black;
+  background: white;
+  box-shadow: 6px 6px 0px #000;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Comment header */
+
+.commentPanel h3 {
+  border-bottom: 4px solid black;
+  padding: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  background: black;
+  color: #B6FF60;
+}
+
+/* Comment list */
+
+.commentList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Individual comment */
+
+.comment {
+  border: 2px solid black;
+  padding: 10px;
+  background: #f9f9f9;
+  font-size: 14px;
+}
+
+.comment b {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+/* Comment input */
+
+.commentInput {
+  border-top: 4px solid black;
+  display: flex;
+}
+
+.commentInput input {
+  flex: 1;
+  border: none;
+  padding: 12px;
+  font-weight: bold;
+  font-size: 13px;
+  outline: none;
+}
+
+.commentInput button {
+  border-left: 4px solid black;
+  padding: 0 16px;
+  background: #B6FF60;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.commentInput button:hover {
+  background: black;
+  color: #B6FF60;
+}
+
+/* Back button */
+
+.backBtn {
+  margin-bottom: 20px;
+  border: 2px solid black;
+  padding: 8px 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+  background: white;
+  box-shadow: 3px 3px 0px #000;
+  cursor: pointer;
+}
+
+.backBtn:hover {
+  background: black;
+  color: #B6FF60;
+}
+
+/* Responsive */
+
+@media (max-width: 900px) {
+
+  .eventPage {
+    grid-template-columns: 1fr;
+  }
+
+  .commentPanel {
+    height: 400px;
+  }
+
+}

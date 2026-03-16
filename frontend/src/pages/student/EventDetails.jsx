@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import "../../styles/EventDetails.css";
 import {
   Calendar,
   MapPin,
@@ -23,11 +24,38 @@ const EventDetails = () => {
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    if (!id) return;
+  const dummyEvent = {
+    _id: "123",
+    title: "AI Hackathon 2026",
+    description:
+      "Join us for an exciting AI hackathon where students build innovative machine learning solutions.",
+    posterUrl:
+      "https://images.unsplash.com/photo-1526378722484-bd91ca387e72",
+    eventDate: "2026-04-10",
+    startTime: "10:00 AM",
+    location: "Main Auditorium",
+    maxSeats: 120,
+  };
 
-    fetchEvent();
-    fetchComments();
-  }, [id]);
+  const dummyComments = [
+    {
+      text: "This event looks amazing!",
+      user: { fullName: "Rahul Sharma" },
+    },
+    {
+      text: "Looking forward to participating 🚀",
+      user: { fullName: "Ananya Patel" },
+    },
+    {
+      text: "Will certificates be provided?",
+      user: { fullName: "Kiran Reddy" },
+    },
+  ];
+
+  setEvent(dummyEvent);
+  setComments(dummyComments);
+  setLoading(false);
+}, []);
 
   const fetchEvent = async () => {
     try {
