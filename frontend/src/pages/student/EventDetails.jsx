@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import "../../styles/EventDetails.css";
 import {
   Calendar,
   MapPin,
@@ -8,9 +7,29 @@ import {
   Clock,
   Ticket,
   Send,
-  ArrowLeft
+  ArrowLeft,
 } from "lucide-react";
 import api from "../../api";
+import "../../styles/EventDetails.css";
+
+const USE_DUMMY = true;
+
+const dummyEvent = {
+  _id: "123",
+  title: "AI Hackathon 2026",
+  description:
+    "Join our AI Hackathon where students build innovative machine learning applications and compete for exciting prizes.",
+  posterUrl:
+    "https://images.unsplash.com/photo-1526378722484-bd91ca387e72",
+  eventDate: "2026-04-10",
+  startTime: "10:00 AM",
+  location: "Main Auditorium",
+  maxSeats: 120,
+};
+
+const dummyComments = [
+  
+];
 
 const EventDetails = () => {
   const { id } = useParams();
@@ -19,235 +38,174 @@ const EventDetails = () => {
   const [event, setEvent] = useState(null);
   const [comments, setComments] = useState([]);
   const [text, setText] = useState("");
-  const [loading, setLoading] = useState(true);
+
+  const commentEndRef = useRef(null);
 
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-  const dummyEvent = {
-    _id: "123",
-    title: "AI Hackathon 2026",
-    description:
-      "Join us for an exciting AI hackathon where students build innovative machine learning solutions.",
-    posterUrl:
-      "https://images.unsplash.com/photo-1526378722484-bd91ca387e72",
-    eventDate: "2026-04-10",
-    startTime: "10:00 AM",
-    location: "Main Auditorium",
-    maxSeats: 120,
-  };
+    if (USE_DUMMY) {
+      setEvent(dummyEvent);
+      setComments(dummyComments);
+      return;
+    }
 
-  const dummyComments = [
-    {
-      text: "This event looks amazing!",
-      user: { fullName: "Rahul Sharma" },
-    },
-    {
-      text: "Looking forward to participating 🚀",
-      user: { fullName: "Ananya Patel" },
-    },
-    {
-      text: "Will certificates be provided?",
-      user: { fullName: "Kiran Reddy" },
-    },
-  ];
-
-  setEvent(dummyEvent);
-  setComments(dummyComments);
-  setLoading(false);
-}, []);
+    fetchEvent();
+    fetchComments();
+  }, [id]);
 
   const fetchEvent = async () => {
     try {
       const res = await api.get(`/events/${id}`);
       setEvent(res.data.event || res.data);
     } catch (err) {
-      console.error("Fetch event error:", err);
+      console.error(err);
     }
   };
 
   const fetchComments = async () => {
     try {
       const res = await api.get(`/comments/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      setComments(res.data.comments || res.data);
+      setComments(res.data.comments || []);
     } catch (err) {
-      console.error("Fetch comments error:", err);
-    } finally {
-      setLoading(false);
+      console.error(err);
     }
   };
 
   const postComment = async () => {
     if (!text.trim()) return;
 
+    if (USE_DUMMY) {
+      const newComment = {
+        text,
+        user: { fullName: "You" },
+      };
+
+      setComments((prev) => [newComment, ...prev]);
+      setText("");
+      return;
+    }
+
     try {
       const res = await api.post(
         `/comments/${id}`,
         { text },
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setComments((prev) => [...prev, res.data.comment || res.data]);
+      setComments((prev) => [res.data.comment, ...prev]);
       setText("");
     } catch (err) {
-      console.error("Post comment error:", err);
+      console.error(err);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen font-mono">
-        Loading event...
-      </div>
-    );
-  }
+  useEffect(() => {
+    commentEndRef.current?.scrollIntoView();
+  }, [comments]);
 
-  if (!event) {
-    return (
-      <div className="p-10 font-mono text-center">
-        Event not found
-      </div>
-    );
-  }
+  if (!event) return null;
 
   return (
-    <div className="w-full min-h-screen font-mono p-6">
+    <div className="eventWrapper">
 
-      {/* Back Button */}
+      {/* BACK BUTTON */}
       <button
         onClick={() => navigate(-1)}
-        className="mb-6 flex items-center gap-2 border-2 border-black px-4 py-2 text-xs font-black uppercase bg-white shadow-[3px_3px_0px_#000] hover:bg-black hover:text-[#B6FF60]"
+        className="backBtn"
       >
-        <ArrowLeft size={14} />
-        Back
+        <ArrowLeft size={14} /> Back
       </button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="eventPage">
 
-        {/* EVENT INFO */}
-        <div className="lg:col-span-2 border-4 border-black bg-white shadow-[6px_6px_0px_#000]">
+        {/* LEFT EVENT SECTION */}
 
-          {/* Poster */}
-          <div className="h-64 border-b-4 border-black overflow-hidden bg-gray-100">
-            {event.posterUrl ? (
-              <img
-                src={
-                  event.posterUrl.startsWith("http")
-                    ? event.posterUrl
-                    : `${import.meta.env.VITE_API_BASE_URL || "http://localhost:5000"}/${event.posterUrl}`
-                }
-                alt={event.title}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full text-5xl font-black text-gray-300">
-                EVENT
-              </div>
-            )}
-          </div>
+        <div className="eventContent">
 
-          <div className="p-6">
+          <img
+            src={event.posterUrl}
+            className="eventImage"
+            alt={event.title}
+          />
 
-            {/* Title */}
-            <h1 className="text-3xl font-black uppercase border-b-4 border-black pb-3 mb-6">
-              {event.title}
-            </h1>
+          <h1>{event.title}</h1>
 
-            {/* Info Grid */}
-            <div className="grid grid-cols-2 gap-4 mb-6 text-xs font-bold uppercase">
+          <div className="eventMeta">
 
-              <div className="border-2 border-black p-3 flex gap-2 items-center">
-                <Calendar size={14} />
-                {new Date(event.eventDate).toDateString()}
-              </div>
+            <span>
+              <Calendar size={12} />
+              {new Date(event.eventDate).toDateString()}
+            </span>
 
-              <div className="border-2 border-black p-3 flex gap-2 items-center">
-                <Clock size={14} />
-                {event.startTime || "TBA"}
-              </div>
+            <span>
+              <Clock size={12} />
+              {event.startTime}
+            </span>
 
-              <div className="border-2 border-black p-3 flex gap-2 items-center">
-                <MapPin size={14} />
-                {event.location || "TBA"}
-              </div>
+            <span>
+              <MapPin size={12} />
+              {event.location}
+            </span>
 
-              <div className="border-2 border-black p-3 flex gap-2 items-center">
-                <Users size={14} />
-                {event.maxSeats || 100} seats
-              </div>
-
-            </div>
-
-            {/* Description */}
-            <div className="border-2 border-black p-4 mb-6 text-sm">
-              {event.description || "No description provided."}
-            </div>
-
-            {/* Register */}
-            <button className="flex items-center gap-2 border-4 border-black px-6 py-3 text-xs font-black uppercase bg-[#B6FF60] shadow-[4px_4px_0px_#000] hover:bg-black hover:text-[#B6FF60]">
-              <Ticket size={15} />
-              Register Event
-            </button>
+            <span>
+              <Users size={12} />
+              {event.maxSeats} seats
+            </span>
 
           </div>
+
+          <p>{event.description}</p>
+
+          <button className="registerBtn">
+            <Ticket size={14} />
+            Register Event
+          </button>
+
         </div>
 
-        {/* COMMENTS PANEL */}
-        <div className="border-4 border-black bg-white shadow-[6px_6px_0px_#000] flex flex-col">
+        {/* COMMENT PANEL */}
 
-          <div className="border-b-4 border-black px-4 py-3 font-black text-sm uppercase bg-black text-[#B6FF60]">
-            Comments
-          </div>
+        <div className="commentPanel">
 
-          {/* Comments */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          <h3>COMMENTS</h3>
 
-            {comments.length === 0 && (
-              <div className="text-xs text-gray-400 uppercase font-bold">
-                No comments yet
-              </div>
-            )}
+          <div className="commentList">
 
             {comments.map((c, i) => (
-              <div
-                key={i}
-                className="border-2 border-black p-3 bg-gray-50 text-sm"
-              >
-                <div className="text-[10px] font-black uppercase text-gray-400">
-                  {c.user?.fullName || "Student"}
-                </div>
+              <div key={i} className="comment">
+                <b>{c.user?.fullName}</b>
                 <p>{c.text}</p>
               </div>
             ))}
 
+            <div ref={commentEndRef}></div>
+
           </div>
 
-          {/* Comment Input */}
-          <div className="border-t-4 border-black flex">
+          <div className="commentInput">
 
             <input
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder="Add comment..."
-              className="flex-1 p-3 text-sm font-bold outline-none"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") postComment();
+              }}
             />
 
-            <button
-              onClick={postComment}
-              className="border-l-4 border-black px-4 bg-[#B6FF60] hover:bg-black hover:text-[#B6FF60]"
-            >
-              <Send size={16} />
+            <button onClick={postComment}>
+              <Send size={14} />
             </button>
 
           </div>
 
         </div>
+
       </div>
+
     </div>
   );
 };

@@ -1,197 +1,185 @@
-/* Page layout */
-
-.eventPage {
-  width: 100%;
-  min-height: 100vh;
-  padding: 24px;
-  font-family: monospace;
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 24px;
+.eventWrapper{
+  width:100%;
+  padding:24px;
+  font-family:monospace;
 }
 
-/* LEFT SIDE EVENT CARD */
-
-.eventContent {
-  background: white;
-  border: 4px solid black;
-  box-shadow: 6px 6px 0px #000;
-  display: flex;
-  flex-direction: column;
+.eventPage{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:24px;
+  align-items:start;
 }
 
-/* Poster */
+/* LEFT EVENT CARD */
 
-.eventImage {
-  width: 100%;
-  height: 260px;
-  object-fit: cover;
-  border-bottom: 4px solid black;
+.eventContent{
+  background:white;
+  border:4px solid black;
+  box-shadow:6px 6px 0 #000;
+  display:flex;
+  flex-direction:column;
 }
 
-/* Title */
-
-.eventContent h1 {
-  font-size: 28px;
-  font-weight: 900;
-  text-transform: uppercase;
-  border-bottom: 4px solid black;
-  padding: 20px;
+.eventImage{
+  width:100%;
+  height:260px;
+  object-fit:cover;
+  border-bottom:4px solid black;
 }
 
-/* Meta grid */
-
-.eventMeta {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  padding: 20px;
+.eventContent h1{
+  font-size:28px;
+  font-weight:900;
+  text-transform:uppercase;
+  border-bottom:4px solid black;
+  padding:20px;
 }
 
-.eventMeta span {
-  border: 2px solid black;
-  padding: 10px;
-  font-size: 12px;
-  font-weight: bold;
-  text-transform: uppercase;
+.eventMeta{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  padding:20px;
 }
 
-/* Description */
-
-.eventContent p {
-  border: 2px solid black;
-  padding: 16px;
-  margin: 0 20px 20px;
-  font-size: 14px;
-  line-height: 1.6;
+.eventMeta span{
+  border:2px solid black;
+  padding:10px;
+  font-size:12px;
+  font-weight:bold;
+  text-transform:uppercase;
+  display:flex;
+  gap:6px;
+  align-items:center;
 }
 
-/* Register button */
-
-.registerBtn {
-  margin: 0 20px 20px;
-  padding: 12px;
-  border: 4px solid black;
-  background: #B6FF60;
-  font-weight: 900;
-  text-transform: uppercase;
-  box-shadow: 4px 4px 0px #000;
-  cursor: pointer;
-  transition: 0.15s;
+.eventContent p{
+  border:2px solid black;
+  padding:16px;
+  margin:0 20px 20px;
+  font-size:14px;
+  line-height:1.6;
 }
 
-.registerBtn:hover {
-  background: black;
-  color: #B6FF60;
+.registerBtn{
+  margin:0 20px 20px;
+  padding:12px;
+  border:4px solid black;
+  background:#B6FF60;
+  font-weight:900;
+  text-transform:uppercase;
+  box-shadow:4px 4px 0 #000;
+  cursor:pointer;
 }
 
-/* RIGHT SIDE COMMENTS */
-
-.commentPanel {
-  border: 4px solid black;
-  background: white;
-  box-shadow: 6px 6px 0px #000;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+.registerBtn:hover{
+  background:black;
+  color:#B6FF60;
 }
 
-/* Comment header */
+/* COMMENT PANEL */
 
-.commentPanel h3 {
-  border-bottom: 4px solid black;
-  padding: 12px;
-  font-weight: 900;
-  text-transform: uppercase;
-  background: black;
-  color: #B6FF60;
+.commentPanel{
+  border:4px solid black;
+  background:white;
+  box-shadow:6px 6px 0 #000;
+  display:flex;
+  flex-direction:column;
+  height:600px;
 }
 
-/* Comment list */
-
-.commentList {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.commentPanel h3{
+  border-bottom:4px solid black;
+  padding:12px;
+  font-weight:900;
+  text-transform:uppercase;
+  background:black;
+  color:#B6FF60;
 }
 
-/* Individual comment */
-
-.comment {
-  border: 2px solid black;
-  padding: 10px;
-  background: #f9f9f9;
-  font-size: 14px;
+.commentList{
+  flex:1;
+  overflow-y:auto;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
 }
 
-.comment b {
-  display: block;
-  font-size: 11px;
-  text-transform: uppercase;
-  color: #666;
-  margin-bottom: 4px;
+.comment{
+  border:2px solid black;
+  padding:10px;
+  background:#f9f9f9;
+  font-size:14px;
 }
 
-/* Comment input */
-
-.commentInput {
-  border-top: 4px solid black;
-  display: flex;
+.comment b{
+  display:block;
+  font-size:11px;
+  text-transform:uppercase;
+  color:#666;
+  margin-bottom:4px;
 }
 
-.commentInput input {
-  flex: 1;
-  border: none;
-  padding: 12px;
-  font-weight: bold;
-  font-size: 13px;
-  outline: none;
+.commentInput{
+  border-top:4px solid black;
+  display:flex;
 }
 
-.commentInput button {
-  border-left: 4px solid black;
-  padding: 0 16px;
-  background: #B6FF60;
-  font-weight: bold;
-  cursor: pointer;
+.commentInput input{
+  flex:1;
+  border:none;
+  padding:12px;
+  font-weight:bold;
+  font-size:13px;
+  outline:none;
 }
 
-.commentInput button:hover {
-  background: black;
-  color: #B6FF60;
+.commentInput button{
+  border-left:4px solid black;
+  padding:0 16px;
+  background:#B6FF60;
+  cursor:pointer;
 }
 
-/* Back button */
-
-.backBtn {
-  margin-bottom: 20px;
-  border: 2px solid black;
-  padding: 8px 14px;
-  font-weight: bold;
-  text-transform: uppercase;
-  background: white;
-  box-shadow: 3px 3px 0px #000;
-  cursor: pointer;
+.commentInput button:hover{
+  background:black;
+  color:#B6FF60;
 }
 
-.backBtn:hover {
-  background: black;
-  color: #B6FF60;
+/* BACK BUTTON */
+
+.backBtn{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  border:2px solid black;
+  padding:6px 12px;
+  font-size:11px;
+  font-weight:800;
+  text-transform:uppercase;
+  background:white;
+  box-shadow:3px 3px 0 #000;
+  margin-bottom:20px;
+  cursor:pointer;
 }
 
-/* Responsive */
+.backBtn:hover{
+  background:black;
+  color:#B6FF60;
+}
 
-@media (max-width: 900px) {
+/* MOBILE */
 
-  .eventPage {
-    grid-template-columns: 1fr;
+@media (max-width:900px){
+
+  .eventPage{
+    grid-template-columns:1fr;
   }
 
-  .commentPanel {
-    height: 400px;
+  .commentPanel{
+    height:400px;
   }
 
 }
