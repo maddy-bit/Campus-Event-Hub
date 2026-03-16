@@ -354,18 +354,7 @@ const StudentEvents = () => {
     if (USE_DUMMY) {
 
     const dummyEvents = [
-      {
-        _id: "123",
-        title: "AI Hackathon 2026",
-        category: "Competition",
-        eventDate: "2026-04-10",
-        startTime: "10:00 AM",
-        location: "Main Auditorium",
-        maxSeats: 120,
-        posterUrl: "https://images.unsplash.com/photo-1526378722484-bd91ca387e72",
-        registrationDeadline: "2026-04-08",
-        createdAt: "2026-03-01",
-      },
+      ,
       {
         _id: "456",
         title: "Robotics Workshop",
@@ -378,18 +367,7 @@ const StudentEvents = () => {
         registrationDeadline: "2026-04-30",
         createdAt: "2026-03-10",
       },
-      {
-        _id: "789",
-        title: "Startup Pitch Competition",
-        category: "Conference",
-        eventDate: "2026-06-01",
-        startTime: "11:00 AM",
-        location: "Innovation Center",
-        maxSeats: 200,
-        posterUrl: "https://images.unsplash.com/photo-1556761175-4b46a572b786",
-        registrationDeadline: "2026-05-28",
-        createdAt: "2026-03-15",
-      },
+      
     ];
 
     setMyCollegeEvents(dummyEvents);
