@@ -361,9 +361,9 @@ const StudentRegistrations = () => {
                       </div>
                     </div>
  
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-8 gap-4">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-8 gap-4 w-full">
                       
-                      <div className="flex flex-row items-center gap-4">
+                      <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
                         <div
                           className={`border-[2px] border-black px-3 py-1 -rotate-2 font-black text-[10px] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
                             ${
@@ -377,7 +377,7 @@ const StudentRegistrations = () => {
 
                         {/* STAR RATING FOR FINISHED EVENTS */}
                         {!upcoming && (
-                          <div className="flex items-center gap-1 bg-gray-100 p-1.5 border-[2px] border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                          <div className="flex flex-wrap items-center justify-center gap-1 bg-gray-100 p-1.5 border-[2px] border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                             {[1, 2, 3, 4, 5].map((star) => {
                               const currentRating = feedbacks[event._id] || 0;
                               const isHovered = ratingHover.eventId === event._id && ratingHover.star >= star;
@@ -408,7 +408,7 @@ const StudentRegistrations = () => {
                         <button
                           onClick={() => handleCancel(reg._id)}
                           disabled={isCancelling}
-                          className="bg-red-500 text-white border-[3px] border-black px-4 py-2 font-black text-[10px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-2 hover:bg-red-600 transition-all active:translate-x-0.5 active:translate-y-0.5 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50 ml-auto"
+                          className="bg-red-500 w-full sm:w-auto text-white border-[3px] border-black px-4 py-2 font-black text-[10px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center gap-2 hover:bg-red-600 transition-all active:translate-x-0.5 active:translate-y-0.5 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50 ml-auto"
                         >
                           {isCancelling ? (
                             <Loader2 size={14} className="animate-spin" />
