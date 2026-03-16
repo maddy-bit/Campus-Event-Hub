@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+const USE_DUMMY = true;
 import {
   Search,
   MapPin,
@@ -334,6 +336,7 @@ const EventDialog = ({
 
 /* ── Main Component ─────────────────────────────────── */
 const StudentEvents = () => {
+  const navigate = useNavigate();
   const [myCollegeEvents, setMyCollegeEvents] = useState([]);
   const [externalEvents, setExternalEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -345,10 +348,57 @@ const StudentEvents = () => {
   const [userCollegeName, setUserCollegeName] = useState("");
   const [collegeContext, setCollegeContext] = useState("My College");
   const [registeredEventIds, setRegisteredEventIds] = useState(new Set());
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
+
 
   useEffect(() => {
+    if (USE_DUMMY) {
+
+    const dummyEvents = [
+      ,
+      {
+        _id: "456",
+        title: "Robotics Workshop",
+        category: "Workshop",
+        eventDate: "2026-05-02",
+        startTime: "02:00 PM",
+        location: "Engineering Lab",
+        maxSeats: 60,
+        posterUrl: "https://images.unsplash.com/photo-1581091870622-1e7b3c6b8c5b",
+        registrationDeadline: "2026-04-30",
+        createdAt: "2026-03-10",
+      },
+      {
+      _id: "456",
+      title: "Robotics Workshop",
+      category: "Workshop",
+      eventDate: "2026-05-02",
+      startTime: "02:00 PM",
+      location: "Engineering Lab",
+      maxSeats: 60,
+      posterUrl: "https://images.unsplash.com/photo-1581091870622-1e7b3c6b8c5b",
+      registrationDeadline: "2026-04-30",
+      createdAt: "2026-03-10",
+    },
+    {
+      _id: "789",
+      title: "Startup Pitch Competition",
+      category: "Conference",
+      eventDate: "2026-06-01",
+      startTime: "11:00 AM",
+      location: "Innovation Center",
+      maxSeats: 200,
+      posterUrl: "https://images.unsplash.com/photo-1556761175-4b46a572b786",
+      registrationDeadline: "2026-05-28",
+      createdAt: "2026-03-15",
+    },
+    ];
+
+    setMyCollegeEvents(dummyEvents);
+    setExternalEvents([]);
+    setLoading(false);
+    return;
+  }
+
     const fetchData = async () => {
       try {
         setLoading(true);
@@ -453,14 +503,7 @@ const StudentEvents = () => {
     }
   };
 
-  const openDialog = (event) => {
-    setSelectedEvent(event);
-    setDialogOpen(true);
-  };
-  const closeDialog = () => {
-    setDialogOpen(false);
-    setSelectedEvent(null);
-  };
+
 
   const categoryOptions = CATEGORIES.map((c) => ({
     label: c === "All" ? "All Categories" : c,
@@ -469,16 +512,8 @@ const StudentEvents = () => {
 
   return (
     <div className="w-full font-mono min-h-screen">
-      <EventDialog
-        event={selectedEvent}
-        isOpen={dialogOpen}
-        onClose={closeDialog}
-        onRegister={handleRegister}
-        isRegistered={
-          selectedEvent ? registeredEventIds.has(selectedEvent._id) : false
-        }
-        isRegistering={registeringId === selectedEvent?._id}
-      />
+      
+
 
       {/* ── Header ── */}
       <div className="mb-6">
@@ -602,7 +637,7 @@ const StudentEvents = () => {
               <article
                 key={event._id}
                 className="relative group cursor-pointer"
-                onClick={() => openDialog(event)}
+                onClick={() => navigate(`/student/events/${event._id}`)}
               >
                 {/* Shadow layer */}
                 <div className="absolute inset-0 bg-black translate-x-2 translate-y-2 group-hover:translate-x-3 group-hover:translate-y-3 transition-all duration-200" />
@@ -704,9 +739,9 @@ const StudentEvents = () => {
                       ) : (
                         <button
                           onClick={(e) => {
-                            e.stopPropagation();
-                            openDialog(event);
-                          }}
+  e.stopPropagation();
+  navigate(`/student/events/${event._id}`);
+}}
                           disabled={deadlinePassed}
                           className={`flex-1 flex items-center justify-center gap-2 py-2.5 border-2 border-black font-black text-[10px] uppercase shadow-[3px_3px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#000] transition-all ${
                             deadlinePassed
