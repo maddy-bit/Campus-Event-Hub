@@ -367,7 +367,18 @@ const StudentEvents = () => {
         registrationDeadline: "2026-04-30",
         createdAt: "2026-03-10",
       },
-      
+      {
+      _id: "456",
+      title: "Robotics Workshop",
+      category: "Workshop",
+      eventDate: "2026-05-02",
+      startTime: "02:00 PM",
+      location: "Engineering Lab",
+      maxSeats: 60,
+      posterUrl: "https://images.unsplash.com/photo-1581091870622-1e7b3c6b8c5b",
+      registrationDeadline: "2026-04-30",
+      createdAt: "2026-03-10",
+    },
     ];
 
     setMyCollegeEvents(dummyEvents);
