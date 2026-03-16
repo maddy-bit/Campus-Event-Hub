@@ -23,6 +23,7 @@ import {
   ComposedChart,
   Line,
   Legend,
+  Tooltip,
 } from "recharts";
 import api from "../../api";
 import "../../styles/AdminDashboard.css";
@@ -128,6 +129,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const [dashData, setDashData] = useState(null);
   const [pendingEvents, setPendingEvents] = useState([]);
   const [performanceData, setPerformanceData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -262,7 +264,7 @@ const Dashboard = () => {
                 </defs>
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#adb5bd", fontWeight: 600 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fill: "#adb5bd" }} axisLine={false} tickLine={false} allowDecimals={false} />
-                <Tooltip content={<CustomTooltip />} />
+                <Tooltip   content={<CustomTooltip />} />
                 <Area
                   type="monotone"
                   dataKey="registrations"
@@ -303,7 +305,7 @@ const Dashboard = () => {
               <BarChart data={ongoingByCategory} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <XAxis dataKey="_id" tick={{ fontSize: 10, fill: "#adb5bd", fontWeight: 600 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 10, fill: "#adb5bd" }} axisLine={false} tickLine={false} allowDecimals={false} />
-                <Tooltip
+                <Tooltip  
                   contentStyle={{ background: "#1a1a2e", border: "none", borderRadius: "12px", color: "#fff", fontSize: "12px" }}
                   itemStyle={{ color: "#fff" }}
                   labelStyle={{ color: "#adb5bd" }}
