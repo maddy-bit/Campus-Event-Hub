@@ -9,6 +9,7 @@ import {
   Clock,
   Tag,
   Search,
+  Star
 } from "lucide-react";
 import api from "../../api";
  
@@ -65,6 +66,11 @@ const StudentRegistrations = () => {
   const [cancellingId, setCancellingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("ALL");
+  const [feedbacks, setFeedbacks] = useState({}); // mapped by eventId
+  const [ratingHover, setRatingHover] = useState({ eventId: null, star: 0 });
+  const [submittingRating, setSubmittingRating] = useState(null); // eventId
+
+  const token = localStorage.getItem("token");
  
   /* Fetch the logged-in student's registrations */
   useEffect(() => {
@@ -74,8 +80,26 @@ const StudentRegistrations = () => {
   const fetchRegistrations = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/registrations/my");
+      const res = await api.get("/registrations/my", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setRegistrations(res.data.registrations || []);
+
+      // Also fetch user's feedback ratings
+      try {
+        const feedRes = await api.get("/feedback/my/ratings", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const feedMap = {};
+        if (feedRes.data.feedbacks) {
+          feedRes.data.feedbacks.forEach(f => {
+            feedMap[f.eventId] = f.rating;
+          });
+        }
+        setFeedbacks(feedMap);
+      } catch (e) {
+        console.error("Failed to load feedbacks:", e);
+      }
     } catch (err) {
       console.error("Fetch registrations error:", err);
       toast.error("Failed to load your registrations");
@@ -102,6 +126,22 @@ const StudentRegistrations = () => {
     }
   };
  
+  /* Submit Star Rating */
+  const handleRatingSubmit = async (eventId, rating) => {
+    try {
+      setSubmittingRating(eventId);
+      await api.post(`/feedback/${eventId}`, { rating }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setFeedbacks(prev => ({ ...prev, [eventId]: rating }));
+      toast.success("Feedback submitted!");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to submit rating");
+    } finally {
+      setSubmittingRating(null);
+    }
+  };
+
   /* Derived stats */
   const stats = useMemo(() => {
     const total = registrations.length;
@@ -239,7 +279,7 @@ const StudentRegistrations = () => {
               <div
                 key={reg._id}
                 className={`relative flex flex-col md:flex-row border-[3px] border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] md:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]
-                  ${!upcoming ? "opacity-60 grayscale" : ""}`}
+                  ${!upcoming ? "border-gray-400 text-gray-700 shadow-[8px_8px_0px_0px_rgba(156,163,175,1)]" : ""}`}
               >
                 {/* ── Status Bar ── */}
                 <div
@@ -321,24 +361,54 @@ const StudentRegistrations = () => {
                       </div>
                     </div>
  
-                    {/* Actions Footer */}
-                    <div className="flex flex-row justify-between items-center mt-8">
-                      <div
-                        className={`border-[2px] border-black px-3 py-1 -rotate-2 font-black text-[10px]
-                          ${
-                            upcoming
-                              ? "bg-[#b4ff39]"
-                              : "bg-gray-300 text-gray-600"
-                          }`}
-                      >
-                        {upcoming ? "PASS_ACTIVE" : "PASS_EXPIRED"}
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-8 gap-4 w-full">
+                      
+                      <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
+                        <div
+                          className={`border-[2px] border-black px-3 py-1 -rotate-2 font-black text-[10px] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
+                            ${
+                              upcoming
+                                ? "bg-[#b4ff39]"
+                                : "bg-gray-200 text-gray-500 border-gray-400 shadow-[2px_2px_0px_0px_rgba(156,163,175,1)]"
+                            }`}
+                        >
+                          {upcoming ? "PASS_ACTIVE" : "PASS_EXPIRED"}
+                        </div>
+
+                        {/* STAR RATING FOR FINISHED EVENTS */}
+                        {!upcoming && (
+                          <div className="flex flex-wrap items-center justify-center gap-1 bg-gray-100 p-1.5 border-[2px] border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                            {[1, 2, 3, 4, 5].map((star) => {
+                              const currentRating = feedbacks[event._id] || 0;
+                              const isHovered = ratingHover.eventId === event._id && ratingHover.star >= star;
+                              const isFilled = currentRating >= star || isHovered;
+                              const isClickable = !feedbacks[event._id] && submittingRating !== event._id;
+
+                              return (
+                                <Star
+                                  key={star}
+                                  size={24}
+                                  className={`cursor-pointer transition-all ${
+                                    isFilled ? "fill-[#b4ff39] text-black stroke-[2px]" : "fill-white text-black stroke-[2px]"
+                                  } ${!isClickable ? "cursor-default opacity-80" : "hover:-translate-y-0.5"}`}
+                                  onMouseEnter={() => isClickable && setRatingHover({ eventId: event._id, star })}
+                                  onMouseLeave={() => isClickable && setRatingHover({ eventId: null, star: 0 })}
+                                  onClick={() => isClickable && handleRatingSubmit(event._id, star)}
+                                />
+                              );
+                            })}
+                            <span className="ml-2 text-[10px] font-black uppercase">
+                              {feedbacks[event._id] ? "RATED" : (submittingRating === event._id ? "..." : "RATE_IT")}
+                            </span>
+                          </div>
+                        )}
                       </div>
  
                       {upcoming && (
                         <button
                           onClick={() => handleCancel(reg._id)}
                           disabled={isCancelling}
-                          className="bg-red-500 text-white border-[3px] border-black px-4 py-2 font-black text-[10px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-2 hover:bg-red-600 transition-all active:translate-x-0.5 active:translate-y-0.5 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50"
+                          className="bg-red-500 w-full sm:w-auto text-white border-[3px] border-black px-4 py-2 font-black text-[10px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center justify-center gap-2 hover:bg-red-600 transition-all active:translate-x-0.5 active:translate-y-0.5 active:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50 ml-auto"
                         >
                           {isCancelling ? (
                             <Loader2 size={14} className="animate-spin" />

@@ -16,11 +16,14 @@ import {
   Area,
   XAxis,
   YAxis,
-  Tooltip,
   ResponsiveContainer,
   BarChart,
   Bar,
   Cell,
+  ComposedChart,
+  Line,
+  Legend,
+  Tooltip,
 } from "recharts";
 import api from "../../api";
 import "../../styles/AdminDashboard.css";
@@ -128,9 +131,11 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [dashData, setDashData] = useState(null);
   const [pendingEvents, setPendingEvents] = useState([]);
+  const [performanceData, setPerformanceData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeMenu, setActiveMenu] = useState(null);
   const [rejectModal, setRejectModal] = useState({ show: false, id: null, type: null });
+  const [activeChartTab, setActiveChartTab] = useState("TREND"); // "TREND" or "PERFORMANCE"
 
   useEffect(() => {
     fetchDashboard();
@@ -139,12 +144,14 @@ const Dashboard = () => {
   const fetchDashboard = async () => {
     try {
       setLoading(true);
-      const [statsRes, pendingRes] = await Promise.all([
+      const [statsRes, pendingRes, perfRes] = await Promise.all([
         api.get("/admin/dashboard-stats"),
         api.get("/admin/events/pending"),
+        api.get("/admin/analytics/event-performance")
       ]);
       setDashData(statsRes.data);
       setPendingEvents(pendingRes.data.events || []);
+      setPerformanceData(perfRes.data.performanceData || []);
     } catch (err) {
       console.error("Dashboard fetch error:", err);
     } finally {
@@ -224,38 +231,70 @@ const Dashboard = () => {
         <div className="chart-container">
           <div className="chart-header">
             <div>
-              <h3>Registration Trend</h3>
-              <span className="chart-subtitle">Last 7 months</span>
+              <h3>{activeChartTab === "TREND" ? "Registration Trend" : "Event Performance"}</h3>
+              <span className="chart-subtitle">
+                {activeChartTab === "TREND" ? "Last 7 months" : "Registrations vs Average Rating"}
+              </span>
             </div>
-            <div className="chart-legend">
-              <TrendingUp size={16} />
-              <span>Registrations</span>
+            
+            <div className="chart-tabs">
+              <button 
+                className={`chart-tab ${activeChartTab === "TREND" ? "active" : ""}`}
+                onClick={() => setActiveChartTab("TREND")}
+              >
+                Trend
+              </button>
+              <button 
+                className={`chart-tab ${activeChartTab === "PERFORMANCE" ? "active" : ""}`}
+                onClick={() => setActiveChartTab("PERFORMANCE")}
+              >
+                Performance
+              </button>
             </div>
           </div>
-          <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="registrationGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#000000" stopOpacity={0.15} />
-                  <stop offset="95%" stopColor="#000000" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#adb5bd", fontWeight: 600 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: "#adb5bd" }} axisLine={false} tickLine={false} allowDecimals={false} />
-              <Tooltip content={<CustomTooltip />} />
-              <Area
-                type="monotone"
-                dataKey="registrations"
-                stroke="#000000"
-                strokeWidth={4}
-                fill="url(#registrationGradient)"
-                dot={false}
-                activeDot={{ r: 6, fill: "#000000", stroke: "#fff", strokeWidth: 3 }}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+          
+          {activeChartTab === "TREND" ? (
+            <ResponsiveContainer width="100%" height={260}>
+              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="registrationGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#000000" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="#000000" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#adb5bd", fontWeight: 600 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: "#adb5bd" }} axisLine={false} tickLine={false} allowDecimals={false} />
+                <Tooltip   content={<CustomTooltip />} />
+                <Area
+                  type="monotone"
+                  dataKey="registrations"
+                  stroke="#000000"
+                  strokeWidth={4}
+                  fill="url(#registrationGradient)"
+                  dot={false}
+                  activeDot={{ r: 6, fill: "#000000", stroke: "#fff", strokeWidth: 3 }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          ) : (
+            <ResponsiveContainer width="100%" height={260}>
+              <ComposedChart data={performanceData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                <XAxis dataKey="eventName" tick={{ fontSize: 10, fill: "#adb5bd", fontWeight: 600 }} axisLine={false} tickLine={false} />
+                <YAxis yAxisId="left" tick={{ fontSize: 11, fill: "#adb5bd" }} axisLine={false} tickLine={false} allowDecimals={false} />
+                <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11, fill: "#adb5bd" }} axisLine={false} tickLine={false} domain={[0, 5]} />
+                <Tooltip 
+                  contentStyle={{ background: "#1a1a2e", border: "none", borderRadius: "12px", color: "#fff", fontSize: "12px" }}
+                  itemStyle={{ color: "#fff" }}
+                  labelStyle={{ color: "#adb5bd", fontWeight: "bold", marginBottom: "4px" }}
+                />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
+                <Bar yAxisId="left" dataKey="registrations" name="Total Registrations" barSize={30} fill="#111827" radius={[4, 4, 0, 0]} />
+                <Line yAxisId="right" type="monotone" dataKey="averageRating" name="Avg Rating (Out of 5)" stroke="#b4ff39" strokeWidth={4} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
+              </ComposedChart>
+            </ResponsiveContainer>
+          )}
         </div>
-
+ 
         <div className="ongoing-events-card">
           <div className="card-header-row">
             <h3>Ongoing Events</h3>
@@ -266,7 +305,7 @@ const Dashboard = () => {
               <BarChart data={ongoingByCategory} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <XAxis dataKey="_id" tick={{ fontSize: 10, fill: "#adb5bd", fontWeight: 600 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 10, fill: "#adb5bd" }} axisLine={false} tickLine={false} allowDecimals={false} />
-                <Tooltip
+                <Tooltip  
                   contentStyle={{ background: "#1a1a2e", border: "none", borderRadius: "12px", color: "#fff", fontSize: "12px" }}
                   itemStyle={{ color: "#fff" }}
                   labelStyle={{ color: "#adb5bd" }}

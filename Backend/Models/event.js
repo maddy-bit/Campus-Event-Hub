@@ -42,6 +42,10 @@ const eventSchema = new mongoose.Schema(
     type: Number,
     default: 100
   },
+  seatsFilled: {
+  type: Number,
+  default: 0
+},
 
   posterUrl: {
     type: String 

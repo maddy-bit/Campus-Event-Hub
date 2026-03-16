@@ -6,20 +6,22 @@ const cookieParser = require('cookie-parser');
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 
+// Initialize Database
 require('./config/db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-//  SECURITY MIDDLEWARE 
+/* ---------------- SECURITY MIDDLEWARE ---------------- */
 
+// Helmet helps secure Express apps by setting various HTTP headers
 app.use(helmet());
 
+// Rate limiting to prevent brute-force/DoS attacks
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10000 // limit each IP to 100 requests per windowMs
 });
-
 app.use(limiter);
 
 app.use(cors({
@@ -27,16 +29,17 @@ app.use(cors({
   credentials: true
 }));
 
+/* ---------------- STANDARD MIDDLEWARE ---------------- */
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-
+/* ---------------- STATIC FILES ---------------- */
 
 app.use('/uploads', express.static('uploads'));
 
-//  ROUTES 
+/* ---------------- ROUTES ---------------- */
 
 const authroutes = require('./Routes/AuthRoutes');
 const eventRoutes = require('./Routes/EventRoutes');
@@ -45,8 +48,10 @@ const dashboardRoutes = require('./Routes/DashboardRoutes');
 const profileRoutes = require('./Routes/ProfileRoutes');
 const notificationRoutes = require('./Routes/NotificationRoutes');
 const adminRoutes = require('./Routes/AdminRoutes');
+const adminAnalyticsRoutes = require('./Routes/AdminAnalyticsRoutes');
 const superAdminRoutes = require('./Routes/SuperAdminRoutes');
 const collegeRoutes = require('./Routes/CollegeRoutes');
+const feedbackRoutes = require('./Routes/FeedbackRoutes');
 
 app.use('/auth', authroutes);
 app.use('/events', eventRoutes);
@@ -55,16 +60,18 @@ app.use('/dashboard', dashboardRoutes);
 app.use('/profile', profileRoutes);
 app.use('/notifications', notificationRoutes);
 app.use('/admin', adminRoutes);
+app.use('/admin/analytics', adminAnalyticsRoutes);
 app.use('/superadmin', superAdminRoutes);
 app.use('/colleges', collegeRoutes);
+app.use('/feedback', feedbackRoutes);
 
-// TEST ROUTE 
+/* ---------------- TEST ROUTE ---------------- */
 
 app.get('/check', (req, res) => {
   res.send(`Server is running in ${process.env.NODE_ENV || 'development'} mode`);
 });
 
-//  ERROR HANDLER LAST
+/* ---------------- ERROR HANDLER ---------------- */
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -75,7 +82,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// SERVER  
+/* ---------------- SERVER ---------------- */
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
