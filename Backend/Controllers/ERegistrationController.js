@@ -35,7 +35,11 @@ const registerForEvent = async (req, res) => {
    const updatedEvent = await EventModel.findOneAndUpdate(
   {
     _id: eventId,
-    seatsFilled: { $lt: event.maxSeats }
+    $or: [
+      { seatsFilled: { $lt: event.maxSeats } },
+      { seatsFilled: { $exists: false } },
+      { seatsFilled: null }
+    ]
   },
   {
     $inc: { seatsFilled: 1 }
