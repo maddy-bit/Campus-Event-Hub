@@ -1,150 +1,221 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { Toaster } from "sonner";
-import { Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import {
+  Calendar,
+  MapPin,
+  Users,
+  Clock,
+  Ticket,
+  Send,
+  ArrowLeft,
+} from "lucide-react";
+import api from "./api";
 
-import Login from "./pages/auth/Login";
-import RegistrationPage from "./pages/auth/RegistrationPage";
-import ForgotPassword from "./pages/auth/ForgotPassword";
-import VerifyOtp from "./pages/auth/VerifyOtp";
-import ResetPassword from "./pages/auth/ResetPassword";
-import VerifyEmail from "./pages/auth/VerifyEmail";
-import LandingPage from "./components/LandingPage";
+const EventDetails = () => {
+  const { id } = useParams();
 
+  const [event, setEvent] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [text, setText] = useState("");
+  const [loading, setLoading] = useState(true);
 
-// Importing ProtectedRoute for role-based access control
-import ProtectedRoute from "./components/ProtectedRoute";
+  const token = localStorage.getItem("token");
 
-// Importing layouts for different roles
-import AdminLayout from "./layouts/AdminLayout";
-import OrganizerLayout from "./layouts/OrganizerLayout";
-import StudentLayout from "./layouts/StudentLayout";
-import SuperAdminLayout from "./layouts/SuperAdminLayout";
+  useEffect(() => {
+    fetchEvent();
+    fetchComments();
+  }, []);
 
+  const fetchEvent = async () => {
+    try {
+      const res = await api.get(`/events/${id}`);
+      setEvent(res.data.event || res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-// Importing dashboards for different roles
-import CreateEvent from "./pages/organizer/CreateEvent";
-import AdminDashboard from "./pages/admin/Dashboard";
-import AdminEvents from "./pages/admin/Events";
-import AdminUsers from "./pages/admin/Users";
-import NotifyHub from "./pages/admin/NotifyHub";
-import Profile from "./pages/admin/Profile";
-import AdminApprovals from "./pages/admin/Approvals";
-import OrganizerDashboard from "./pages/organizer/Dashboard";
-import SendNotification from "./pages/organizer/SendNotification";
-import OrganizerMyEvents from "./pages/organizer/MyEvents";
-import OrganizerProfile from "./pages/organizer/Profile";
-import ViewParticipants from "./pages/organizer/ViewParticipants";
-import OrganizerNotification from "./pages/organizer/Notification";
-import StudentEvents from "./pages/student/Events";
-import SuperAdminDashboard from "./pages/superadmin/Dashboard";
-import StudentProfile from "./pages/student/Profile";
-import Notification from "./pages/student/Notification";
-import Registrations from "./pages/student/Registrations";
-import SearchUsers from "./pages/student/SearchUsers";
-import ViewInstitutions from "./pages/superadmin/ViewInstitutions";
-import CollegeDetail from "./pages/superadmin/CollegeDetail";
-import SuperAdminEvents from "./pages/superadmin/Events";
-import CollegeSetup from "./pages/superadmin/CollegeSetup";
+  const fetchComments = async () => {
+    try {
+      const res = await api.get(`/comments/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setComments(res.data.comments || res.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-function App() {
+  const postComment = async () => {
+    if (!text.trim()) return;
+
+    try {
+      const res = await api.post(
+        `/comments/${id}`,
+        { text },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      setComments([...comments, res.data.comment || res.data]);
+      setText("");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen font-mono">
+        Loading event...
+      </div>
+    );
+  }
+
+  if (!event) {
+    return <div className="p-10 font-mono">Event not found</div>;
+  }
+
   return (
-    <>
-      <Toaster position="top-center" richColors />
+    <div className="w-full font-mono min-h-screen p-6">
 
-      <Routes>
+      {/* Header */}
+      <button
+        onClick={() => window.history.back()}
+        className="mb-6 flex items-center gap-2 border-2 border-black px-4 py-2 font-black text-xs uppercase bg-white shadow-[3px_3px_0px_#000] hover:bg-black hover:text-[#B6FF60]"
+      >
+        <ArrowLeft size={14} />
+        Back
+      </button>
 
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* super admin route */}
-        <Route
-          path="/superadmin"
-          element={
-            /*<ProtectedRoute allowedRoles={["superadmin"]}>*/
-            <SuperAdminLayout />
-            /*</ProtectedRoute>*/
-          }
-        >
-          <Route index element={<Navigate to="dashboard" />} />
-          <Route path="dashboard" element={<SuperAdminDashboard />} />
-          <Route path="events" element={<SuperAdminEvents />} />
-          <Route path="setup" element={<CollegeSetup />} />
-          <Route path="institutions" element={<ViewInstitutions />} />
-          <Route path="institutions/:id" element={<CollegeDetail />} />
-        </Route>
+        {/* LEFT SIDE EVENT INFO */}
+        <div className="lg:col-span-2 border-4 border-black bg-white shadow-[6px_6px_0px_#000]">
 
-        {/* admin route */}
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute allowedRoles={["admin", "superadmin"]}>
-              <AdminLayout />
-            </ProtectedRoute>
-          }
-        >
-          {/* Standard Admin Pages with Sidebar/Header */}
+          {/* Poster */}
+          <div className="h-64 border-b-4 border-black overflow-hidden bg-gray-100">
+            {event.posterUrl ? (
+              <img
+                src={
+                  event.posterUrl.startsWith("http")
+                    ? event.posterUrl
+                    : `${import.meta.env.VITE_API_BASE_URL || "http://localhost:5000"}/${event.posterUrl}`
+                }
+                alt={event.title}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full text-6xl font-black text-gray-300">
+                EVENT
+              </div>
+            )}
+          </div>
 
-          <Route index element={<Navigate to="dashboard" />} />
-          <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="events" element={<AdminEvents />} />
-          <Route path="users" element={<AdminUsers />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="notify" element={<NotifyHub />} />
-          <Route path="approvals" element={<AdminApprovals />} />
-          <Route path="analytics" element={<div>Analytics Page</div>} />
-        </Route>
+          {/* Event Content */}
+          <div className="p-6">
 
-        {/* Admin pages are handled inside the nested /admin route above */}
+            <h1 className="text-3xl font-black uppercase tracking-tight mb-6 border-b-4 border-black pb-3">
+              {event.title}
+            </h1>
 
-        {/* organizer route */}
-        <Route
-          path="/organizer"
-          element={
-            <ProtectedRoute allowedRoles={["organizer"]}>
-              <OrganizerLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Navigate to="dashboard" />} />
-          <Route path="dashboard" element={<OrganizerDashboard />} />
-          <Route path="create-event" element={<CreateEvent />} />
-          <Route path="myevents" element={<OrganizerMyEvents />} />
-          <Route path="view-participants" element={<ViewParticipants />} />
-          <Route path="profile" element={<OrganizerProfile />} />
-          <Route path="inbox" element={<OrganizerNotification />} />
-          <Route path="notifications" element={<SendNotification />} />
-        </Route>
+            {/* Info Grid */}
+            <div className="grid grid-cols-2 gap-4 mb-6 text-xs font-bold uppercase">
 
-        {/* student route */}
-        <Route
-          path="/student"
-          element={
-            <ProtectedRoute allowedRoles={["student"]}>
-              <StudentLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Navigate to="events" />} />
-          <Route path="events" element={<StudentEvents />} />
-          <Route path="profile" element={<StudentProfile />} />
-          <Route path="notification" element={<Notification />} />
-          <Route path="registrations" element={<Registrations />} />
-        </Route>
+              <div className="border-2 border-black p-3 flex gap-2 items-center">
+                <Calendar size={14} />
+                {new Date(event.eventDate).toDateString()}
+              </div>
 
-        {/* Standalone student pages without layout */}
-        <Route path="/student/search" element={<SearchUsers />} />
+              <div className="border-2 border-black p-3 flex gap-2 items-center">
+                <Clock size={14} />
+                {event.startTime || "TBA"}
+              </div>
 
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<RegistrationPage />} />
-        <Route path="/verify-email" element={<VerifyEmail />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/verify-otp" element={<VerifyOtp />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/create-event" element={<CreateEvent />} />
+              <div className="border-2 border-black p-3 flex gap-2 items-center">
+                <MapPin size={14} />
+                {event.location || "TBA"}
+              </div>
 
-      </Routes>
+              <div className="border-2 border-black p-3 flex gap-2 items-center">
+                <Users size={14} />
+                {event.maxSeats || 100} seats
+              </div>
 
-    </>
+            </div>
+
+            {/* Description */}
+            <div className="border-2 border-black p-4 mb-6 text-sm leading-relaxed">
+              {event.description || "No description provided."}
+            </div>
+
+            {/* Register Button */}
+            <button
+              className="flex items-center gap-2 border-4 border-black px-6 py-3 font-black text-xs uppercase bg-[#B6FF60] shadow-[4px_4px_0px_#000] hover:bg-black hover:text-[#B6FF60]"
+            >
+              <Ticket size={15} />
+              Register Event
+            </button>
+
+          </div>
+        </div>
+
+        {/* RIGHT SIDE COMMENTS */}
+        <div className="border-4 border-black bg-white shadow-[6px_6px_0px_#000] flex flex-col">
+
+          <div className="border-b-4 border-black px-4 py-3 font-black text-sm uppercase bg-black text-[#B6FF60]">
+            Comments
+          </div>
+
+          {/* Comments list */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+
+            {comments.length === 0 && (
+              <div className="text-xs text-gray-400 font-bold uppercase">
+                No comments yet
+              </div>
+            )}
+
+            {comments.map((c, i) => (
+              <div
+                key={i}
+                className="border-2 border-black p-3 text-sm bg-gray-50"
+              >
+                <div className="text-[10px] font-black uppercase text-gray-400">
+                  {c.user?.fullName || "Student"}
+                </div>
+                <p>{c.text}</p>
+              </div>
+            ))}
+
+          </div>
+
+          {/* Comment input */}
+          <div className="border-t-4 border-black flex">
+
+            <input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder="Add comment..."
+              className="flex-1 p-3 text-sm font-bold outline-none"
+            />
+
+            <button
+              onClick={postComment}
+              className="border-l-4 border-black px-4 bg-[#B6FF60] hover:bg-black hover:text-[#B6FF60]"
+            >
+              <Send size={16} />
+            </button>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
   );
-}
+};
 
-export default App;
+export default EventDetails;

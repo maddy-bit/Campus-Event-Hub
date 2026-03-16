@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import {
   Search,
@@ -334,6 +335,7 @@ const EventDialog = ({
 
 /* ── Main Component ─────────────────────────────────── */
 const StudentEvents = () => {
+  const navigate = useNavigate();
   const [myCollegeEvents, setMyCollegeEvents] = useState([]);
   const [externalEvents, setExternalEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -345,8 +347,7 @@ const StudentEvents = () => {
   const [userCollegeName, setUserCollegeName] = useState("");
   const [collegeContext, setCollegeContext] = useState("My College");
   const [registeredEventIds, setRegisteredEventIds] = useState(new Set());
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -453,14 +454,7 @@ const StudentEvents = () => {
     }
   };
 
-  const openDialog = (event) => {
-    setSelectedEvent(event);
-    setDialogOpen(true);
-  };
-  const closeDialog = () => {
-    setDialogOpen(false);
-    setSelectedEvent(null);
-  };
+
 
   const categoryOptions = CATEGORIES.map((c) => ({
     label: c === "All" ? "All Categories" : c,
@@ -469,16 +463,8 @@ const StudentEvents = () => {
 
   return (
     <div className="w-full font-mono min-h-screen">
-      <EventDialog
-        event={selectedEvent}
-        isOpen={dialogOpen}
-        onClose={closeDialog}
-        onRegister={handleRegister}
-        isRegistered={
-          selectedEvent ? registeredEventIds.has(selectedEvent._id) : false
-        }
-        isRegistering={registeringId === selectedEvent?._id}
-      />
+      
+
 
       {/* ── Header ── */}
       <div className="mb-6">
@@ -602,7 +588,7 @@ const StudentEvents = () => {
               <article
                 key={event._id}
                 className="relative group cursor-pointer"
-                onClick={() => openDialog(event)}
+                onClick={() => navigate(`/student/events/${event._id}`)}
               >
                 {/* Shadow layer */}
                 <div className="absolute inset-0 bg-black translate-x-2 translate-y-2 group-hover:translate-x-3 group-hover:translate-y-3 transition-all duration-200" />
@@ -704,9 +690,9 @@ const StudentEvents = () => {
                       ) : (
                         <button
                           onClick={(e) => {
-                            e.stopPropagation();
-                            openDialog(event);
-                          }}
+  e.stopPropagation();
+  navigate(`/student/events/${event._id}`);
+}}
                           disabled={deadlinePassed}
                           className={`flex-1 flex items-center justify-center gap-2 py-2.5 border-2 border-black font-black text-[10px] uppercase shadow-[3px_3px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#000] transition-all ${
                             deadlinePassed
