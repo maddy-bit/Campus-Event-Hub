@@ -587,11 +587,8 @@ const StudentEvents = () => {
       ) : (
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {filteredEvents.map((event) => {
-<<<<<<< HEAD
             if (!event) return null; // Protect against undefined elements in the array
-=======
-            if (!event) return null;
->>>>>>> 3a7bc1e9102f1ddb2d5044d69860684e9367e60d
+
             const catConfig =
               CATEGORY_CONFIG[event.category] || CATEGORY_CONFIG.Other;
             const deadlinePassed = isDeadlinePassed(event.registrationDeadline);
