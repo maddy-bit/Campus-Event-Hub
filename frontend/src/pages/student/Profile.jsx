@@ -16,8 +16,10 @@ import {
   Shield,
   Sparkles,
   User,
+  LogOutIcon,
 } from "lucide-react";
 import api from "../../api";
+import { useNavigate } from "react-router-dom";
  
 const ProfilePortal = () => {
   const [user, setUser] = useState(null);
@@ -27,6 +29,8 @@ const ProfilePortal = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({});
   const fileInputRef = useRef(null);
+    const navigate = useNavigate();
+
  
   const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
  
@@ -113,6 +117,15 @@ const ProfilePortal = () => {
       day: "numeric",
       year: "numeric",
     });
+  };
+
+    const handleLogout = async () => {
+    try {
+      await api.post("/auth/logout");
+      toast.success("Logged out safely");
+      navigate("/login");
+    } catch { /* silent */ }
+    navigate("/login");
   };
  
   const initials = user?.fullName
@@ -304,6 +317,15 @@ const ProfilePortal = () => {
           >
             <Edit3 size={16} /> EDIT PROFILE
           </button>
+
+               <button
+                onClick={handleLogout}
+                disabled={saving}
+            className="bg-red-400 border-4 border-black px-6 py-3 font-black text-xs flex items-center gap-2 shadow-[4px_4px_0px_#000] hover:bg-[#eefd22] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_#000] transition-all"
+              >
+                <LogOutIcon size={16} />
+                LOGOUT
+              </button>
         </div>
       </div>
  
@@ -358,6 +380,7 @@ const ProfilePortal = () => {
                 {saving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
                 {saving ? "SAVING..." : "SAVE CHANGES"}
               </button>
+
             </div>
           </div>
         </div>
