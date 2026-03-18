@@ -20,6 +20,29 @@ const networkingSocket = (io) => {
           return callback({ success: false, message: "Missing required payload data." });
         }
 
+        // 1. SECURITY: Verify Event is TODAY
+        const event = await EventModel.findById(eventId);
+        if (!event) {
+          return callback({ success: false, message: "Event not found." });
+        }
+
+        const today = new Date().toDateString();
+        const eventDate = new Date(event.eventDate).toDateString();
+        if (today !== eventDate) {
+          return callback({ success: false, message: "Networking is only available on the day of the event." });
+        }
+
+        // 2. SECURITY: Verify User is REGISTERED
+        const registration = await ERegistrationModel.findOne({
+          userId,
+          eventId,
+          status: { $in: ["Registered", "Pending_Approval"] }
+        });
+
+        if (!registration) {
+          return callback({ success: false, message: "You must be registered for this event to network." });
+        }
+
         // Leave previous rooms if any
         Array.from(socket.rooms).forEach(room => {
           if (room !== socket.id) socket.leave(room);
@@ -40,7 +63,8 @@ const networkingSocket = (io) => {
         if (callback) callback({ success: true, room: roomName });
 
         // Broadcast updated online peers to everyone in this event room
-        emitActivePeers(eventId);
+        // Use a small delay or execute after callback to ensure room joining state is updated
+        setImmediate(() => emitActivePeers(eventId));
       } catch (err) {
         console.error("[Socket] joinEventRoom error:", err);
         if (callback) callback({ success: false, message: "Internal server error." });
