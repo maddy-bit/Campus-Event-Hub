@@ -19,6 +19,7 @@ const TABS = [
   { key: "events", label: "Event Approvals", icon: CalendarDays },
   { key: "promotions", label: "Student to Organizer", icon: UserPlus },
   { key: "access", label: "Event Access Requests", icon: KeyRound },
+  { key: "students", label: "Student Registrations", icon: UserPlus },
 ];
 
 const ITEMS_PER_PAGE = 6;
@@ -94,6 +95,7 @@ const Approvals = () => {
   const [events, setEvents] = useState([]);
   const [promotions, setPromotions] = useState([]);
   const [accessRequests, setAccessRequests] = useState([]);
+  const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [activeMenu, setActiveMenu] = useState(null);
@@ -111,14 +113,16 @@ const Approvals = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [eventsRes, promotionsRes, accessRes] = await Promise.all([
+      const [eventsRes, promotionsRes, accessRes, studentsRes] = await Promise.all([
         api.get("/admin/events/pending"),
         api.get("/admin/promotions/pending"),
         api.get("/admin/access-requests/pending"),
+        api.get("/admin/students/pending"),
       ]);
       setEvents(eventsRes.data.events || []);
       setPromotions(promotionsRes.data.promotions || []);
       setAccessRequests(accessRes.data.accessRequests || []);
+      setStudents(studentsRes.data.students || []);
     } catch (err) {
       console.error("Approvals fetch error:", err);
     } finally {
@@ -177,6 +181,23 @@ const Approvals = () => {
     } catch (err) { console.error(err); }
   };
 
+  // Student actions
+  const handleApproveStudent = async (id) => {
+    try {
+      await api.patch(`/admin/students/${id}/approve`);
+      setActiveMenu(null);
+      fetchData();
+    } catch (err) { console.error(err); }
+  };
+
+  const handleRejectStudent = async (reason) => {
+    try {
+      await api.patch(`/admin/students/${rejectModal.id}/reject`, { reason });
+      closeRejectModal();
+      fetchData();
+    } catch (err) { console.error(err); }
+  };
+
   const closeRejectModal = () => {
     setRejectModal({ show: false, id: null, tab: null });
     setActiveMenu(null);
@@ -203,6 +224,7 @@ const Approvals = () => {
       case "events": return events;
       case "promotions": return promotions;
       case "access": return accessRequests;
+      case "students": return students;
       default: return [];
     }
   };
@@ -216,6 +238,7 @@ const Approvals = () => {
       case "events": return events.length;
       case "promotions": return promotions.length;
       case "access": return accessRequests.length;
+      case "students": return students.length;
       default: return 0;
     }
   };
@@ -225,6 +248,7 @@ const Approvals = () => {
       case "events": return "Reject Event";
       case "promotions": return "Deny Promotion Request";
       case "access": return "Reject Access Request";
+      case "students": return "Reject Registration";
       default: return "Rejection Reason";
     }
   };
@@ -234,6 +258,7 @@ const Approvals = () => {
       case "events": return handleRejectEvent(reason);
       case "promotions": return handleDenyPromotion(reason);
       case "access": return handleRejectAccess(reason);
+      case "students": return handleRejectStudent(reason);
     }
   };
 
@@ -242,6 +267,7 @@ const Approvals = () => {
       case "events": return handleApproveEvent(id);
       case "promotions": return handleApprovePromotion(id);
       case "access": return handleGrantAccess(id);
+      case "students": return handleApproveStudent(id);
     }
   };
 
@@ -385,11 +411,57 @@ const Approvals = () => {
     </tr>
   );
 
+  const renderStudentRow = (student) => (
+    <tr key={student._id} className="approval-row">
+      <td>
+        <div className="requester-info">
+          <div className="requester-avatar" style={{ background: "#8b5cf615", color: "#8b5cf6" }}>
+            {getInitials(student.fullName)}
+          </div>
+          <div className="requester-details">
+            <span className="requester-name">{student.fullName}</span>
+            <span className="requester-sub">{student.email}</span>
+          </div>
+        </div>
+      </td>
+      <td>
+        <div className="detail-block">
+          <span className="detail-primary">{student.department}</span>
+          <span className="detail-secondary">Year: {student.yearOfStudy}</span>
+        </div>
+      </td>
+      <td>
+        <div className="date-block">
+          <span className="date-primary">{formatDate(student.createdAt)}</span>
+          <span className="date-secondary">{formatTime(student.createdAt)}</span>
+        </div>
+      </td>
+      <td className="actions-cell">
+        <button
+          className="approval-more-btn reject-text"
+          onClick={() => {
+            setRejectModal({ show: true, id: student._id, tab: "students" });
+            setActiveMenu(null);
+          }}
+        >
+          Reject
+        </button>
+        <button
+          className="approval-action-primary"
+          onClick={() => handleApproveStudent(student._id)}
+        >
+          Approve Student
+        </button>
+      </td>
+    </tr>
+  );
+
   const renderRow = (item) => {
     switch (activeTab) {
       case "events": return renderEventRow(item);
       case "promotions": return renderPromotionRow(item);
       case "access": return renderAccessRow(item);
+      case "students": return renderStudentRow(item);
       default: return null;
     }
   };
