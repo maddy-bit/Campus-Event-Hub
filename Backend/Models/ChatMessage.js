@@ -20,8 +20,11 @@ const chatMessageSchema = new mongoose.Schema({
   },
   createdAt: {
     type: Date,
-    default: Date.now,
-    expires: 600 // TTL index: documents expire 10 minutes 
+    default: Date.now
+  },
+  expiresAt: {
+    type: Date,
+    index: { expires: 0 } // TTL index: deletes document when current time >= expiresAt
   }
 });
 

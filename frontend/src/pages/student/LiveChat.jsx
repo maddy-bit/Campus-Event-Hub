@@ -20,6 +20,7 @@ const LiveChat = () => {
   const [timeLeft, setTimeLeft] = useState(null); // in seconds
   const [isExpired, setIsExpired] = useState(false);
   const [peerId, setPeerId] = useState(null);
+  const peerIdRef = useRef(null);
 
   const messagesEndRef = useRef(null);
 
@@ -80,6 +81,7 @@ const LiveChat = () => {
           setIsExpired(true);
         } else {
           setTimeLeft(diffSeconds);
+          peerIdRef.current = res.peerId;
           setPeerId(res.peerId);
         }
         
@@ -100,7 +102,7 @@ const LiveChat = () => {
     });
 
     newSocket.on("peerDisconnected", (data) => {
-      if (data.userId === peerId) {
+      if (data.userId === peerIdRef.current) {
         toast.info("Peer disconnected.");
         setIsExpired(true);
       }
@@ -112,7 +114,7 @@ const LiveChat = () => {
         newSocket.disconnect();
       }
     };
-  }, [currentUser, connectionId, peerId]);
+  }, [currentUser, connectionId]);
 
   // Timer Countdown
   useEffect(() => {

@@ -135,7 +135,8 @@ const NetworkRoom = () => {
     return () => {
       newSocket.disconnect();
     };
-  }, [selectedEventId, currentUser, navigate]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedEventId, currentUser]);
 
   // Actions
   const handleSendRequest = (peerId) => {

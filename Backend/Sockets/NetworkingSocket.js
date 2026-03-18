@@ -157,7 +157,7 @@ const networkingSocket = (io) => {
         // Notify recipient immediately
         io.to(recipient.socketId).emit("incomingConnectRequest", {
           connectionId: newConnection._id,
-          requester: requester.profile
+          requester: { ...requester.profile, userId: requesterId }
         });
 
         if (callback) callback({ success: true, connectionId: newConnection._id });
@@ -231,7 +231,8 @@ const networkingSocket = (io) => {
         const msg = await ChatMessageModel.create({
           connectionId,
           senderId,
-          content: text
+          content: text,
+          expiresAt: connection.chatExpiresAt
         });
 
         // Figure out recipient ID
