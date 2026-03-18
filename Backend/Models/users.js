@@ -58,6 +58,7 @@ const userSchema = new mongoose.Schema(
       },
     },
 
+
     interests: {
       type: [String],
       default: function () {

@@ -39,13 +39,16 @@ const ERegistrationSchema = new mongoose.Schema({
     min:1
   }
 },{ timestamps: true });
+// Only unique per user+event (one registration per person)
 ERegistrationSchema.index(
   { eventId: 1, userId: 1 },
   { unique: true }
 );
+
+// Optional: Keep seat index but don't force unique if it's not and make it partial if it is
 ERegistrationSchema.index(
   { eventId: 1, seatNumber: 1 },
-  { unique: true, sparse: true }
+  { sparse: true }
 );
 const ERegistrationModel = mongoose.model('ERegistration', ERegistrationSchema);
 module.exports = { ERegistrationModel };

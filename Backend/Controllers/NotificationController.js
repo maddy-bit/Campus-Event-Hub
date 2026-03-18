@@ -121,19 +121,37 @@ const getMyNotifications = async (req, res) => {
     const userRole = req.user.role;
     const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
-    // find event-based notifications (for students and any registered user)
+    // 1. Find event-based notifications
     const registrations = await ERegistrationModel.find({ userId }).select("eventId");
     const eventIds = registrations.map(r => r.eventId);
 
     let query = { channel: "In-App", $or: [] };
 
+    // Standard student notifications (All Participants)
     if (eventIds.length > 0) {
-      query.$or.push({ event: { $in: eventIds } });
+      query.$or.push({ 
+        event: { $in: eventIds },
+        recipientType: "All Participants" 
+      });
     }
 
-    // for organizers, also find notifications sent to their club
-    if (userRole === "organizer" && req.user.clubId) {
-      query.$or.push({ club: req.user.clubId });
+    // Targeted notifications specifically for this user
+    query.$or.push({ recipient: userId });
+
+    // For organizers, also find notifications sent to their club OR specifically marked for Organizers of their events
+    if (userRole === "organizer") {
+      if (req.user.clubId) {
+        query.$or.push({ club: req.user.clubId });
+      }
+      // Also get notifications for events they created that are marked for "Organizer"
+      const myCreatedEvents = await EventModel.find({ createdBy: userId }).select("_id");
+      const myEventIds = myCreatedEvents.map(e => e._id);
+      if (myEventIds.length > 0) {
+        query.$or.push({ 
+          event: { $in: myEventIds },
+          recipientType: "Organizer"
+        });
+      }
     }
 
     if (query.$or.length === 0) {

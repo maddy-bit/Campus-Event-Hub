@@ -17,6 +17,8 @@ import {
   Sparkles,
   User,
   LogOutIcon,
+  Tag,
+  Plus
 } from "lucide-react";
 import api from "../../api";
 import { useNavigate } from "react-router-dom";
@@ -28,6 +30,7 @@ const ProfilePortal = () => {
   const [uploading, setUploading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({});
+  const [interestInput, setInterestInput] = useState("");
   const fileInputRef = useRef(null);
     const navigate = useNavigate();
 
@@ -58,7 +61,9 @@ const ProfilePortal = () => {
 
       department: user?.department || "",
       yearOfStudy: user?.yearOfStudy || "",
+      interests: user?.interests || [],
     });
+    setInterestInput("");
     setIsEditing(true);
   };
  
@@ -296,6 +301,31 @@ const ProfilePortal = () => {
             </div>
           </div>
         </div>
+
+        {/* ── INTERESTS ── */}
+        <div className="bg-white border-4 border-black shadow-[6px_6px_0px_#000] overflow-hidden mb-6">
+          <div className="bg-black text-white px-5 py-3 flex items-center justify-between">
+             <div className="flex items-center gap-2">
+              <Tag size={14} />
+              <span className="font-black text-sm">NETWORKING_INTERESTS</span>
+            </div>
+            <span className="text-[10px] uppercase font-bold text-gray-400">Match with peers</span>
+          </div>
+          <div className="p-5 flex flex-wrap gap-2.5">
+            {user.interests && user.interests.length > 0 ? (
+              user.interests.map((interest, idx) => (
+                <span
+                  key={idx}
+                  className="border-[2px] border-black text-black text-[10px] font-black px-3 py-1.5 shadow-[2px_2px_0px_#000] uppercase tracking-wider bg-[#c6ff00]"
+                >
+                  {interest}
+                </span>
+              ))
+            ) : (
+              <p className="text-sm font-bold text-gray-400 italic">No interests added yet. Add some to start networking!</p>
+            )}
+          </div>
+        </div>
  
         {/* ── ACCOUNT META ── */}
         <div className="bg-[#c2d9ff] border-4 border-black shadow-[6px_6px_0px_#000] p-5 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -370,6 +400,57 @@ const ProfilePortal = () => {
                   />
                 </div>
               ))}
+
+              {/* Interests Input */}
+              <div>
+                <label className="text-[9px] font-black text-gray-400 mb-1.5 block uppercase">
+                  Networking Interests
+                </label>
+                <div className="flex gap-2 mb-3">
+                  <input
+                    type="text"
+                    value={interestInput}
+                    onChange={(e) => setInterestInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (interestInput.trim() && !editForm.interests?.includes(interestInput.trim().toUpperCase())) {
+                          setEditForm(prev => ({ ...prev, interests: [...(prev.interests || []), interestInput.trim().toUpperCase()] }));
+                          setInterestInput("");
+                        }
+                      }
+                    }}
+                    placeholder="e.g. AI, REACT, UI/UX"
+                    className="flex-1 border-3 border-black p-3 font-bold text-sm focus:outline-none focus:bg-[#fff8e1] transition-colors uppercase"
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      if (interestInput.trim() && !editForm.interests?.includes(interestInput.trim().toUpperCase())) {
+                        setEditForm(prev => ({ ...prev, interests: [...(prev.interests || []), interestInput.trim().toUpperCase()] }));
+                        setInterestInput("");
+                      }
+                    }}
+                    className="bg-[#c6ff00] border-3 border-black px-4 flex items-center justify-center shadow-[4px_4px_0px_#000] hover:bg-black hover:text-[#c6ff00] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_#000] transition-all"
+                  >
+                    <Plus size={20} className="stroke-[3px]" />
+                  </button>
+                </div>
+                
+                {/* Interest Tags Display */}
+                <div className="flex flex-wrap gap-2">
+                  {editForm.interests?.map((interest, idx) => (
+                    <span
+                      key={idx}
+                      className="border-[2px] border-black text-black text-[10px] font-black px-2 py-1 flex items-center gap-1 shadow-[2px_2px_0px_#000] uppercase tracking-wider bg-white cursor-pointer hover:bg-red-400 hover:text-white transition-colors group"
+                      onClick={() => setEditForm(prev => ({ ...prev, interests: prev.interests.filter(i => i !== interest) }))}
+                    >
+                      {interest}
+                      <X size={10} className="group-hover:text-white" />
+                    </span>
+                  ))}
+                </div>
+              </div>
  
               {/* Save Button */}
               <button
