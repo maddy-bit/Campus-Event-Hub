@@ -18,6 +18,9 @@ const {
   getPendingPromotions,
   promoteToOrganizer,
   denyPromotion,
+  getPendingStudents,
+  approveStudent,
+  rejectStudent,
   getPendingAccessRequests,
   grantAccessRequest,
   rejectAccessRequest,
@@ -64,6 +67,11 @@ router.patch("/registrations/:id/review", reviewCrossCollegeRegistration);
 router.get("/promotions/pending", getPendingPromotions);
 router.patch("/promotions/:id/approve", promoteToOrganizer);
 router.patch("/promotions/:id/deny", denyPromotion);
+
+// student registration approval
+router.get("/students/pending", getPendingStudents);
+router.patch("/students/:id/approve", approveStudent);
+router.patch("/students/:id/reject", rejectStudent);
 
 // event access requests
 router.get("/access-requests/pending", getPendingAccessRequests);

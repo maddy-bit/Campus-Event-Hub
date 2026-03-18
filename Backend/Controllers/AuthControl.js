@@ -46,6 +46,7 @@ const signup = async (req, res) => {
     userToSave.yearOfStudy = yearOfStudy;
     userToSave.password = hashedPassword;
     userToSave.isEmailVerified = false;
+    userToSave.isApproved = false;
     userToSave.emailVerificationToken = emailOtp;
     userToSave.emailVerificationExpiry = Date.now() + 10 * 60 * 1000;
 
@@ -167,6 +168,10 @@ const login = async (req, res) => {
 
     if (!user.isEmailVerified) {
       return res.status(403).json({ message: "Please register first" });
+    }
+
+    if (user.isApproved === false) {
+      return res.status(403).json({ message: "Your account is pending approval by your college admin." });
     }
 
     const token = jwt.sign(

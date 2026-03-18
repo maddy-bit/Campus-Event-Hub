@@ -798,6 +798,74 @@ const deleteUser = async (req, res) => {
   }
 };
 
+const getPendingStudents = async (req, res) => {
+  try {
+    const students = await UserModel.find({
+      collegeId: req.user.collegeId,
+      role: "student",
+      isApproved: false,
+      isDeleted: false
+    }).select("-password").sort({ createdAt: -1 });
+
+    res.status(200).json({ count: students.length, students });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch pending students", error: err.message });
+  }
+};
+
+const approveStudent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await UserModel.findById(id);
+
+    if (!user) return res.status(404).json({ message: "Student not found" });
+    if (user.collegeId.toString() !== req.user.collegeId.toString()) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    user.isApproved = true;
+    await user.save();
+
+    await NotificationModel.create({
+      recipient: user._id,
+      recipientType: "Student",
+      title: "Account Approved",
+      message: `Welcome ${user.fullName}! Your account has been approved by the college admin. You can now login and explore events.`,
+      type: "Submission_Update",
+      sender: req.user._id,
+      status: "Sent",
+      reachCount: 1,
+    });
+
+    res.status(200).json({ message: "Student approved successfully", user });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to approve student", error: err.message });
+  }
+};
+
+const rejectStudent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+
+    if (!reason || !reason.trim()) {
+      return res.status(400).json({ message: "Rejection reason is required" });
+    }
+
+    const user = await UserModel.findById(id);
+    if (!user || user.collegeId.toString() !== req.user.collegeId.toString()) {
+      return res.status(404).json({ message: "Student not found or unauthorized" });
+    }
+
+    user.isDeleted = true;
+    await user.save();
+
+    res.status(200).json({ message: "Student registration rejected and account removed." });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to reject student", error: err.message });
+  }
+};
+
 const Profiledata = async (req, res) => {
   try {
     const id= req.user._id    
@@ -826,6 +894,9 @@ module.exports = {
   getPendingPromotions,
   promoteToOrganizer,
   denyPromotion,
+  getPendingStudents,
+  approveStudent,
+  rejectStudent,
   getPendingAccessRequests,
   grantAccessRequest,
   rejectAccessRequest,
