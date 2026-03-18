@@ -166,7 +166,7 @@ const LiveChat = () => {
   // --- RENDER ---
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F4F4EB] flex flex-col items-center justify-center font-mono">
+      <div className="flex flex-col items-center justify-center font-mono py-20">
         <Loader2 className="animate-spin mb-4" size={48} />
         <p className="font-black uppercase tracking-widest text-sm text-black">ESTABLISHING_SECURE_LINK...</p>
       </div>
@@ -175,17 +175,17 @@ const LiveChat = () => {
 
   if (isExpired) {
     return (
-      <div className="min-h-screen bg-[#F4F4EB] flex flex-col items-center justify-center font-mono p-8 text-center text-black">
-        <div className="bg-white border-[4px] border-black p-12 shadow-[12px_12px_0px_#000] max-w-lg w-full">
+      <div className="flex flex-col items-center justify-center font-mono p-4 text-center text-black">
+        <div className="bg-white border-[4px] border-black p-8 shadow-[8px_8px_0px_#000] max-w-lg w-full">
           <AlertTriangle size={64} className="mb-6 opacity-30 mx-auto" strokeWidth={1.5} />
-          <h1 className="text-4xl font-black uppercase mb-4 tracking-tighter">CONNECTION_TERMINATED</h1>
-          <p className="font-bold text-gray-500 uppercase tracking-widest mb-8 leading-relaxed">
+          <h1 className="text-3xl font-black uppercase mb-4 tracking-tighter leading-none">CONNECTION_TERMINATED</h1>
+          <p className="font-bold text-gray-500 uppercase tracking-widest mb-8 text-[10px] leading-relaxed">
             The networking window is closed. 
             Your session data is being cleared for privacy.
           </p>
           <button 
             onClick={() => navigate("/student/network")}
-            className="w-full bg-[#c6ff00] border-[4px] border-black py-5 font-black text-sm uppercase tracking-widest hover:bg-black hover:text-[#c6ff00] transition-colors shadow-[6px_6px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[4px_4px_0px_#111]"
+            className="w-full bg-[#c6ff00] border-[4px] border-black py-4 font-black text-sm uppercase tracking-widest hover:bg-black hover:text-[#c6ff00] transition-colors shadow-[4px_4px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-[2px_2px_0px_#111]"
           >
             RETURN_TO_LOBBY
           </button>
@@ -197,8 +197,8 @@ const LiveChat = () => {
   const isLowTime = timeLeft !== null && timeLeft <= 60;
 
   return (
-    <div className="h-screen bg-[#F4F4EB] font-mono flex flex-col p-2 md:p-8 selection:bg-black selection:text-[#c6ff00]">
-      <div className="max-w-4xl w-full mx-auto flex flex-col h-full bg-white border-[4px] border-black shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden">
+    <div className="font-mono flex flex-col selection:bg-black selection:text-[#c6ff00]">
+      <div className="max-w-4xl w-full mx-auto flex flex-col h-[70vh] md:h-[80vh] bg-white border-[4px] border-black shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden">
         
         {/* Header */}
         <div className="border-b-[4px] border-black p-4 md:p-6 flex justify-between items-center bg-white z-20 shrink-0">

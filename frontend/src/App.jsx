@@ -131,12 +131,10 @@ function App() {
           <Route path="notification" element={<Notification />} />
           <Route path="registrations" element={<Registrations />} />
           <Route path="events/:id" element={<EventDetails />} />
+          <Route path="search" element={<SearchUsers />} />
+          <Route path="network" element={<NetworkRoom />} />
+          <Route path="chat/:connectionId" element={<LiveChat />} />
         </Route>
-
-        {/* Standalone student pages without layout */}
-        <Route path="/student/search" element={<SearchUsers />} />
-        <Route path="/student/network" element={<NetworkRoom />} />
-        <Route path="/student/chat/:connectionId" element={<LiveChat />} />
 
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />

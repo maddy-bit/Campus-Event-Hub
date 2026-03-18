@@ -253,7 +253,7 @@ const NetworkRoom = () => {
   });
 
   return (
-    <div className="min-h-screen bg-[#F4F4EB] font-mono p-4 md:p-8 selection:bg-[#c6ff00] selection:text-black relative">
+    <div className="font-mono selection:bg-[#c6ff00] selection:text-black relative">
       <div className="max-w-6xl mx-auto flex flex-col items-center pb-24">
         
         {/* Header & Back Action */}

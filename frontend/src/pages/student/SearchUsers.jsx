@@ -72,7 +72,7 @@ const SearchUsers = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F4F4EB] p-8 md:p-16 font-mono selection:bg-[#c6ff00] selection:text-black">
+    <div className="font-mono selection:bg-[#c6ff00] selection:text-black">
       <div className="max-w-6xl mx-auto flex flex-col items-center">
         
         {/* Search Bar */}

@@ -125,8 +125,8 @@ const StudentSidebar = () => {
         </div>
       </aside>
 
-      {/* ── Mobile Bottom Nav (floating) — NO logo on mobile ── */}
-      <nav className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] bg-white border-3 border-black shadow-[5px_5px_0px_#000] z-50 flex items-center justify-around py-2 px-1">
+      {/* ── Mobile Bottom Nav (Docked) ── */}
+      <nav className="md:hidden fixed bottom-0 left-0 w-full bg-white border-t-2 border-black z-50 flex items-center justify-around py-3 px-2 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
         {[...menuItems, ...bottomItems].map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
