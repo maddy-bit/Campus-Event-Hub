@@ -7,6 +7,7 @@ import {
   User,
   LogOut,
   Zap,
+  Users
 } from "lucide-react";
 import api from "../api";
 import { toast } from "sonner";
@@ -14,6 +15,7 @@ import { toast } from "sonner";
 const menuItems = [
   { name: "Events", path: "/student/events", icon: CalendarDays },
   { name: "Tickets", path: "/student/registrations", icon: Ticket },
+  { name: "Network", path: "/student/network", icon: Users },
   { name: "Notifs", path: "/student/notification", icon: Bell },
 ];
 

@@ -57,13 +57,14 @@ const getProfile = async (req, res) => {
 const updateBasicProfile = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { fullName, phoneNumber, department, yearOfStudy } = req.body;
+    const { fullName, phoneNumber, department, yearOfStudy, interests } = req.body;
 
     const updateData = {};
     if (fullName) updateData.fullName = fullName;
     if (phoneNumber) updateData.phoneNumber = phoneNumber;
     if (department) updateData.department = department;
     if (yearOfStudy) updateData.yearOfStudy = yearOfStudy;
+    if (interests && Array.isArray(interests)) updateData.interests = interests;
 
     const updatedUser = await UserModel.findByIdAndUpdate(
       userId,

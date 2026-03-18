@@ -41,6 +41,8 @@ import StudentProfile from "./pages/student/Profile";
 import Notification from "./pages/student/Notification";
 import Registrations from "./pages/student/Registrations";
 import SearchUsers from "./pages/student/SearchUsers";
+import NetworkRoom from "./pages/student/NetworkRoom";
+import LiveChat from "./pages/student/LiveChat";
 import ViewInstitutions from "./pages/superadmin/ViewInstitutions";
 import CollegeDetail from "./pages/superadmin/CollegeDetail";
 import SuperAdminEvents from "./pages/superadmin/Events";
@@ -133,6 +135,8 @@ function App() {
 
         {/* Standalone student pages without layout */}
         <Route path="/student/search" element={<SearchUsers />} />
+        <Route path="/student/network" element={<NetworkRoom />} />
+        <Route path="/student/chat/:connectionId" element={<LiveChat />} />
 
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />

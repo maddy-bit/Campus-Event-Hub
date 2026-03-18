@@ -15,7 +15,9 @@ const PORT = process.env.PORT || 3000;
 /* ---------------- SECURITY MIDDLEWARE ---------------- */
 
 // Helmet helps secure Express apps by setting various HTTP headers
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+}));
 
 // Rate limiting to prevent brute-force/DoS attacks
 const limiter = rateLimit({
@@ -82,8 +84,25 @@ app.use((err, req, res, next) => {
   });
 });
 
-/* ---------------- SERVER ---------------- */
+/* ---------------- SERVER & SOCKETS ---------------- */
 
-app.listen(PORT, () => {
+const http = require('http');
+const { Server } = require('socket.io');
+
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: process.env.CLIENT_URL || '*',
+    methods: ["GET", "POST"],
+    credentials: true,
+  }
+});
+
+// Initialize Networking Socket
+const networkingSocket = require('./Sockets/NetworkingSocket');
+networkingSocket(io);
+
+server.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });

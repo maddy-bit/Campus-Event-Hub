@@ -32,25 +32,7 @@ const registerForEvent = async (req, res) => {
         .json({ message: "Registration deadline has passed" });
     }
 
-   const updatedEvent = await EventModel.findOneAndUpdate(
-  {
-    _id: eventId,
-    $or: [
-      { seatsFilled: { $lt: event.maxSeats } },
-      { seatsFilled: { $exists: false } },
-      { seatsFilled: null }
-    ]
-  },
-  {
-    $inc: { seatsFilled: 1 }
-  },
-  { new: true }
-);
-
-if (!updatedEvent) {
-  return res.status(400).json({ message: "Event is full" });
-}
-
+    // 1. CHECK IF ALREADY REGISTERED FIRST (prevents seat count leaks)
     const existingRegistration = await ERegistrationModel.findOne({
       userId,
       eventId,
@@ -61,7 +43,27 @@ if (!updatedEvent) {
         .json({ message: "You are already registered for this event" });
     }
 
-    // check if cross-college
+    // 2. INCREMENT SEATS AND CHECK LIMIT (concurrency safe)
+    const updatedEvent = await EventModel.findOneAndUpdate(
+      {
+        _id: eventId,
+        $or: [
+          { seatsFilled: { $lt: event.maxSeats } },
+          { seatsFilled: { $exists: false } },
+          { seatsFilled: null }
+        ]
+      },
+      {
+        $inc: { seatsFilled: 1 }
+      },
+      { new: true }
+    );
+
+    if (!updatedEvent) {
+      return res.status(400).json({ message: "Event is full" });
+    }
+
+    // 3. PROCEED TO CREATE REGISTRATION
     const student = await UserModel.findById(userId);
     const isCrossCollege =
       student.collegeId.toString() !== event.collegeId.toString();
@@ -73,33 +75,38 @@ if (!updatedEvent) {
       paymentAmount: paymentAmount || 0,
       isCrossCollege,
       status: isCrossCollege ? "Pending_Approval" : "Registered",
-       ticketType: event.isPaidEvent ? "Paid" : "Free",
-
-  payment: {
-    amount: event.ticketPrice || 0,
-    currency: "INR",
-    status: event.isPaidEvent ? "Pending" : "Completed"
-  }
+      ticketType: event.isPaidEvent ? "Paid" : "Free",
+      payment: {
+        amount: event.ticketPrice || 0,
+        currency: "INR",
+        status: event.isPaidEvent ? "Pending" : "Completed"
+      }
     });
 
-    await registration.save();
+    try {
+      await registration.save();
+    } catch (saveErr) {
+      // If saving fails (e.g. database error), we must decerement seatsFilled since we incremented it already
+      await EventModel.findByIdAndUpdate(eventId, { $inc: { seatsFilled: -1 } });
+      
+      if (saveErr.code === 11000) {
+        return res.status(400).json({
+          message: "You are already registered for this event"
+        });
+      }
+      throw saveErr; // bubble up for generic 500
+    }
 
     res.status(201).json({
       message: isCrossCollege
         ? "Registration submitted. Pending admin approval for cross-college event."
         : "Registration successful",
-       registrationId: registration._id,
-  eventId: registration.eventId,
-
-  paymentRequired: event.isPaidEvent,
-  paymentStatus: registration.payment?.status||"Pending"
+      registrationId: registration._id,
+      eventId: registration.eventId,
+      paymentRequired: event.isPaidEvent,
+      paymentStatus: registration.payment?.status || "Pending"
     });
   } catch (err) {
-     if (err.code === 11000) {
-    return res.status(400).json({
-      message: "You are already registered for this event"
-    });
-  }
     console.error("Register for event error:", err);
     res
       .status(500)
