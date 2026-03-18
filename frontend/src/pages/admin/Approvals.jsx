@@ -522,7 +522,7 @@ const Approvals = () => {
                 <td colSpan={4}>
                   <div className="approvals-empty">
                     <Check size={36} strokeWidth={1.5} />
-                    <p>No pending {activeTab === "events" ? "event approvals" : activeTab === "promotions" ? "promotion requests" : "access requests"}.</p>
+                    <p>No pending {activeTab === "events" ? "event approvals" : activeTab === "promotions" ? "promotion requests" : activeTab === "access" ? "access requests" : "student registrations"}.</p>
                     <span>You're all caught up!</span>
                   </div>
                 </td>
