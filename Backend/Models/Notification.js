@@ -42,9 +42,14 @@ const notificationSchema = new mongoose.Schema(
         "Pending Payment",
         "Volunteers",
         "Waitlisted",
+        "Organizer",
       ],
       default: "All Participants",
       required: true,
+    },
+    recipient: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
     sender: {
       type: mongoose.Schema.Types.ObjectId,

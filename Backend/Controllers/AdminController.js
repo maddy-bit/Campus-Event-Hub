@@ -62,6 +62,7 @@ const approveEvent = async (req, res) => {
       message: `Your event "${event.title}" has been approved.`,
       event: event._id,
       type: "Submission_Update",
+      recipientType: "Organizer",
       sender: req.user._id,
       status: "Sent",
       reachCount: 1,
@@ -109,6 +110,7 @@ const rejectEvent = async (req, res) => {
       message: `Your event "${event.title}" was rejected. Reason: ${reason}`,
       event: event._id,
       type: "Submission_Update",
+      recipientType: "Organizer",
       sender: req.user._id,
       status: "Sent",
       reachCount: 1,
@@ -408,16 +410,28 @@ const reviewCrossCollegeRegistration = async (req, res) => {
     registration.status = action === "approve" ? "Registered" : "Cancelled";
     await registration.save();
 
-    // Notify the event organizer about the decision
+    // Notify the student about the decision
+    await NotificationModel.create({
+      title: action === "approve" ? "Registration Approved" : "Registration Rejected",
+      message: action === "approve" 
+        ? `Great news! Your registration for "${registration.eventId.title}" has been approved.`
+        : `Your registration for "${registration.eventId.title}" was declined. Reason: ${reason}`,
+      event: registration.eventId._id,
+      recipient: registration.userId._id,
+      recipientType: "All Participants", 
+      sender: req.user._id,
+      status: "Sent",
+    });
+
+    // Notify the event organizer if it was a rejection (so they know why a student isn't joining)
     if (action === "reject" && registration.eventId?.createdBy) {
       await NotificationModel.create({
         title: "Access Request Rejected",
-        message: `Access request by "${registration.userId.fullName}" for "${registration.eventId.title}" was rejected. Reason: ${reason}`,
+        message: `Access request by "${registration.userId.fullName}" for "${registration.eventId.title}" was rejected by Admin. Reason: ${reason}`,
         event: registration.eventId._id,
-        type: "Submission_Update",
+        recipientType: "Organizer",
         sender: req.user._id,
         status: "Sent",
-        reachCount: 1,
       });
     }
 
@@ -594,6 +608,7 @@ const promoteToOrganizer = async (req, res) => {
       title: "Promotion Approved",
       message: `Congratulations! You have been promoted to Organizer role.`,
       type: "Submission_Update",
+      recipient: user._id,
       sender: req.user._id,
       status: "Sent",
       reachCount: 1,
@@ -629,6 +644,7 @@ const denyPromotion = async (req, res) => {
       title: "Promotion Request Denied",
       message: `Your request to become an organizer was denied. Reason: ${reason}`,
       type: "Submission_Update",
+      recipient: user._id,
       sender: req.user._id,
       status: "Sent",
       reachCount: 1,

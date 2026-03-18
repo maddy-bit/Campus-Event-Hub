@@ -2,6 +2,7 @@ const { ERegistrationModel } = require("../Models/ERegistration");
 const { EventModel } = require("../Models/event");
 const { EventCommentModel } = require("../Models/EventComment");
 const { UserModel } = require("../Models/users");
+const { NotificationModel } = require("../Models/Notification");
 
 // routes for comment posting and getting are here
 
@@ -95,6 +96,33 @@ const registerForEvent = async (req, res) => {
         });
       }
       throw saveErr; // bubble up for generic 500
+    }
+
+    // 4. TRIGGER NOTIFICATIONS
+    try {
+      // Notify Student
+      await NotificationModel.create({
+        title: "Registration Confirmed",
+        message: `You're in! You have successfully registered for "${event.title}".`,
+        event: eventId,
+        recipient: userId,
+        recipientType: "All Participants", // It's to them specifically, but matches their view filter
+        sender: event.createdBy, 
+        status: "Sent",
+      });
+
+      // Notify Organizer
+      await NotificationModel.create({
+        title: "New Registration",
+        message: `User "${student.fullName}" has joined your event "${event.title}".`,
+        event: eventId,
+        recipientType: "Organizer", 
+        sender: userId, 
+        status: "Sent",
+      });
+    } catch (notifyErr) {
+      console.error("Failed to send registration notifications:", notifyErr);
+      // We don't want to fail the whole registration if notifications fail
     }
 
     res.status(201).json({
