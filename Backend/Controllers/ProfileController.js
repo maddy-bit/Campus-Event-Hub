@@ -3,6 +3,8 @@ const { ClubModel } = require("../Models/club");
 const bcrypt = require("bcryptjs");
 const cloudinary = require("../Config/cloudinary");
 
+const { ConnectionModel } = require("../Models/Connection");
+
 // Helper: upload buffer to Cloudinary using upload_stream
 const uploadToCloudinary = (fileBuffer, options) => {
   return new Promise((resolve, reject) => {
@@ -319,7 +321,48 @@ const getCollegeClubs = async (req, res) => {
   }
 };
 
+// get active chat connection for floating button
+const getActiveConnection = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const now = new Date();
+    // find an accepted connection where chatExpiresAt is in the future
+    const connection = await ConnectionModel.findOne({
+      $or: [{ requesterId: userId }, { recipientId: userId }],
+      status: 'Accepted',
+      chatExpiresAt: { $gt: now }
+    }).populate('requesterId', 'fullName profilePicture')
+      .populate('recipientId', 'fullName profilePicture');
+
+    if (!connection) {
+      return res.status(200).json({ success: true, active: false });
+    }
+
+    // Determine peer details for frontend
+    const isRequester = connection.requesterId._id.toString() === userId.toString();
+    const peer = isRequester ? connection.recipientId : connection.requesterId;
+
+    return res.status(200).json({
+      success: true,
+      active: true,
+      data: {
+        connectionId: connection._id,
+        chatExpiresAt: connection.chatExpiresAt,
+        peer: {
+          _id: peer._id,
+          fullName: peer.fullName,
+          profilePicture: peer.profilePicture
+        }
+      }
+    });
+
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Error fetching active connection", error: error.message });
+  }
+};
+
 module.exports = {
+  getActiveConnection,
   getProfile,
   updateBasicProfile,
   updateClubInfo,

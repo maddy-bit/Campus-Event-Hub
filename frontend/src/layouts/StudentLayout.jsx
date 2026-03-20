@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import StudentSidebar from "../components/StudentSidebar";
 import Header from "../components/Header";
+import FloatingChatButton from "../components/FloatingChatButton";
 
 const StudentLayout = () => {
   return (
@@ -21,6 +22,7 @@ const StudentLayout = () => {
         </div>
       </div>
 
+      <FloatingChatButton />
     </div>
   );
 };

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {
+  getActiveConnection,
   getProfile,
   updateBasicProfile,
   updateClubInfo,
@@ -24,6 +25,8 @@ router.post('/upload/club-logo', verifyToken, checkOrganizerRole, upload.single(
 router.delete('/profile-picture', verifyToken, deleteProfilePicture);
 router.delete('/club-logo', verifyToken, checkOrganizerRole, deleteClubLogo);
 router.put('/change-password', verifyToken, changePassword);
+
+router.get('/active-connection', verifyToken, getActiveConnection);
 
 router.get('/:userId?', verifyToken, getProfile);
 
