@@ -23,6 +23,10 @@ const signup = async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
+    if(phoneNumber.length < 10){
+      return res.status(400).json({ message: "Please enter a valid phone number" });
+    }
+
     // verify college exists
     const college = await CollegeModel.findById(collegeId);
     if (!college) {

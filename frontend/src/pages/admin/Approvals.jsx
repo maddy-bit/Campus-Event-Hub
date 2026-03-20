@@ -66,7 +66,7 @@ const RejectModal = ({ show, onClose, onSubmit, title }) => {
       <div className="approval-modal-content" onClick={(e) => e.stopPropagation()}>
         <h3>{title || "Rejection Reason"}</h3>
         <p className="approval-modal-desc">
-          Please provide a reason. This will be sent as a notification to the organizer of this event.
+          Please provide a reason. This will be sent as a notification to the User.
         </p>
         <textarea
           value={reason}

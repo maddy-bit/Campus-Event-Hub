@@ -5,6 +5,7 @@ const { ERegistrationModel } = require("../Models/ERegistration");
 const { ClubModel } = require("../Models/club");
 const { NotificationModel } = require("../Models/Notification");
 const cloudinary = require("../Config/cloudinary");
+const sendEmail = require("../utils/sendEmail");
 
 // Helper: upload buffer to Cloudinary using upload_stream
 const uploadToCloudinary = (fileBuffer, options) => {
@@ -853,6 +854,23 @@ const approveStudent = async (req, res) => {
       reachCount: 1,
     });
 
+    console.log("approving");
+    
+
+    await sendEmail({
+  to: user.email,
+  subject: "Account Approved",
+  html: `
+    <p>Hello ${user.fullName},</p>
+    <p>Your account on <b>CampusEventHub</b> has been approved.</p>
+    <p>You can now login and explore events.</p>
+    <br/>
+    <p>Best regards,<br/>CampusEventHub Team</p>
+  `,
+});
+
+    console.log("email sent");
+    
     res.status(200).json({ message: "Student approved successfully", user });
   } catch (err) {
     res.status(500).json({ message: "Failed to approve student", error: err.message });
@@ -873,9 +891,26 @@ const rejectStudent = async (req, res) => {
       return res.status(404).json({ message: "Student not found or unauthorized" });
     }
 
+
+    await sendEmail({
+  to: user.email,
+  subject: "Account Rejected",
+  html: `
+    <p>Hello ${user.fullName},</p>
+    <p>Your account has been rejected.</p>
+    <p><b>Reason:</b> ${reason}</p>
+    <br/>
+    <p>If this is a mistake, contact your college admin.</p>
+    <br/>
+    <p>Best regards,<br/>CampusEventHub Team</p>
+  `,
+});
+
+    console.log("Student rejection email sent");
     user.isDeleted = true;
     await user.save();
-
+    console.log("student rejected");
+    
     res.status(200).json({ message: "Student registration rejected and account removed." });
   } catch (err) {
     res.status(500).json({ message: "Failed to reject student", error: err.message });

@@ -96,21 +96,19 @@ const LiveChat = () => {
     // Handle peer leaving
     newSocket.on("peerLeftChat", (data) => {
       if (data.connectionId === connectionId) {
-        toast.info("Peer has left the session.");
-        setIsExpired(true);
+        toast.info("Peer has left the chat screen, but session is still active.");
       }
     });
 
     newSocket.on("peerDisconnected", (data) => {
       if (data.userId === peerIdRef.current) {
-        toast.info("Peer disconnected.");
-        setIsExpired(true);
+        toast.info("Peer disconnected. They may be switching pages.");
       }
     });
 
     return () => {
       if (newSocket) {
-        newSocket.emit("leaveChat", { connectionId, userId: currentUser._id });
+        // Do NOT emit "leaveChat" to preserve the session
         newSocket.disconnect();
       }
     };
@@ -207,7 +205,6 @@ const LiveChat = () => {
           <div className="flex items-center gap-4">
             <button 
               onClick={() => {
-                if (socket) socket.emit("leaveChat", { connectionId, userId: currentUser._id });
                 navigate("/student/network");
               }}
               className="w-12 h-12 border-[3.5px] border-black flex items-center justify-center bg-white hover:bg-black hover:text-[#c6ff00] transition-all shadow-[3px_3px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#000]"
@@ -224,6 +221,17 @@ const LiveChat = () => {
             <Clock size={24} strokeWidth={3} />
             {formatTime(timeLeft)}
           </div>
+          
+          <button
+            onClick={() => {
+              if (socket) socket.emit("leaveChat", { connectionId, userId: currentUser._id });
+              setIsExpired(true);
+              toast.info("You left the chat permanently.");
+            }}
+            className="ml-4 bg-red-500 text-white border-[3px] border-black px-4 py-2 font-black text-xs uppercase hover:bg-red-600 transition-colors shadow-[3px_3px_0px_#000]"
+          >
+            END CHAT
+          </button>
         </div>
 
         {/* Status Bar */}
