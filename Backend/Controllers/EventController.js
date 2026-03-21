@@ -13,6 +13,25 @@ const uploadToCloudinary = (fileBuffer, options) => {
     stream.end(fileBuffer);
   });
 };
+//helper : strict ddate validation helper
+// ===== STRICT DATE VALIDATION HELPER =====
+const isValidDateStrict = (dateStr) => {
+  const regex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!regex.test(dateStr)) return false;
+
+  const [year, month, day] = dateStr.split("-").map(Number);
+
+  if (month < 1 || month > 12) return false;
+  if (day < 1 || day > 31) return false;
+
+  const date = new Date(dateStr);
+
+  return (
+    date.getFullYear() === year &&
+    date.getMonth() + 1 === month &&
+    date.getDate() === day
+  );
+};
 
 const createEvent = async (req, res) => {
   try {
@@ -33,6 +52,32 @@ const createEvent = async (req, res) => {
 
     if (!title || !description || !eventDate || !startTime || !location || !category || !registrationDeadline) {
       return res.status(400).json({ message: "All required fields must be provided" });
+    }
+    // date validation done 👍
+       if (!isValidDateStrict(eventDate) || !isValidDateStrict(registrationDeadline)) {
+      return res.status(400).json({
+        message: "Date must be in YYYY-MM-DD format and valid"
+      });
+    }
+    
+    const eventDateObj=new Date(eventDate);
+    const deadlineObj=new Date(registrationDeadline);
+
+    const today=new Date();
+    today.setHours(0,0,0,0);
+  
+
+    //event in past
+    if(eventDateObj<today){
+      return res.status(400).json({ message: "Event date cannot be in the past" });
+    }
+    //deadline in past
+    if(deadlineObj<today){
+      return res.status(400).json({ message: "Registration deadline cannot be in the past" });
+    }
+    // deadline after event
+    if (deadlineObj > eventDateObj) {
+      return res.status(400).json({ message: "Registration deadline cannot be after event date" });
     }
 
     // get creator's collegeId
