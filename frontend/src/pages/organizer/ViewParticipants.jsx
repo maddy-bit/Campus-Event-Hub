@@ -270,11 +270,13 @@ const ViewParticipants = () => {
                 </div>
               </div>
 
-              <div className={`grid grid-cols-1 border-b-[3px] border-black ${selectedEvent?.isPaidEvent ? 'md:grid-cols-4' : 'md:grid-cols-3'}`}>
+              <div className="grid grid-cols-1 md:grid-cols-4 border-b-[3px] border-black">
                 <Stat label="REGISTRATIONS" value={stats.total} sub={`of ${selectedEvent.maxSeats}`} color="bg-[#B4F481]" />
                 <Stat label="SEATS LEFT" value={stats.remaining} sub="capacity" color="bg-white" />
-                {selectedEvent?.isPaidEvent && (
+                {selectedEvent?.isPaidEvent ? (
                   <Stat label="PENDING" value={stats.pending} sub="actions" color="bg-[#FFEB69]" />
+                ) : (
+                  <Stat label="STATUS" value="ACTIVE" sub="accepting users" color="bg-[#FFEB69]" />
                 )}
                 <Stat label="COLLEGES" value={stats.uniqueColleges} sub="campuses" color="bg-[#A2D2FF]" />
               </div>
@@ -329,8 +331,10 @@ const ViewParticipants = () => {
                         <th className="p-4 border-r-[2px] border-black w-12">#</th>
                         <th className="p-4 border-r-[2px] border-black">PARTICIPANT</th>
                         <th className="p-4 border-r-[2px] border-black">COLLEGE</th>
-                        {selectedEvent?.isPaidEvent && (
+                        {selectedEvent?.isPaidEvent ? (
                           <th className="p-4 border-r-[2px] border-black">PAYMENT STATUS</th>
+                        ) : (
+                          <th className="p-4 border-r-[2px] border-black">PHONE NUMBER</th>
                         )}
                         <th className="p-4">ACTIONS</th>
                       </tr>
@@ -341,7 +345,7 @@ const ViewParticipants = () => {
                           <td className="p-4 border-r-[2px] border-black">{index + 1}</td>
                           <td className="p-4 border-r-[2px] border-black font-black">{p.userId?.fullName}</td>
                           <td className="p-4 border-r-[2px] border-black">{p.userId?.collegeId?.name}</td>
-                          {selectedEvent?.isPaidEvent && (
+                          {selectedEvent?.isPaidEvent ? (
                             <td className="p-4 border-r-[2px] border-black">
                               <select 
                                 value={p.payment?.status || "Pending"} 
@@ -355,6 +359,8 @@ const ViewParticipants = () => {
                                 <option value="Failed">FAILED</option>
                               </select>
                             </td>
+                          ) : (
+                            <td className="p-4 border-r-[2px] border-black">{p.userId?.phoneNumber || "NOT PROVIDED"}</td>
                           )}
                           <td className="p-4">
                             <div className="flex gap-2">
