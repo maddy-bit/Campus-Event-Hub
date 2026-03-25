@@ -15,13 +15,14 @@ import {
   X,
 } from "lucide-react";
 import api from "../../api";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+
 
 const BrutalistBox = ({ children, className = "", onClick }) => (
   <div
-    onClick={onClick}
-    className={`border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all cursor-pointer bg-white ${className}`}
+  onClick={onClick}
+  className={`border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all cursor-pointer bg-white ${className}`}
   >
     {children}
   </div>
@@ -79,6 +80,8 @@ const App = () => {
       year: "numeric",
     });
   };
+
+  const navigate = useNavigate();
 
   const getStatusStyles = (status) => {
     switch (status?.toLowerCase()) {
@@ -363,7 +366,7 @@ const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
                       </td>
                       <td className="p-4">
                         <div className="flex justify-center gap-2">
-                          <button className="p-1.5 border-2 border-black hover:bg-black hover:text-white transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px]">
+                          <button onClick={(e)=>{navigate("/organizer/view-participants")}} className="p-1.5 border-2 border-black hover:bg-black hover:text-white transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px]">
                             <Eye size={14} />
                           </button>
                           <button
