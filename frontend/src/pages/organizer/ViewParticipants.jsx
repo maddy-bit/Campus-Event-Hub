@@ -185,7 +185,9 @@ const ViewParticipants = () => {
                 <DetailRow label="EMAIL ADDRESS" value={activeParticipant?.userId?.email} />
                 <DetailRow label="COLLEGE" value={activeParticipant?.userId?.collegeId?.name} />
                 <DetailRow label="REGISTRATION ID" value={activeParticipant?._id} />
-                <DetailRow label="PAYMENT STATUS" value={activeParticipant?.payment?.status} isStatus />
+                {selectedEvent?.isPaidEvent && (
+                  <DetailRow label="PAYMENT STATUS" value={activeParticipant?.payment?.status} isStatus />
+                )}
                 <button onClick={closeModals} className="w-full border-4 border-black p-2 mt-4 font-black hover:bg-black hover:text-white transition-all">
                   CLOSE
                 </button>
@@ -271,7 +273,11 @@ const ViewParticipants = () => {
               <div className="grid grid-cols-1 md:grid-cols-4 border-b-[3px] border-black">
                 <Stat label="REGISTRATIONS" value={stats.total} sub={`of ${selectedEvent.maxSeats}`} color="bg-[#B4F481]" />
                 <Stat label="SEATS LEFT" value={stats.remaining} sub="capacity" color="bg-white" />
-                <Stat label="PENDING" value={stats.pending} sub="actions" color="bg-[#FFEB69]" />
+                {selectedEvent?.isPaidEvent ? (
+                  <Stat label="PENDING" value={stats.pending} sub="actions" color="bg-[#FFEB69]" />
+                ) : (
+                  <Stat label="STATUS" value="ACTIVE" sub="accepting users" color="bg-[#FFEB69]" />
+                )}
                 <Stat label="COLLEGES" value={stats.uniqueColleges} sub="campuses" color="bg-[#A2D2FF]" />
               </div>
 
@@ -325,7 +331,11 @@ const ViewParticipants = () => {
                         <th className="p-4 border-r-[2px] border-black w-12">#</th>
                         <th className="p-4 border-r-[2px] border-black">PARTICIPANT</th>
                         <th className="p-4 border-r-[2px] border-black">COLLEGE</th>
-                        <th className="p-4 border-r-[2px] border-black">PAYMENT STATUS</th>
+                        {selectedEvent?.isPaidEvent ? (
+                          <th className="p-4 border-r-[2px] border-black">PAYMENT STATUS</th>
+                        ) : (
+                          <th className="p-4 border-r-[2px] border-black">PHONE NUMBER</th>
+                        )}
                         <th className="p-4">ACTIONS</th>
                       </tr>
                     </thead>
@@ -335,19 +345,23 @@ const ViewParticipants = () => {
                           <td className="p-4 border-r-[2px] border-black">{index + 1}</td>
                           <td className="p-4 border-r-[2px] border-black font-black">{p.userId?.fullName}</td>
                           <td className="p-4 border-r-[2px] border-black">{p.userId?.collegeId?.name}</td>
-                          <td className="p-4 border-r-[2px] border-black">
-                            <select 
-                              value={p.payment?.status || "Pending"} 
-                              onChange={(e) => handleStatusChange(p._id, e.target.value)} 
-                              className={`border-2 border-black font-black px-2 py-1 text-[10px] ${
-                                p.payment?.status === "Completed" ? "bg-[#B4F481]" : "bg-[#FFEB69]"
-                              }`}
-                            >
-                              <option value="Pending">PENDING</option>
-                              <option value="Completed">COMPLETED</option>
-                              <option value="Failed">FAILED</option>
-                            </select>
-                          </td>
+                          {selectedEvent?.isPaidEvent ? (
+                            <td className="p-4 border-r-[2px] border-black">
+                              <select 
+                                value={p.payment?.status || "Pending"} 
+                                onChange={(e) => handleStatusChange(p._id, e.target.value)} 
+                                className={`border-2 border-black font-black px-2 py-1 text-[10px] ${
+                                  p.payment?.status === "Completed" ? "bg-[#B4F481]" : "bg-[#FFEB69]"
+                                }`}
+                              >
+                                <option value="Pending">PENDING</option>
+                                <option value="Completed">COMPLETED</option>
+                                <option value="Failed">FAILED</option>
+                              </select>
+                            </td>
+                          ) : (
+                            <td className="p-4 border-r-[2px] border-black">{p.userId?.phoneNumber || "NOT PROVIDED"}</td>
+                          )}
                           <td className="p-4">
                             <div className="flex gap-2">
                               <button 
