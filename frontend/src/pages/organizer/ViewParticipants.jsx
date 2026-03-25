@@ -342,7 +342,7 @@ const ViewParticipants = () => {
                     <tbody>
                       {filteredParticipants.map((p, index) => (
                         <tr key={p._id} className="border-b-[2px] border-black hover:bg-[#F3F3F3]">
-                          <td className="p-4 border-r-[2px] border-black">{index + 1}</td>
+                          <td className="p-4  border-r-[2px] border-black">{index + 1}</td>
                           <td className="p-4 border-r-[2px] border-black font-black">{p.userId?.fullName}</td>
                           <td className="p-4 border-r-[2px] border-black">{p.userId?.collegeId?.name}</td>
                           {selectedEvent?.isPaidEvent ? (

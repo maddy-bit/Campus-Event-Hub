@@ -394,7 +394,7 @@ th {
     letter-spacing: 0.5px;
 }
 
-td {
+.tableData {
     padding: 1.25rem 0;
     border-bottom: 1px solid #f8f9fa;
     font-size: 0.875rem;

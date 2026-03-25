@@ -362,20 +362,20 @@ const Dashboard = () => {
               <tbody>
                 {top5Submissions.map((sub) => (
                   <tr key={sub._id}>
-                    <td className="event-name">{sub.title}</td>
-                    <td className="organizer-cell">
+                    <td className="tableData tableData event-name">{sub.title}</td>
+                    <td className="tableData organizer-cell">
                       <div className="organizer-badge">
                         <span className="org-initials">{getInitials(sub.createdBy?.fullName)}</span>
                         {sub.createdBy?.fullName || "Unknown"}
                       </div>
                     </td>
-                    <td className="date-cell">{formatDate(sub.createdAt)}</td>
+                    <td className="tableData date-cell">{formatDate(sub.createdAt)}</td>
                     <td>
                       <span className={`status-badge ${sub.status.toLowerCase()}`}>
                         {sub.status}
                       </span>
                     </td>
-                    <td className="actions-cell">
+                    <td className="tableData actions-cell">
                       <button
                         className="actions-btn"
                         onClick={() => setActiveMenu(activeMenu === sub._id ? null : sub._id)}
