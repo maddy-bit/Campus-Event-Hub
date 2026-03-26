@@ -19,7 +19,8 @@ import {
   Tag,
   Plus,
   Trophy,
-  History
+  History,
+  ArrowUpCircle
 } from "lucide-react";
 import api from "../../api";
 import { useNavigate } from "react-router-dom";
@@ -38,6 +39,10 @@ const ProfilePortal = () => {
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [pointHistory, setPointHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+
+  const [showPromoteModal, setShowPromoteModal] = useState(false);
+  const [promoteReason, setPromoteReason] = useState("");
+  const [submittingPromote, setSubmittingPromote] = useState(false);
 
  
   const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
@@ -148,6 +153,23 @@ const ProfilePortal = () => {
       toast.error("Failed to fetch point history");
     } finally {
       setHistoryLoading(false);
+    }
+  };
+
+  const handleRequestPromotion = async () => {
+    try {
+      if (!promoteReason.trim()) {
+        return toast.error("Please provide a reason");
+      }
+      setSubmittingPromote(true);
+      await api.post("/profile/promotion-request", { reason: promoteReason.trim() });
+      toast.success("Promotion request submitted successfully!");
+      setShowPromoteModal(false);
+      fetchProfile(); // refresh user data to show pending state
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to submit request");
+    } finally {
+      setSubmittingPromote(false);
     }
   };
  
@@ -384,9 +406,22 @@ const ProfilePortal = () => {
             <Edit3 size={16} /> EDIT PROFILE
           </button>
 
-               <button
-                onClick={handleLogout}
-                disabled={saving}
+          {!user.promotionRequest || user.promotionRequest.status !== "pending" ? (
+            <button
+              onClick={() => setShowPromoteModal(true)}
+              className="bg-[#c6ff00] border-4 border-black px-6 py-3 font-black text-xs flex items-center gap-2 shadow-[4px_4px_0px_#000] hover:bg-[#aadd00] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_#000] transition-all"
+            >
+              <ArrowUpCircle size={16} /> REQUEST ORGANIZER
+            </button>
+          ) : (
+            <div className="bg-gray-200 border-4 border-black px-6 py-3 font-black text-xs flex items-center gap-2 shadow-[4px_4px_0px_#000] opacity-70 cursor-not-allowed text-gray-600">
+               <ArrowUpCircle size={16} /> PROMOTION PENDING
+            </div>
+          )}
+
+          <button
+            onClick={handleLogout}
+            disabled={saving}
             className="bg-red-400 border-4 border-black px-6 py-3 font-black text-xs flex items-center gap-2 shadow-[4px_4px_0px_#000] hover:bg-[#eefd22] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_#000] transition-all"
               >
                 <LogOutIcon size={16} />
@@ -545,6 +580,53 @@ const ProfilePortal = () => {
                   ))}
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── PROMOTE MODAL ── */}
+      {showPromoteModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4" onClick={() => setShowPromoteModal(false)}>
+          <div
+            className="bg-white border-4 border-black shadow-[12px_12px_0px_#000] w-full max-w-md relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="bg-black text-white px-5 py-3 flex items-center justify-between">
+              <span className="font-black text-sm flex items-center gap-2">
+                <ArrowUpCircle size={14} /> REQUEST_ORGANIZER
+              </span>
+              <button
+                onClick={() => setShowPromoteModal(false)}
+                className="w-7 h-7 bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                disabled={submittingPromote}
+              >
+                <X size={14} className="text-white" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <p className="text-xs font-bold text-gray-600">
+                Submit a request to your college Admin to become an Organizer. Write a short reason explaining which club you want to manage or why you'd like an upgrade.
+              </p>
+              <div>
+                <label className="text-[9px] font-black text-gray-400 mb-1.5 block uppercase">Reason for Promotion</label>
+                <textarea
+                  value={promoteReason}
+                  onChange={(e) => setPromoteReason(e.target.value)}
+                  placeholder="I am the president of the Coding Club..."
+                  className="w-full border-3 border-black p-3 font-bold text-sm focus:outline-none focus:bg-[#fff8e1] transition-colors resize-none h-28"
+                />
+              </div>
+
+              <button
+                onClick={handleRequestPromotion}
+                disabled={submittingPromote}
+                className="w-full bg-[#B6FF60] border-3 border-black py-3 font-black text-xs flex items-center justify-center gap-2 shadow-[4px_4px_0px_#000] hover:bg-black hover:text-[#B6FF60] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0px_#000] transition-all disabled:opacity-50 mt-2 text-black"
+              >
+                {submittingPromote ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                {submittingPromote ? "SUBMITTING..." : "SUBMIT REQUEST"}
+              </button>
             </div>
           </div>
         </div>
