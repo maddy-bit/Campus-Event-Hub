@@ -13,6 +13,7 @@ import {
   MapPin,
   Calendar,
   X,
+  Award,
 } from "lucide-react";
 import api from "../../api";
 import { Link, useNavigate } from "react-router-dom";
@@ -55,6 +56,12 @@ const App = () => {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = import.meta.env.VITE_ITEM_PER_PAGE_IN_MY_EVENTS ?? 10; // how many events per page
+
+  // Winner assignment state
+  const [isResultsModalOpen, setIsResultsModalOpen] = useState(false);
+  const [selectedEventForResults, setSelectedEventForResults] = useState(null);
+  const [eventParticipants, setEventParticipants] = useState([]);
+  const [resultsFormData, setResultsFormData] = useState({ first: "", second: "", third: "" });
 
   useEffect(() => {
     setCurrentPage(1);
@@ -164,6 +171,44 @@ const handleDelete = async (eventId) => {
   } catch (error) {
     console.error("Deletion failed:", error);
     alert("FATAL_ERROR: UNABLE TO DELETE EVENT");
+  }
+};
+
+const handleOpenResultsModal = async (event) => {
+  setSelectedEventForResults(event);
+  setResultsFormData({ first: "", second: "", third: "" });
+  setIsResultsModalOpen(true);
+  try {
+    const res = await api.get(`/registrations/event/${event._id}`);
+    setEventParticipants(res.data.participants || []);
+  } catch (err) {
+    console.error("Failed to fetch participants:", err);
+    toast.error("Failed to load participants");
+  }
+};
+
+const handleAssignWinners = async (e) => {
+  e.preventDefault();
+  if (!resultsFormData.first || !resultsFormData.second) {
+    return toast.error("1st and 2nd place are required");
+  }
+  if (
+    resultsFormData.first === resultsFormData.second ||
+    (resultsFormData.third && (resultsFormData.first === resultsFormData.third || resultsFormData.second === resultsFormData.third))
+  ) {
+    return toast.error("A student cannot hold multiple winning positions");
+  }
+
+  try {
+    await api.post(`/event-results/${selectedEventForResults._id}/results`, resultsFormData);
+    toast.success("Winners assigned! Event is now completed.", { className: "rounded-none border-2 border-black bg-[#B6FF60] text-black font-black uppercase tracking-tight shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]" });
+    setIsResultsModalOpen(false);
+    // refresh list
+    const response = await api.get("/events/my-events");
+    setEvents(response.data.events);
+  } catch (err) {
+    console.error(err);
+    toast.error(err.response?.data?.message || "Failed to assign winners");
   }
 };
 const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
@@ -572,8 +617,17 @@ const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
                             <Trash2 size={14} />
                           </button>
                           
-                        </div>
-                      </td>
+                          {event.status === "Approved" && (
+                            <button
+                              onClick={() => handleOpenResultsModal(event)}
+                              title="Assign Winners & Complete Event"
+                              className="p-1.5 border-2 border-black hover:bg-[#B6FF60] hover:text-black transition-all shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-[1px]"
+                            >
+                              <Award size={14} />
+                            </button>
+                          )}
+
+                          {/* edit is done here  */}                  </td>
                     </tr>
                   );
                 })
@@ -632,6 +686,62 @@ const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
           </button>
         </div>
       </div>
+
+      {/* Assign Winners Modal */}
+      {isResultsModalOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#F5F5F0] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="bg-black text-[#B6FF60] p-4 flex justify-between items-center sticky top-0 z-10 transition-colors">
+              <h2 className="font-black uppercase tracking-tighter flex items-center gap-2">
+                <Award size={20} /> Assign_Winners
+              </h2>
+              <button onClick={() => setIsResultsModalOpen(false)} className="hover:text-red-400">
+                <X size={24} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleAssignWinners} className="p-6 space-y-6">
+              <div className="mb-4 text-xs font-bold leading-relaxed border-l-4 border-black pl-3 py-1 bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                Selecting winners will permanently mark this event as <span className="bg-[#B6FF60] px-1 border border-black">COMPLETED</span> and award gamification points to the winners. This action cannot be undone.
+              </div>
+
+              {["first", "second", "third"].map((pos, i) => (
+                <div key={pos}>
+                  <label className="block text-[10px] font-black uppercase mb-1 flex items-center justify-between">
+                    <span>
+                      {pos === 'first' ? '1st' : pos === 'second' ? '2nd' : '3rd'} Place {pos !== 'third' && <span className="text-red-500">*</span>}
+                    </span>
+                    <span className="text-gray-400">
+                      +{pos === 'first' ? 50 : pos === 'second' ? 30 : 20} pts
+                    </span>
+                  </label>
+                  <select
+                    className="w-full border-2 border-black p-3 text-sm focus:outline-none bg-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                    value={resultsFormData[pos]}
+                    onChange={(e) => setResultsFormData({ ...resultsFormData, [pos]: e.target.value })}
+                  >
+                    <option value="">-- SELECT STUDENT --</option>
+                    {eventParticipants.map((p) => (
+                      <option key={p.userId._id} value={p.userId._id}>
+                        {p.userId.fullName} ({p.userId.email})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ))}
+
+              <div className="flex gap-4 pt-4 mt-6">
+                <button type="submit" className="flex-1 bg-black text-[#B6FF60] border-2 border-black p-3 font-black uppercase text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
+                  Confirm & Complete
+                </button>
+                <button type="button" onClick={() => setIsResultsModalOpen(false)} className="flex-1 bg-white border-2 border-black p-3 font-black uppercase text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {deleteTarget && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
