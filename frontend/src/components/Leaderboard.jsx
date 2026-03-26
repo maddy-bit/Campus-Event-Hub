@@ -148,6 +148,9 @@ const Leaderboard = () => {
                   <div className="w-full h-28 bg-[#C0C0C0] border-4 border-black border-b-0 flex flex-col items-center justify-start pt-3 relative hover:-translate-y-2 transition-transform cursor-default">
                      <span className="text-3xl font-black">2</span>
                      <span className="text-[10px] font-bold text-center px-1 truncate w-full mt-2">{leaderboard[1].fullName}</span>
+                     {activeTab === "global" && leaderboard[1].collegeName && (
+                       <span className="text-[8px] font-bold text-center px-1 truncate w-full mt-0.5" style={{color: "rgba(0,0,0,0.6)"}}>{leaderboard[1].collegeName}</span>
+                     )}
                      <span className="text-xs font-black bg-black text-[#B6FF60] px-2 py-0.5 border border-black mt-1">{leaderboard[1].totalPoints} pts</span>
                   </div>
                 </div>
@@ -171,6 +174,9 @@ const Leaderboard = () => {
                   <div className="w-full h-36 bg-[#FFD700] border-4 border-black border-b-0 flex flex-col items-center justify-start pt-3 relative hover:-translate-y-2 transition-transform cursor-default">
                      <span className="text-4xl font-black drop-shadow-[2px_2px_0px_#fff]">1</span>
                      <span className="text-xs font-black text-center px-1 truncate w-full mt-3">{leaderboard[0].fullName}</span>
+                     {activeTab === "global" && leaderboard[0].collegeName && (
+                       <span className="text-[9px] font-bold text-center px-1 truncate w-full mt-0.5" style={{color: "rgba(0,0,0,0.6)"}}>{leaderboard[0].collegeName}</span>
+                     )}
                      <span className="text-sm font-black bg-black text-[#B6FF60] px-2 py-0.5 border-2 border-black mt-1 shadow-[2px_2px_0px_rgba(0,0,0,1)]">{leaderboard[0].totalPoints} pts</span>
                   </div>
                 </div>
@@ -191,6 +197,9 @@ const Leaderboard = () => {
                   <div className="w-full h-24 bg-[#CD7F32] border-4 border-black border-b-0 flex flex-col items-center justify-start pt-3 relative hover:-translate-y-2 transition-transform cursor-default">
                      <span className="text-3xl font-black text-white drop-shadow-[2px_2px_0px_#000]">3</span>
                      <span className="text-[10px] font-bold text-center px-1 truncate w-full mt-2 text-white">{leaderboard[2].fullName}</span>
+                     {activeTab === "global" && leaderboard[2].collegeName && (
+                       <span className="text-[8px] font-bold text-center px-1 truncate w-full mt-0.5" style={{color: "rgba(255,255,255,0.7)"}}>{leaderboard[2].collegeName}</span>
+                     )}
                      <span className="text-xs font-black bg-black text-[#B6FF60] px-2 py-0.5 border border-black mt-1">{leaderboard[2].totalPoints} pts</span>
                   </div>
                 </div>
@@ -238,7 +247,10 @@ const Leaderboard = () => {
                                 )}
                               </span>
                               <span className={`text-[9px] font-bold uppercase ${userContext && student._id === userContext._id ? "text-gray-800" : "text-gray-400"}`}>
-                                {student.department || "N/A"}
+                                {student.department || "N/A"} 
+                                {activeTab === "global" && student.collegeName && (
+                                  <span className="text-gray-500 font-extrabold ml-1">[{student.collegeName}]</span>
+                                )}
                               </span>
                             </div>
                           </div>

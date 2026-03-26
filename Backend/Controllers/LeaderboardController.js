@@ -13,7 +13,8 @@ const getLeaderboard = async (req, res) => {
     const users = await UserModel.find(query)
       .sort({ totalPoints: -1 })
       .limit(Number(limit))
-      .select("fullName profilePicture department totalPoints");
+      .select("fullName profilePicture department totalPoints collegeId")
+      .populate("collegeId", "name");
 
     const ranked = users.map((u, i) => ({
       rank: i + 1,
@@ -21,7 +22,8 @@ const getLeaderboard = async (req, res) => {
       fullName: u.fullName,
       profilePicture: u.profilePicture,
       department: u.department,
-      totalPoints: u.totalPoints
+      totalPoints: u.totalPoints,
+      collegeName: u.collegeId ? u.collegeId.name : "N/A"
     }));
 
     res.status(200).json({ leaderboard: ranked });
