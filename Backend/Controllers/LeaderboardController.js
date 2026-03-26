@@ -1,4 +1,5 @@
 const { UserModel } = require("../Models/users");
+const { PointTransactionModel } = require("../Models/PointTransaction");
 
 const getLeaderboard = async (req, res) => {
   try {
@@ -50,4 +51,17 @@ const getMyRank = async (req, res) => {
   }
 };
 
-module.exports = { getLeaderboard, getMyRank };
+const getPointHistory = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const history = await PointTransactionModel.find({ userId })
+      .populate("eventId", "title")
+      .sort({ createdAt: -1 });
+    
+    res.status(200).json({ history });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch points history", error: err.message });
+  }
+};
+
+module.exports = { getLeaderboard, getMyRank, getPointHistory };
