@@ -423,7 +423,7 @@ const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
 
                           {/* edit is done here  */}
                           {isEditModalOpen && (
-                            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
                               <div className="bg-[#F5F5F0] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] w-full max-w-2xl max-h-[90vh] overflow-y-auto">
                                 <div className="bg-black text-white p-4 flex justify-between items-center sticky top-0 z-10">
                                   <h2 className="font-black uppercase tracking-tighter">
@@ -691,7 +691,7 @@ const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
 
       {/* Assign Winners Modal */}
       {isResultsModalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
           <div className="bg-[#F5F5F0] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="bg-black text-[#B6FF60] p-4 flex justify-between items-center sticky top-0 z-10 transition-colors">
               <h2 className="font-black uppercase tracking-tighter flex items-center gap-2">
@@ -746,7 +746,7 @@ const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
       )}
 
       {deleteTarget && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
           <div className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 max-w-sm w-full animate-in fade-in zoom-in duration-200">
             <div className="flex items-center gap-2 mb-4">
               <div className="bg-red-500 text-white p-1 border-2 border-black">
