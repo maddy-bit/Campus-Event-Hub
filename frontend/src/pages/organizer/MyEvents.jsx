@@ -627,7 +627,9 @@ const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
                             </button>
                           )}
 
-                          {/* edit is done here  */}                  </td>
+
+                        </div>
+                      </td>
                     </tr>
                   );
                 })
