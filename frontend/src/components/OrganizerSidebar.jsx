@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   CalendarPlus,
@@ -51,6 +51,18 @@ const OrganizerSidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [notifCount, setNotifCount] = useState(0);
+
+  useEffect(() => {
+    const fetchNotifCount = async () => {
+      try {
+        const res = await api.get("/notifications/my");
+        const unread = (res.data.notifications || []).filter((n) => !n.isRead).length;
+        setNotifCount(unread);
+      } catch { /* silent */ }
+    };
+    fetchNotifCount();
+  }, [location.pathname]);
 
   const handleLogout = async () => {
     try {
@@ -67,6 +79,7 @@ const OrganizerSidebar = () => {
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
+          const showBadge = item.name === "Inbox" && notifCount > 0;
 
           return (
             <Link
@@ -81,6 +94,11 @@ const OrganizerSidebar = () => {
             >
               <Icon size={16} strokeWidth={2.5} />
               <span>{item.name}</span>
+              {showBadge && (
+                <span className="ml-auto w-5 h-5 bg-red-500 text-white text-[8px] font-black flex items-center justify-center border border-black">
+                  {notifCount > 9 ? "9+" : notifCount}
+                </span>
+              )}
             </Link>
           );
         })}
