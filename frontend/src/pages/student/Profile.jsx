@@ -16,9 +16,10 @@ import {
   Shield,
   Sparkles,
   User,
-  LogOutIcon,
   Tag,
-  Plus
+  Plus,
+  Trophy,
+  History
 } from "lucide-react";
 import api from "../../api";
 import { useNavigate } from "react-router-dom";
@@ -32,7 +33,11 @@ const ProfilePortal = () => {
   const [editForm, setEditForm] = useState({});
   const [interestInput, setInterestInput] = useState("");
   const fileInputRef = useRef(null);
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [pointHistory, setPointHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
  
   const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
@@ -131,6 +136,19 @@ const ProfilePortal = () => {
       navigate("/login");
     } catch { /* silent */ }
     navigate("/login");
+  };
+
+  const openHistoryModal = async () => {
+    setShowHistoryModal(true);
+    setHistoryLoading(true);
+    try {
+      const res = await api.get("/leaderboard/history");
+      setPointHistory(res.data.history || []);
+    } catch (err) {
+      toast.error("Failed to fetch point history");
+    } finally {
+      setHistoryLoading(false);
+    }
   };
  
   const initials = user?.fullName
@@ -338,6 +356,24 @@ const ProfilePortal = () => {
             <p className="text-sm font-black">{fmtDate(user.createdAt)}</p>
           </div>
         </div>
+
+        {/* ── GAMIFICATION ── */}
+        <div className="bg-[#B6FF60] border-4 border-black shadow-[6px_6px_0px_#000] p-5 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <p className="text-[9px] font-bold text-black/50 mb-1">TOTAL GAMIFICATION POINTS</p>
+            <p className="text-3xl font-black tracking-tight flex items-center gap-2">
+              <Trophy size={28} /> {user.totalPoints || 0}
+            </p>
+          </div>
+          <div>
+            <button
+              onClick={openHistoryModal}
+              className="bg-black text-[#B6FF60] border-2 border-transparent px-4 py-2 font-black text-xs flex items-center gap-2 hover:bg-white hover:text-black hover:border-black shadow-[2px_2px_0px_#000] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all"
+            >
+              <History size={16} /> VIEW HISTORY
+            </button>
+          </div>
+        </div>
  
         {/* ── ACTIONS ── */}
         <div className="flex flex-wrap gap-4">
@@ -462,6 +498,53 @@ const ProfilePortal = () => {
                 {saving ? "SAVING..." : "SAVE CHANGES"}
               </button>
 
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── HISTORY MODAL ── */}
+      {showHistoryModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4" onClick={() => setShowHistoryModal(false)}>
+          <div
+            className="bg-white border-4 border-black shadow-[12px_12px_0px_#000] w-full max-w-lg relative flex flex-col max-h-[80vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="bg-black text-white px-5 py-3 flex items-center justify-between shrink-0">
+              <span className="font-black text-sm flex items-center gap-2">
+                <History size={14} /> POINT_HISTORY
+              </span>
+              <button
+                onClick={() => setShowHistoryModal(false)}
+                className="w-7 h-7 bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+              >
+                <X size={14} className="text-white" />
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto">
+              {historyLoading ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="animate-spin" size={24} />
+                </div>
+              ) : pointHistory.length === 0 ? (
+                <p className="text-sm font-bold text-gray-400 text-center py-8">No points earned yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {pointHistory.map((tx) => (
+                    <div key={tx._id} className="flex items-center justify-between border-2 border-black p-3 bg-gray-50 shadow-[2px_2px_0px_#000]">
+                      <div>
+                        <p className="font-black text-sm">{tx.action.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())}</p>
+                        <p className="text-[10px] text-gray-500 font-bold max-w-[200px] truncate">{tx.eventId?.title || "Unknown Event"}</p>
+                        <p className="text-[9px] text-gray-400">{new Date(tx.createdAt).toLocaleDateString()}</p>
+                      </div>
+                      <div className="bg-[#B6FF60] border-2 border-black px-3 py-1 font-black text-sm shadow-[2px_2px_0px_#000]">
+                        +{tx.points}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
