@@ -8,7 +8,9 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import VerifyOtp from "./pages/auth/VerifyOtp";
 import ResetPassword from "./pages/auth/ResetPassword";
 import VerifyEmail from "./pages/auth/VerifyEmail";
+import VerifyEmail from "./pages/auth/VerifyEmail";
 import LandingPage from "./components/LandingPage";
+import Leaderboard from "./components/Leaderboard";
 
 
 // Importing ProtectedRoute for role-based access control
@@ -114,6 +116,7 @@ function App() {
           <Route path="profile" element={<OrganizerProfile />} />
           <Route path="inbox" element={<OrganizerNotification />} />
           <Route path="notifications" element={<SendNotification />} />
+          <Route path="leaderboard" element={<Leaderboard />} />
         </Route>
 
         {/* student route */}
@@ -134,6 +137,7 @@ function App() {
           <Route path="search" element={<SearchUsers />} />
           <Route path="network" element={<NetworkRoom />} />
           <Route path="chat/:connectionId" element={<LiveChat />} />
+          <Route path="leaderboard" element={<Leaderboard />} />
         </Route>
 
         <Route path="/" element={<LandingPage />} />

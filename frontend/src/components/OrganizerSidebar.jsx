@@ -13,6 +13,7 @@ import {
   Menu,
   X,
   Zap,
+  Trophy,
 } from "lucide-react";
 import api from "../api";
 import { toast } from "sonner";
@@ -22,6 +23,7 @@ const menuItems = [
   { name: "Create", path: "/organizer/create-event", icon: CalendarPlus },
   { name: "Events", path: "/organizer/myevents", icon: ListChecks },
   { name: "Participants", path: "/organizer/view-participants", icon: Users },
+  { name: "Rankings", path: "/organizer/leaderboard", icon: Trophy },
   { name: "Inbox", path: "/organizer/inbox", icon: Inbox },
   { name: "Send Notifs", path: "/organizer/notifications", icon: Send },
 ];
