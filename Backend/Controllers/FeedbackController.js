@@ -1,6 +1,9 @@
 const { FeedbackModel } = require("../Models/Feedback");
 const { ERegistrationModel } = require("../Models/ERegistration");
 const { EventModel } = require("../Models/event");
+const { UserModel } = require("../Models/users");
+const { PointTransactionModel } = require("../Models/PointTransaction");
+const POINTS = require("../config/points");
 
 const submitFeedback = async (req, res) => {
   try {
@@ -39,6 +42,19 @@ const submitFeedback = async (req, res) => {
       { rating },
       { new: true, upsert: true }
     );
+
+    // Give points for rating
+    try {
+      await PointTransactionModel.create({
+        userId,
+        eventId,
+        action: 'rating_given',
+        points: POINTS.RATING_GIVEN
+      });
+      await UserModel.findByIdAndUpdate(userId, { $inc: { totalPoints: POINTS.RATING_GIVEN } });
+    } catch (ptsErr) {
+      if (ptsErr.code !== 11000) console.error("Rating points error:", ptsErr);
+    }
 
     res.status(200).json({
       message: "Feedback submitted successfully",
