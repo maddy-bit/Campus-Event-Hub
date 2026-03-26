@@ -129,60 +129,132 @@ const Leaderboard = () => {
             No students found on this leaderboard.
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b-2 border-black bg-gray-50 text-[10px] font-bold text-gray-500 uppercase">
-                  <th className="p-4 w-16 text-center">Rank</th>
-                  <th className="p-4 border-l-2 border-black">Student</th>
-                  <th className="p-4 border-l-2 border-black w-24 text-right">Points</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y-2 divide-gray-100">
-                {leaderboard.map((student) => (
-                  <tr 
-                    key={student._id} 
-                    className={`hover:bg-gray-50 transition-colors ${userContext && student._id === userContext._id ? "bg-[#B6FF60]/20" : ""}`}
-                  >
-                    <td className="p-4 text-center">
-                      <span className={`inline-block w-8 h-8 leading-7 text-xs font-black ${getRankColor(student.rank)}`}>
-                        {student.rank}
-                      </span>
-                    </td>
-                    <td className="p-4 border-l-2 border-black">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 border-2 border-black bg-white overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                          {student.profilePicture ? (
-                            <img src={`${API_BASE}/${student.profilePicture}`} alt="Avatar" className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center font-black text-xs uppercase bg-gray-100 text-gray-500">
-                              {student.fullName.substring(0, 2)}
+          <div>
+            {/* ── PODIUM ── */}
+            <div className="flex justify-center items-end gap-2 md:gap-8 pt-12 pb-0 px-4 mt-8 bg-[#f5f5f0] border-b-4 border-black relative">
+              
+              {/* 2nd Place */}
+              {leaderboard[1] && (
+                <div className="flex flex-col items-center w-28 md:w-36">
+                  <div className="w-16 h-16 md:w-20 md:h-20 border-4 border-black bg-white overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-4 rounded-full">
+                     {leaderboard[1].profilePicture ? (
+                       <img src={`${API_BASE}/${leaderboard[1].profilePicture}`} className="w-full h-full object-cover" />
+                     ) : (
+                       <div className="w-full h-full flex items-center justify-center font-black text-xl bg-[#C0C0C0] text-black border-2 border-black">
+                         {leaderboard[1].fullName.substring(0,2).toUpperCase()}
+                       </div>
+                     )}
+                  </div>
+                  <div className="w-full h-28 bg-[#C0C0C0] border-4 border-black border-b-0 flex flex-col items-center justify-start pt-3 relative hover:-translate-y-2 transition-transform cursor-default">
+                     <span className="text-3xl font-black">2</span>
+                     <span className="text-[10px] font-bold text-center px-1 truncate w-full mt-2">{leaderboard[1].fullName}</span>
+                     <span className="text-xs font-black bg-black text-[#B6FF60] px-2 py-0.5 border border-black mt-1">{leaderboard[1].totalPoints} pts</span>
+                  </div>
+                </div>
+              )}
+
+              {/* 1st Place */}
+              {leaderboard[0] && (
+                <div className="flex flex-col items-center w-32 md:w-44 z-10">
+                  <div className="relative">
+                    <Trophy size={20} fill="#B6FF60" className="absolute -top-8 left-1/2 -translate-x-1/2 z-20 text-black drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" />
+                    <div className="w-20 h-20 md:w-24 md:h-24 border-4 border-black bg-[#FFD700] overflow-hidden shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] mb-4 text-center rounded-full">
+                       {leaderboard[0].profilePicture ? (
+                         <img src={`${API_BASE}/${leaderboard[0].profilePicture}`} className="w-full h-full object-cover" />
+                       ) : (
+                         <div className="w-full h-full flex items-center justify-center font-black text-2xl bg-[#FFD700] text-black">
+                           {leaderboard[0].fullName.substring(0,2).toUpperCase()}
+                         </div>
+                       )}
+                    </div>
+                  </div>
+                  <div className="w-full h-36 bg-[#FFD700] border-4 border-black border-b-0 flex flex-col items-center justify-start pt-3 relative hover:-translate-y-2 transition-transform cursor-default">
+                     <span className="text-4xl font-black drop-shadow-[2px_2px_0px_#fff]">1</span>
+                     <span className="text-xs font-black text-center px-1 truncate w-full mt-3">{leaderboard[0].fullName}</span>
+                     <span className="text-sm font-black bg-black text-[#B6FF60] px-2 py-0.5 border-2 border-black mt-1 shadow-[2px_2px_0px_rgba(0,0,0,1)]">{leaderboard[0].totalPoints} pts</span>
+                  </div>
+                </div>
+              )}
+
+              {/* 3rd Place */}
+              {leaderboard[2] && (
+                <div className="flex flex-col items-center w-28 md:w-36">
+                  <div className="w-16 h-16 md:w-20 md:h-20 border-4 border-black bg-[#CD7F32] overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-4 rounded-full">
+                     {leaderboard[2].profilePicture ? (
+                       <img src={`${API_BASE}/${leaderboard[2].profilePicture}`} className="w-full h-full object-cover" />
+                     ) : (
+                       <div className="w-full h-full flex items-center justify-center font-black text-xl bg-[#CD7F32] text-white">
+                         {leaderboard[2].fullName.substring(0,2).toUpperCase()}
+                       </div>
+                     )}
+                  </div>
+                  <div className="w-full h-24 bg-[#CD7F32] border-4 border-black border-b-0 flex flex-col items-center justify-start pt-3 relative hover:-translate-y-2 transition-transform cursor-default">
+                     <span className="text-3xl font-black text-white drop-shadow-[2px_2px_0px_#000]">3</span>
+                     <span className="text-[10px] font-bold text-center px-1 truncate w-full mt-2 text-white">{leaderboard[2].fullName}</span>
+                     <span className="text-xs font-black bg-black text-[#B6FF60] px-2 py-0.5 border border-black mt-1">{leaderboard[2].totalPoints} pts</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* ── REST OF TABLE ── */}
+            {leaderboard.length > 3 && (
+              <div className="overflow-x-auto bg-white">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b-4 border-black bg-gray-100 text-[10px] font-black tracking-widest text-[#B6FF60] uppercase shadow-[0_4px_0_#000]">
+                      <th className="p-4 w-16 text-center text-black">Rank</th>
+                      <th className="p-4 border-l-4 border-black text-black">Student</th>
+                      <th className="p-4 border-l-4 border-black w-24 text-right text-black">Points</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y-4 divide-black">
+                    {leaderboard.slice(3).map((student) => (
+                      <tr 
+                        key={student._id} 
+                        className={`transition-colors ${userContext && student._id === userContext._id ? "bg-[#B6FF60]" : "hover:bg-gray-100"}`}
+                      >
+                        <td className="p-4 text-center">
+                          <span className={`inline-block w-8 h-8 leading-7 text-xs font-black bg-black text-white border-2 border-black`}>
+                            {student.rank}
+                          </span>
+                        </td>
+                        <td className="p-4 border-l-4 border-black">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 border-2 border-black bg-white overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                              {student.profilePicture ? (
+                                <img src={`${API_BASE}/${student.profilePicture}`} alt="Avatar" className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center font-black text-xs uppercase bg-gray-100 text-gray-500">
+                                  {student.fullName.substring(0, 2)}
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-xs font-black uppercase tracking-tight flex items-center gap-1">
-                            {student.fullName}
-                            {userContext && student._id === userContext._id && (
-                              <span className="bg-[#B6FF60] text-black text-[9px] px-1 border border-black ml-1">YOU</span>
-                            )}
-                          </span>
-                          <span className="text-[9px] font-bold text-gray-400 uppercase">
-                            {student.department || "N/A"}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="p-4 border-l-2 border-black text-right">
-                      <div className="inline-flex items-center gap-1 bg-black text-[#B6FF60] border-2 border-black px-2 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                        <Star size={12} fill="#B6FF60" />
-                        <span className="text-xs font-black">{student.totalPoints}</span>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                            <div className="flex flex-col">
+                              <span className="text-xs font-black uppercase tracking-tight flex items-center gap-1">
+                                {student.fullName}
+                                {userContext && student._id === userContext._id && (
+                                  <span className="bg-black text-[#B6FF60] text-[9px] px-1 ml-1 font-bold">YOU</span>
+                                )}
+                              </span>
+                              <span className={`text-[9px] font-bold uppercase ${userContext && student._id === userContext._id ? "text-gray-800" : "text-gray-400"}`}>
+                                {student.department || "N/A"}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-4 border-l-4 border-black text-right">
+                          <div className={`inline-flex items-center gap-1 border-2 border-black px-2 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${userContext && student._id === userContext._id ? "bg-white text-black" : "bg-black text-[#B6FF60]"}`}>
+                            <Star size={12} fill={userContext && student._id === userContext._id ? "black" : "#B6FF60"} />
+                            <span className="text-xs font-black">{student.totalPoints}</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
       </div>
