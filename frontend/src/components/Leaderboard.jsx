@@ -71,15 +71,15 @@ const Leaderboard = () => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-4 md:p-6 font-mono selection:bg-[#ccff00]">
+    <div className="w-full max-w-4xl mx-auto p-2 sm:p-4 md:p-6 font-mono selection:bg-[#ccff00] overflow-x-hidden">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6 mb-4 md:mb-8">
         <div>
-          <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-2 flex items-center gap-3">
-            <Trophy size={40} className="text-yellow-500" />
+          <h1 className="text-2xl sm:text-4xl md:text-6xl font-black tracking-tighter mb-2 flex items-center gap-2 md:gap-3">
+            <Trophy size={24} className="text-yellow-500 shrink-0 md:w-10 md:h-10" />
             STANDINGS
           </h1>
-          <div className="bg-black text-[#B6FF60] px-3 py-1 inline-flex items-center gap-2 text-[10px] font-bold uppercase border-2 border-black">
+          <div className="bg-black text-[#B6FF60] px-2 md:px-3 py-1 inline-flex items-center gap-1 md:gap-2 text-[8px] md:text-[10px] font-bold uppercase border-2 border-black">
             <span>Gamification Points</span>
             <span className="text-gray-500">//</span>
             <span>Real-time Rankings</span>
@@ -87,47 +87,47 @@ const Leaderboard = () => {
         </div>
 
         {myRank && (
-          <div className="border-4 border-black bg-white p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-4">
+          <div className="border-2 md:border-4 border-black bg-white p-2 md:p-3 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] md:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex items-center gap-3 md:gap-4">
             <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-gray-400 uppercase">Your Global Rank</span>
-              <span className="text-2xl font-black">#{myRank.rank}</span>
+              <span className="text-[8px] md:text-[10px] font-bold text-gray-400 uppercase">Your Rank</span>
+              <span className="text-lg md:text-2xl font-black">#{myRank.rank}</span>
             </div>
-            <div className="h-10 w-1 bg-black"></div>
+            <div className="h-8 md:h-10 w-0.5 md:w-1 bg-black"></div>
             <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-gray-400 uppercase">Total Points</span>
-              <span className="text-2xl font-black text-[#B6FF60] bg-black px-2">{myRank.totalPoints}</span>
+              <span className="text-[8px] md:text-[10px] font-bold text-gray-400 uppercase">Points</span>
+              <span className="text-lg md:text-2xl font-black text-[#B6FF60] bg-black px-1.5 md:px-2">{myRank.totalPoints}</span>
             </div>
           </div>
         )}
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-4 mb-6">
+      <div className="flex gap-2 md:gap-4 mb-4 md:mb-6">
         <button
           onClick={() => setActiveTab("global")}
-          className={`flex-1 flex justify-center items-center gap-2 p-3 border-2 border-black font-black uppercase text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all active:translate-x-1 active:translate-y-1 active:shadow-none ${
+          className={`flex-1 flex justify-center items-center gap-1 md:gap-2 p-2 md:p-3 border-2 border-black font-black uppercase text-xs md:text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] md:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all active:translate-x-1 active:translate-y-1 active:shadow-none ${
             activeTab === "global" ? "bg-[#B6FF60]" : "bg-white hover:bg-gray-50"
           }`}
         >
-          <Globe size={18} /> Global
+          <Globe size={14} className="md:w-[18px] md:h-[18px]" /> Global
         </button>
         <button
           onClick={() => setActiveTab("local")}
-          className={`flex-1 flex justify-center items-center gap-2 p-3 border-2 border-black font-black uppercase text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all active:translate-x-1 active:translate-y-1 active:shadow-none ${
+          className={`flex-1 flex justify-center items-center gap-1 md:gap-2 p-2 md:p-3 border-2 border-black font-black uppercase text-xs md:text-sm shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] md:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all active:translate-x-1 active:translate-y-1 active:shadow-none ${
             activeTab === "local" ? "bg-[#B6FF60]" : "bg-white hover:bg-gray-50"
           }`}
         >
-          <MapPin size={18} /> Local (College)
+          <MapPin size={14} className="md:w-[18px] md:h-[18px]" /> Local
         </button>
       </div>
 
       {/* Leaderboard Content */}
-      <div className="border-4 border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
-        <div className="bg-black text-white p-3 flex justify-between items-center px-4 border-b-2 border-black">
-          <h2 className="text-sm font-bold tracking-widest uppercase flex items-center gap-2">
-            <Medal size={16} /> Top_Students
+      <div className="border-2 md:border-4 border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+        <div className="bg-black text-white p-2 md:p-3 flex justify-between items-center px-3 md:px-4 border-b-2 border-black">
+          <h2 className="text-xs md:text-sm font-bold tracking-widest uppercase flex items-center gap-2">
+            <Medal size={14} /> Top_Students
           </h2>
-          <span className="text-[10px] text-gray-400 font-bold uppercase">
+          <span className="text-[8px] md:text-[10px] text-gray-400 font-bold uppercase">
             {activeTab === "global" ? "All Colleges" : "Your College"}
           </span>
         </div>
@@ -223,10 +223,10 @@ const Leaderboard = () => {
               <div className="overflow-x-auto bg-white">
                 <table className="w-full text-left">
                   <thead>
-                    <tr className="border-b-4 border-black bg-gray-100 text-[10px] font-black tracking-widest uppercase shadow-[0_4px_0_#000]">
-                      <th className="p-4 w-16 text-center text-black">Rank</th>
-                      <th className="p-4 border-l-4 border-black text-black">Student</th>
-                      <th className="p-4 border-l-4 border-black w-24 text-right text-black">Points</th>
+                    <tr className="border-b-4 border-black bg-gray-100 text-[8px] md:text-[10px] font-black tracking-widest uppercase shadow-[0_4px_0_#000]">
+                      <th className="p-2 md:p-4 w-12 md:w-16 text-center text-black">Rank</th>
+                      <th className="p-2 md:p-4 border-l-2 md:border-l-4 border-black text-black">Student</th>
+                      <th className="p-2 md:p-4 border-l-2 md:border-l-4 border-black w-16 md:w-24 text-right text-black">Points</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y-2 divide-gray-200">
@@ -235,14 +235,14 @@ const Leaderboard = () => {
                         key={student._id} 
                         className={`transition-colors ${userContext && student._id === userContext._id ? "bg-[#B6FF60]" : "hover:bg-gray-100"}`}
                       >
-                        <td className="p-4 text-center">
-                          <span className="inline-block w-8 h-8 leading-7 text-xs font-black bg-black text-white border-2 border-black">
+                        <td className="p-2 md:p-4 text-center">
+                          <span className="inline-block w-6 h-6 md:w-8 md:h-8 leading-5 md:leading-7 text-[10px] md:text-xs font-black bg-black text-white border-2 border-black">
                             {student.rank}
                           </span>
                         </td>
-                        <td className="p-4 border-l-4 border-black">
+                        <td className="p-2 md:p-4 border-l-2 md:border-l-4 border-black">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 border-2 border-black bg-white overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                            <div className="w-8 h-8 md:w-10 md:h-10 border-2 border-black bg-white overflow-hidden shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] shrink-0">
                               {student.profilePicture ? (
                                 <img src={`${API_BASE}/${student.profilePicture}`} alt="Avatar" className="w-full h-full object-cover" />
                               ) : (
@@ -267,10 +267,10 @@ const Leaderboard = () => {
                             </div>
                           </div>
                         </td>
-                        <td className="p-4 border-l-4 border-black text-right">
-                          <div className={`inline-flex items-center gap-1 border-2 border-black px-2 py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${userContext && student._id === userContext._id ? "bg-white text-black" : "bg-black text-[#B6FF60]"}`}>
-                            <Star size={12} fill={userContext && student._id === userContext._id ? "black" : "#B6FF60"} />
-                            <span className="text-xs font-black">{student.totalPoints}</span>
+                        <td className="p-2 md:p-4 border-l-2 md:border-l-4 border-black text-right">
+                          <div className={`inline-flex items-center gap-1 border-2 border-black px-1.5 md:px-2 py-0.5 md:py-1 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${userContext && student._id === userContext._id ? "bg-white text-black" : "bg-black text-[#B6FF60]"}`}>
+                            <Star size={10} className="md:w-3 md:h-3" fill={userContext && student._id === userContext._id ? "black" : "#B6FF60"} />
+                            <span className="text-[10px] md:text-xs font-black">{student.totalPoints}</span>
                           </div>
                         </td>
                       </tr>
