@@ -143,76 +143,76 @@ const Leaderboard = () => {
         ) : (
           <div>
             {/* Podium */}
-            <div className="flex justify-center items-end gap-2 md:gap-8 pt-12 pb-0 px-4 mt-8 bg-[#f5f5f0] border-b-4 border-black relative">
+            <div className="flex justify-center items-end gap-1 sm:gap-2 md:gap-8 pt-8 md:pt-12 pb-0 px-2 md:px-4 mt-4 md:mt-8 bg-[#f5f5f0] border-b-4 border-black relative overflow-hidden">
               
               {/* 2nd Place */}
               {leaderboard[1] && (
-                <div className="flex flex-col items-center w-28 md:w-36">
-                  <div className="w-16 h-16 md:w-20 md:h-20 border-4 border-black bg-white overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-4 rounded-full">
+                <div className="flex flex-col items-center flex-1 max-w-[120px] md:max-w-[144px]">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 border-3 md:border-4 border-black bg-white overflow-hidden shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] mb-2 md:mb-4 rounded-full">
                      {leaderboard[1].profilePicture ? (
                        <img src={`${API_BASE}/${leaderboard[1].profilePicture}`} className="w-full h-full object-cover" />
                      ) : (
-                       <div className="w-full h-full flex items-center justify-center font-black text-xl bg-[#C0C0C0] text-black border-2 border-black">
+                       <div className="w-full h-full flex items-center justify-center font-black text-sm md:text-xl bg-[#C0C0C0] text-black border-2 border-black">
                          {leaderboard[1].fullName.substring(0,2).toUpperCase()}
                        </div>
                      )}
                   </div>
-                  <div className="w-full h-28 bg-[#C0C0C0] border-4 border-black border-b-0 flex flex-col items-center justify-start pt-3 relative hover:-translate-y-2 transition-transform cursor-default">
-                     <span className="text-3xl font-black">2</span>
-                     <span className="text-[10px] font-bold text-center px-1 truncate w-full mt-2">{leaderboard[1].fullName}</span>
+                  <div className="w-full h-24 sm:h-28 md:h-32 bg-[#C0C0C0] border-3 md:border-4 border-black border-b-0 flex flex-col items-center justify-start pt-2 md:pt-3 relative hover:-translate-y-2 transition-transform cursor-default">
+                     <span className="text-xl sm:text-2xl md:text-3xl font-black">2</span>
+                     <span className="text-[8px] sm:text-[10px] font-bold text-center px-1 truncate w-full mt-1 md:mt-2">{leaderboard[1].fullName}</span>
                      {activeTab === "global" && leaderboard[1].collegeName && (
-                       <span className="text-[8px] font-bold text-center px-1 truncate w-full mt-0.5" style={{color: "rgba(0,0,0,0.6)"}}>{leaderboard[1].collegeName}</span>
+                       <span className="text-[7px] md:text-[8px] font-bold text-center px-1 truncate w-full mt-0.5 hidden sm:block" style={{color: "rgba(0,0,0,0.6)"}}>{leaderboard[1].collegeName}</span>
                      )}
-                     <span className="text-xs font-black bg-black text-[#B6FF60] px-2 py-0.5 border border-black mt-1">{leaderboard[1].totalPoints} pts</span>
+                     <span className="text-[10px] md:text-xs font-black bg-black text-[#B6FF60] px-1.5 md:px-2 py-0.5 border border-black mt-1">{leaderboard[1].totalPoints} pts</span>
                   </div>
                 </div>
               )}
 
               {/* 1st Place */}
               {leaderboard[0] && (
-                <div className="flex flex-col items-center w-32 md:w-44 z-10">
+                <div className="flex flex-col items-center flex-1 max-w-[140px] md:max-w-[176px] z-10">
                   <div className="relative">
-                    <Trophy size={20} fill="#B6FF60" className="absolute -top-8 left-1/2 -translate-x-1/2 z-20 text-black drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" />
-                    <div className="w-20 h-20 md:w-24 md:h-24 border-4 border-black bg-[#FFD700] overflow-hidden shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] mb-4 text-center rounded-full">
+                    <Trophy size={16} fill="#B6FF60" className="absolute -top-6 md:-top-8 left-1/2 -translate-x-1/2 z-20 text-black drop-shadow-[2px_2px_0px_rgba(0,0,0,1)]" />
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 border-3 md:border-4 border-black bg-[#FFD700] overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] md:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] mb-2 md:mb-4 text-center rounded-full">
                        {leaderboard[0].profilePicture ? (
                          <img src={`${API_BASE}/${leaderboard[0].profilePicture}`} className="w-full h-full object-cover" />
                        ) : (
-                         <div className="w-full h-full flex items-center justify-center font-black text-2xl bg-[#FFD700] text-black">
+                         <div className="w-full h-full flex items-center justify-center font-black text-lg md:text-2xl bg-[#FFD700] text-black">
                            {leaderboard[0].fullName.substring(0,2).toUpperCase()}
                          </div>
                        )}
                     </div>
                   </div>
-                  <div className="w-full h-36 bg-[#FFD700] border-4 border-black border-b-0 flex flex-col items-center justify-start pt-3 relative hover:-translate-y-2 transition-transform cursor-default">
-                     <span className="text-4xl font-black drop-shadow-[2px_2px_0px_#fff]">1</span>
-                     <span className="text-xs font-black text-center px-1 truncate w-full mt-3">{leaderboard[0].fullName}</span>
+                  <div className="w-full h-28 sm:h-32 md:h-40 bg-[#FFD700] border-3 md:border-4 border-black border-b-0 flex flex-col items-center justify-start pt-2 md:pt-3 relative hover:-translate-y-2 transition-transform cursor-default">
+                     <span className="text-2xl sm:text-3xl md:text-4xl font-black drop-shadow-[2px_2px_0px_#fff]">1</span>
+                     <span className="text-[10px] md:text-xs font-black text-center px-1 truncate w-full mt-2 md:mt-3">{leaderboard[0].fullName}</span>
                      {activeTab === "global" && leaderboard[0].collegeName && (
-                       <span className="text-[9px] font-bold text-center px-1 truncate w-full mt-0.5" style={{color: "rgba(0,0,0,0.6)"}}>{leaderboard[0].collegeName}</span>
+                       <span className="text-[7px] md:text-[9px] font-bold text-center px-1 truncate w-full mt-0.5 hidden sm:block" style={{color: "rgba(0,0,0,0.6)"}}>{leaderboard[0].collegeName}</span>
                      )}
-                     <span className="text-sm font-black bg-black text-[#B6FF60] px-2 py-0.5 border-2 border-black mt-1 shadow-[2px_2px_0px_rgba(0,0,0,1)]">{leaderboard[0].totalPoints} pts</span>
+                     <span className="text-[10px] md:text-sm font-black bg-black text-[#B6FF60] px-1.5 md:px-2 py-0.5 border-2 border-black mt-1 shadow-[2px_2px_0px_rgba(0,0,0,1)]">{leaderboard[0].totalPoints} pts</span>
                   </div>
                 </div>
               )}
 
               {/* 3rd Place */}
               {leaderboard[2] && (
-                <div className="flex flex-col items-center w-28 md:w-36">
-                  <div className="w-16 h-16 md:w-20 md:h-20 border-4 border-black bg-[#CD7F32] overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mb-4 rounded-full">
+                <div className="flex flex-col items-center flex-1 max-w-[120px] md:max-w-[144px]">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 border-3 md:border-4 border-black bg-[#CD7F32] overflow-hidden shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] mb-2 md:mb-4 rounded-full">
                      {leaderboard[2].profilePicture ? (
                        <img src={`${API_BASE}/${leaderboard[2].profilePicture}`} className="w-full h-full object-cover" />
                      ) : (
-                       <div className="w-full h-full flex items-center justify-center font-black text-xl bg-[#CD7F32] text-white">
+                       <div className="w-full h-full flex items-center justify-center font-black text-sm md:text-xl bg-[#CD7F32] text-white">
                          {leaderboard[2].fullName.substring(0,2).toUpperCase()}
                        </div>
                      )}
                   </div>
-                  <div className="w-full h-24 bg-[#CD7F32] border-4 border-black border-b-0 flex flex-col items-center justify-start pt-3 relative hover:-translate-y-2 transition-transform cursor-default">
-                     <span className="text-3xl font-black text-white drop-shadow-[2px_2px_0px_#000]">3</span>
-                     <span className="text-[10px] font-bold text-center px-1 truncate w-full mt-2 text-white">{leaderboard[2].fullName}</span>
+                  <div className="w-full h-20 sm:h-24 md:h-28 bg-[#CD7F32] border-3 md:border-4 border-black border-b-0 flex flex-col items-center justify-start pt-2 md:pt-3 relative hover:-translate-y-2 transition-transform cursor-default">
+                     <span className="text-xl sm:text-2xl md:text-3xl font-black text-white drop-shadow-[2px_2px_0px_#000]">3</span>
+                     <span className="text-[8px] sm:text-[10px] font-bold text-center px-1 truncate w-full mt-1 md:mt-2 text-white">{leaderboard[2].fullName}</span>
                      {activeTab === "global" && leaderboard[2].collegeName && (
-                       <span className="text-[8px] font-bold text-center px-1 truncate w-full mt-0.5" style={{color: "rgba(255,255,255,0.7)"}}>{leaderboard[2].collegeName}</span>
+                       <span className="text-[7px] md:text-[8px] font-bold text-center px-1 truncate w-full mt-0.5 text-white/70 hidden sm:block">{leaderboard[2].collegeName}</span>
                      )}
-                     <span className="text-xs font-black bg-black text-[#B6FF60] px-2 py-0.5 border border-black mt-1">{leaderboard[2].totalPoints} pts</span>
+                     <span className="text-[10px] md:text-xs font-black bg-black text-[#B6FF60] px-1.5 md:px-2 py-0.5 border border-black mt-1">{leaderboard[2].totalPoints} pts</span>
                   </div>
                 </div>
               )}
