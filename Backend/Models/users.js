@@ -87,6 +87,12 @@ const userSchema = new mongoose.Schema(
       completedEvents: { type: Number, default: 0 },
     },
 
+    totalPoints: {
+      type: Number,
+      default: 0,
+      index: true, 
+    },
+
     isEmailVerified: {
       type: Boolean,
       default: false,
