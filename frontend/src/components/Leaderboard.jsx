@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Trophy, Globe, MapPin, Medal, Star } from "lucide-react";
-import api from "../../api";
+import api from "../../src/api";
 
 const Leaderboard = () => {
   const [activeTab, setActiveTab] = useState("global");

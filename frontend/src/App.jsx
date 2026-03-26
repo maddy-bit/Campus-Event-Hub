@@ -2,12 +2,13 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import { Navigate } from "react-router-dom";
 
+
+//import pages for auth
 import Login from "./pages/auth/Login";
 import RegistrationPage from "./pages/auth/RegistrationPage";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import VerifyOtp from "./pages/auth/VerifyOtp";
 import ResetPassword from "./pages/auth/ResetPassword";
-import VerifyEmail from "./pages/auth/VerifyEmail";
 import VerifyEmail from "./pages/auth/VerifyEmail";
 import LandingPage from "./components/LandingPage";
 import Leaderboard from "./components/Leaderboard";
