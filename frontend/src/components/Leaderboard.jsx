@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Trophy, Globe, MapPin, Medal, Star } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { Trophy, Globe, MapPin, Medal, Star, ChevronDown } from "lucide-react";
 import api from "../../src/api";
 
 const Leaderboard = () => {
@@ -7,7 +7,10 @@ const Leaderboard = () => {
   const [leaderboard, setLeaderboard] = useState([]);
   const [myRank, setMyRank] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [userContext, setUserContext] = useState(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
 
   const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
@@ -23,40 +26,48 @@ const Leaderboard = () => {
     init();
   }, []);
 
-  useEffect(() => {
-    const fetchLeaderboard = async () => {
-      setIsLoading(true);
-      try {
-        let endpoint = "/leaderboard";
-        const actualCollegeId = userContext?.collegeId?._id || userContext?.collegeId;
-        if (activeTab === "local" && actualCollegeId) {
-          endpoint += `?collegeId=${actualCollegeId}`;
-        }
-        
-        const [lbRes, rankRes] = await Promise.all([
-          api.get(endpoint),
-          api.get("/leaderboard/me")
-        ]);
+  // Fetch leaderboard data (page 1 or appending)
+  const fetchLeaderboard = useCallback(async (pageNum, append = false) => {
+    if (pageNum === 1) setIsLoading(true);
+    else setIsLoadingMore(true);
 
+    try {
+      const endpoint = activeTab === "local"
+        ? `/leaderboard/local?page=${pageNum}&limit=10`
+        : `/leaderboard/global?page=${pageNum}&limit=10`;
+
+      const [lbRes, rankRes] = await Promise.all([
+        api.get(endpoint),
+        api.get("/leaderboard/me")
+      ]);
+
+      if (append) {
+        setLeaderboard(prev => [...prev, ...lbRes.data.leaderboard]);
+      } else {
         setLeaderboard(lbRes.data.leaderboard);
-        setMyRank(rankRes.data);
-      } catch (err) {
-        console.error("Leaderboard fetch error", err);
-      } finally {
-        setIsLoading(false);
       }
-    };
-
-    if (activeTab === "global" || (activeTab === "local" && userContext)) {
-      fetchLeaderboard();
+      setHasMore(lbRes.data.hasMore);
+      setMyRank(rankRes.data);
+    } catch (err) {
+      console.error("Leaderboard fetch error", err);
+    } finally {
+      setIsLoading(false);
+      setIsLoadingMore(false);
     }
-  }, [activeTab, userContext]);
+  }, [activeTab]);
 
-  const getRankColor = (rank) => {
-    if (rank === 1) return "bg-[#FFD700] text-black border-2 border-black"; // Gold
-    if (rank === 2) return "bg-[#C0C0C0] text-black border-2 border-black"; // Silver
-    if (rank === 3) return "bg-[#CD7F32] text-white border-2 border-black"; // Bronze
-    return "bg-black text-white border-2 border-black";
+  // Reset and fetch on tab change
+  useEffect(() => {
+    setPage(1);
+    setLeaderboard([]);
+    setHasMore(false);
+    fetchLeaderboard(1, false);
+  }, [activeTab, fetchLeaderboard]);
+
+  const handleLoadMore = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchLeaderboard(nextPage, true);
   };
 
   return (
@@ -110,14 +121,14 @@ const Leaderboard = () => {
         </button>
       </div>
 
-      {/* Leaderboard Table */}
+      {/* Leaderboard Content */}
       <div className="border-4 border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
         <div className="bg-black text-white p-3 flex justify-between items-center px-4 border-b-2 border-black">
           <h2 className="text-sm font-bold tracking-widest uppercase flex items-center gap-2">
             <Medal size={16} /> Top_Students
           </h2>
           <span className="text-[10px] text-gray-400 font-bold uppercase">
-            Top 50
+            {activeTab === "global" ? "All Colleges" : "Your College"}
           </span>
         </div>
 
@@ -131,7 +142,7 @@ const Leaderboard = () => {
           </div>
         ) : (
           <div>
-            {/* ── PODIUM ── */}
+            {/* Podium */}
             <div className="flex justify-center items-end gap-2 md:gap-8 pt-12 pb-0 px-4 mt-8 bg-[#f5f5f0] border-b-4 border-black relative">
               
               {/* 2nd Place */}
@@ -207,25 +218,25 @@ const Leaderboard = () => {
               )}
             </div>
 
-            {/* ── REST OF TABLE ── */}
+            {/* Rest of table */}
             {leaderboard.length > 3 && (
               <div className="overflow-x-auto bg-white">
                 <table className="w-full text-left">
                   <thead>
-                    <tr className="border-b-4 border-black bg-gray-100 text-[10px] font-black tracking-widest text-[#B6FF60] uppercase shadow-[0_4px_0_#000]">
+                    <tr className="border-b-4 border-black bg-gray-100 text-[10px] font-black tracking-widest uppercase shadow-[0_4px_0_#000]">
                       <th className="p-4 w-16 text-center text-black">Rank</th>
                       <th className="p-4 border-l-4 border-black text-black">Student</th>
                       <th className="p-4 border-l-4 border-black w-24 text-right text-black">Points</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y-4 divide-black">
+                  <tbody className="divide-y-2 divide-gray-200">
                     {leaderboard.slice(3).map((student) => (
                       <tr 
                         key={student._id} 
                         className={`transition-colors ${userContext && student._id === userContext._id ? "bg-[#B6FF60]" : "hover:bg-gray-100"}`}
                       >
                         <td className="p-4 text-center">
-                          <span className={`inline-block w-8 h-8 leading-7 text-xs font-black bg-black text-white border-2 border-black`}>
+                          <span className="inline-block w-8 h-8 leading-7 text-xs font-black bg-black text-white border-2 border-black">
                             {student.rank}
                           </span>
                         </td>
@@ -266,6 +277,26 @@ const Leaderboard = () => {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+
+            {/* Load More */}
+            {hasMore && (
+              <div className="p-4 flex justify-center border-t-2 border-black">
+                <button
+                  onClick={handleLoadMore}
+                  disabled={isLoadingMore}
+                  className="flex items-center gap-2 bg-black text-[#B6FF60] border-2 border-black px-6 py-3 font-black uppercase text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all disabled:opacity-50"
+                >
+                  {isLoadingMore ? (
+                    <span className="animate-pulse">Loading...</span>
+                  ) : (
+                    <>
+                      <ChevronDown size={16} />
+                      Load More
+                    </>
+                  )}
+                </button>
               </div>
             )}
           </div>
