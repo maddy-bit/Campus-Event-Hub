@@ -28,8 +28,9 @@ const Leaderboard = () => {
       setIsLoading(true);
       try {
         let endpoint = "/leaderboard";
-        if (activeTab === "local" && userContext?.collegeId) {
-          endpoint += `?collegeId=${userContext.collegeId}`;
+        const actualCollegeId = userContext?.collegeId?._id || userContext?.collegeId;
+        if (activeTab === "local" && actualCollegeId) {
+          endpoint += `?collegeId=${actualCollegeId}`;
         }
         
         const [lbRes, rankRes] = await Promise.all([
