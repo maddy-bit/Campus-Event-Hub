@@ -124,7 +124,7 @@ const submitContact = async (req, res) => {
 
     // Send email to the super admin
     await sendEmail({
-      to: "prajwalvr1357@gmail.com",
+      to: process.env.CONTACT_EMAIL || "prajwalvr1357@gmail.com",
       subject: `[CampusEventHub] New Contact Message from ${name}`,
       html: `
         <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; border: 2px solid #e5e7eb;">
