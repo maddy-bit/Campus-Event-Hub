@@ -3,7 +3,7 @@ const { UserModel } = require("../Models/users");
 const { ClubModel } = require("../Models/club");
 const { EventModel } = require("../Models/event");
 const bcrypt = require("bcryptjs");
-const cloudinary = require("../Config/cloudinary");
+const cloudinary = require("../config/cloudinary");
 const sendAdminCreationEmail = require("../helpers/emailTemplates/collegeadmin");
 const sendEmail = require("../utils/sendEmail");
 

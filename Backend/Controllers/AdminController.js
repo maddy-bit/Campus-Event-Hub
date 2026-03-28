@@ -4,7 +4,7 @@ const { UserModel } = require("../Models/users");
 const { ERegistrationModel } = require("../Models/ERegistration");
 const { ClubModel } = require("../Models/club");
 const { NotificationModel } = require("../Models/Notification");
-const cloudinary = require("../Config/cloudinary");
+const cloudinary = require("../config/cloudinary");
 const sendEmail = require("../utils/sendEmail");
 
 // Helper: upload buffer to Cloudinary using upload_stream

@@ -49,7 +49,7 @@ club-event-management/
 ```
 Backend/
 │
-├── Config/
+├── config/
 │   ├── db.js                  # Database connection configuration
 │   ├── cloudinary.js          # Image upload configuration
 │   ├── payment.js             # Payment gateway configuration (Razorpay/Stripe)

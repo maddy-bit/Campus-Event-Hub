@@ -1,7 +1,7 @@
 const { EventModel } = require("../Models/event");
 const { UserModel } = require("../Models/users");
 const { ERegistrationModel } = require("../Models/ERegistration");
-const cloudinary = require("../Config/cloudinary");
+const cloudinary = require("../config/cloudinary");
 
 // Helper: upload buffer to Cloudinary using upload_stream
 const uploadToCloudinary = (fileBuffer, options) => {

@@ -1,7 +1,7 @@
 const { UserModel } = require("../Models/users");
 const { ClubModel } = require("../Models/club");
 const bcrypt = require("bcryptjs");
-const cloudinary = require("../Config/cloudinary");
+const cloudinary = require("../config/cloudinary");
 
 const { ConnectionModel } = require("../Models/Connection");
 
