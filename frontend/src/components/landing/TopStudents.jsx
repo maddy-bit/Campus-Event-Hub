@@ -7,35 +7,31 @@ gsap.registerPlugin(ScrollTrigger);
 
 const TopStudents = ({ students, loading }) => {
   const sectionRef = useRef(null);
+  const podiumRef = useRef(null);
 
   useEffect(() => {
     if (loading || students.length === 0) return;
 
     const ctx = gsap.context(() => {
-      gsap.from(".leaderboard-section .section-header > *", {
-        y: 30,
-        opacity: 0,
-        duration: 0.6,
-        stagger: 0.1,
-        scrollTrigger: {
-          trigger: ".leaderboard-section",
-          start: "top 80%",
-        },
-      });
-
-      // Podium cards scale up
-      gsap.from(".podium-card", {
-        y: 80,
-        opacity: 0,
-        scale: 0.85,
-        duration: 0.8,
-        stagger: 0.2,
-        ease: "back.out(1.4)",
-        scrollTrigger: {
-          trigger: ".leaderboard-podium",
-          start: "top 85%",
-        },
-      });
+      const cards = podiumRef.current?.querySelectorAll(".podium-card");
+      if (cards && cards.length) {
+        gsap.set(cards, { y: 60, opacity: 0, scale: 0.88 });
+        ScrollTrigger.create({
+          trigger: podiumRef.current,
+          start: "top 90%",
+          onEnter: () => {
+            gsap.to(cards, {
+              y: 0,
+              opacity: 1,
+              scale: 1,
+              duration: 0.8,
+              stagger: 0.18,
+              ease: "back.out(1.4)",
+            });
+          },
+          once: true,
+        });
+      }
     }, sectionRef);
 
     return () => ctx.revert();
@@ -110,7 +106,7 @@ const TopStudents = ({ students, loading }) => {
             <p className="events-empty-text">🏅 No leaderboard data yet — start participating to earn points!</p>
           </div>
         ) : (
-          <div className="leaderboard-podium">
+          <div className="leaderboard-podium" ref={podiumRef}>
             {podiumOrder.map((student) => {
               const config = rankConfig[student.rank] || rankConfig[3];
               return (

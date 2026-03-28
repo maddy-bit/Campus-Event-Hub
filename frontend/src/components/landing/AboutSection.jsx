@@ -38,54 +38,29 @@ const features = [
 
 const AboutSection = () => {
   const sectionRef = useRef(null);
+  const cardsRef = useRef(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Header animation
-      gsap.from(".about-section .section-tag", {
-        y: 30,
-        opacity: 0,
-        duration: 0.6,
-        scrollTrigger: {
-          trigger: ".about-section",
-          start: "top 80%",
-        },
-      });
-
-      gsap.from(".about-section .section-title", {
-        y: 40,
-        opacity: 0,
-        duration: 0.7,
-        delay: 0.1,
-        scrollTrigger: {
-          trigger: ".about-section",
-          start: "top 80%",
-        },
-      });
-
-      gsap.from(".about-section .section-subtitle", {
-        y: 30,
-        opacity: 0,
-        duration: 0.6,
-        delay: 0.2,
-        scrollTrigger: {
-          trigger: ".about-section",
-          start: "top 80%",
-        },
-      });
-
-      // Cards stagger
-      gsap.from(".about-card", {
-        y: 60,
-        opacity: 0,
-        duration: 0.7,
-        stagger: 0.15,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: ".about-grid",
-          start: "top 85%",
-        },
-      });
+      // Cards stagger animation
+      const cards = cardsRef.current?.querySelectorAll(".about-card");
+      if (cards && cards.length) {
+        gsap.set(cards, { y: 50, opacity: 0 });
+        ScrollTrigger.create({
+          trigger: cardsRef.current,
+          start: "top 90%",
+          onEnter: () => {
+            gsap.to(cards, {
+              y: 0,
+              opacity: 1,
+              duration: 0.7,
+              stagger: 0.12,
+              ease: "power2.out",
+            });
+          },
+          once: true,
+        });
+      }
     }, sectionRef);
 
     return () => ctx.revert();
@@ -106,7 +81,7 @@ const AboutSection = () => {
           </p>
         </div>
 
-        <div className="about-grid">
+        <div className="about-grid" ref={cardsRef}>
           {features.map((feature, idx) => (
             <div className="about-card" key={idx}>
               <div

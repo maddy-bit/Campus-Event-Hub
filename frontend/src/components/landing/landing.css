@@ -354,7 +354,6 @@
   border: 2px solid #6366f130;
   border-radius: 100px;
   margin-bottom: 24px;
-  animation: fadeInUp 0.8s ease;
 }
 
 .hero-title {
@@ -364,7 +363,6 @@
   line-height: 1.1;
   margin: 0 0 20px;
   letter-spacing: -1.5px;
-  animation: fadeInUp 0.8s ease 0.1s both;
 }
 
 .hero-title-accent {
@@ -379,7 +377,6 @@
   color: var(--landing-text-muted);
   line-height: 1.7;
   margin-bottom: 32px;
-  animation: fadeInUp 0.8s ease 0.2s both;
 }
 
 .hero-cta-group {
@@ -387,7 +384,6 @@
   gap: 14px;
   flex-wrap: wrap;
   margin-bottom: 48px;
-  animation: fadeInUp 0.8s ease 0.3s both;
 }
 
 /* Neo-Brutal Primary CTA */
@@ -460,7 +456,6 @@
   display: flex;
   align-items: center;
   gap: 24px;
-  animation: fadeInUp 0.8s ease 0.4s both;
 }
 
 .hero-stat {
@@ -505,7 +500,7 @@
   height: 380px;
 }
 
-/* Floating cards */
+/* Floating cards — animated by GSAP */
 .hero-float-card {
   position: absolute;
   display: flex;
@@ -516,42 +511,23 @@
   border-radius: var(--landing-radius);
   padding: 16px 22px;
   box-shadow: var(--landing-shadow);
-  animation: floatCard 6s infinite ease-in-out;
   min-width: 240px;
 }
 
 .hero-float-card-1 {
   top: 0;
   left: 0;
-  animation-delay: 0s;
 }
 
 .hero-float-card-2 {
   top: 50%;
   right: 0;
   transform: translateY(-50%);
-  animation-delay: -2s;
 }
 
 .hero-float-card-3 {
   bottom: 0;
   left: 30px;
-  animation-delay: -4s;
-}
-
-@keyframes floatCard {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-12px); }
-}
-
-.hero-float-card-2 {
-  animation: floatCard2 6s infinite ease-in-out;
-  animation-delay: -2s;
-}
-
-@keyframes floatCard2 {
-  0%, 100% { transform: translateY(-50%); }
-  50% { transform: translateY(calc(-50% - 12px)); }
 }
 
 .float-card-icon {
@@ -656,7 +632,6 @@
   overflow: hidden;
   box-shadow: var(--landing-shadow);
   transition: all 0.2s ease;
-  animation: fadeInUp 0.6s ease both;
 }
 
 .event-card:hover {

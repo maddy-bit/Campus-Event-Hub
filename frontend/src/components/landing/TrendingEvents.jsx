@@ -17,38 +17,35 @@ const categoryColors = {
 
 const TrendingEvents = ({ events, loading }) => {
   const sectionRef = useRef(null);
+  const gridRef = useRef(null);
 
   useEffect(() => {
     if (loading) return;
 
     const ctx = gsap.context(() => {
-      gsap.from(".events-section .section-header > *", {
-        y: 30,
-        opacity: 0,
-        duration: 0.6,
-        stagger: 0.1,
-        scrollTrigger: {
-          trigger: ".events-section",
-          start: "top 80%",
-        },
-      });
-
-      gsap.from(".event-card", {
-        y: 50,
-        opacity: 0,
-        scale: 0.95,
-        duration: 0.6,
-        stagger: 0.1,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: ".events-grid",
-          start: "top 85%",
-        },
-      });
+      const cards = gridRef.current?.querySelectorAll(".event-card");
+      if (cards && cards.length) {
+        gsap.set(cards, { y: 40, opacity: 0, scale: 0.96 });
+        ScrollTrigger.create({
+          trigger: gridRef.current,
+          start: "top 90%",
+          onEnter: () => {
+            gsap.to(cards, {
+              y: 0,
+              opacity: 1,
+              scale: 1,
+              duration: 0.6,
+              stagger: 0.1,
+              ease: "power2.out",
+            });
+          },
+          once: true,
+        });
+      }
     }, sectionRef);
 
     return () => ctx.revert();
-  }, [loading]);
+  }, [loading, events]);
 
   const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleDateString("en-IN", {
@@ -88,7 +85,7 @@ const TrendingEvents = ({ events, loading }) => {
             <p className="events-empty-text">🎉 No trending events right now — be the first to create one!</p>
           </div>
         ) : (
-          <div className="events-grid">
+          <div className="events-grid" ref={gridRef}>
             {events.map((event, idx) => {
               const catStyle = categoryColors[event.category] || categoryColors.Other;
               return (

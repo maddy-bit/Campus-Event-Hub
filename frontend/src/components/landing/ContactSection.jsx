@@ -10,34 +10,51 @@ const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const ContactSection = () => {
   const sectionRef = useRef(null);
+  const infoRef = useRef(null);
+  const formRef = useRef(null);
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [status, setStatus] = useState("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.from(".contact-info > *", {
-        x: -40,
-        opacity: 0,
-        duration: 0.7,
-        stagger: 0.12,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: ".contact-section",
-          start: "top 75%",
-        },
-      });
+      // Info side
+      if (infoRef.current) {
+        const infoChildren = infoRef.current.children;
+        gsap.set(infoChildren, { x: -30, opacity: 0 });
+        ScrollTrigger.create({
+          trigger: sectionRef.current,
+          start: "top 80%",
+          onEnter: () => {
+            gsap.to(infoChildren, {
+              x: 0,
+              opacity: 1,
+              duration: 0.7,
+              stagger: 0.1,
+              ease: "power2.out",
+            });
+          },
+          once: true,
+        });
+      }
 
-      gsap.from(".contact-form-card", {
-        x: 40,
-        opacity: 0,
-        duration: 0.8,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: ".contact-section",
-          start: "top 75%",
-        },
-      });
+      // Form card
+      if (formRef.current) {
+        gsap.set(formRef.current, { x: 30, opacity: 0 });
+        ScrollTrigger.create({
+          trigger: sectionRef.current,
+          start: "top 80%",
+          onEnter: () => {
+            gsap.to(formRef.current, {
+              x: 0,
+              opacity: 1,
+              duration: 0.8,
+              ease: "power2.out",
+            });
+          },
+          once: true,
+        });
+      }
     }, sectionRef);
 
     return () => ctx.revert();
@@ -69,7 +86,7 @@ const ContactSection = () => {
       <div className="section-container">
         <div className="contact-grid">
           {/* Left info */}
-          <div className="contact-info">
+          <div className="contact-info" ref={infoRef}>
             <span className="section-tag">💬 Get in Touch</span>
             <h2 className="section-title" style={{ textAlign: "left" }}>
               Have questions?<br />
@@ -97,7 +114,7 @@ const ContactSection = () => {
           </div>
 
           {/* Right form */}
-          <div className="contact-form-card">
+          <div className="contact-form-card" ref={formRef}>
             <form onSubmit={handleSubmit} className="contact-form">
               <div className="form-group">
                 <label htmlFor="contact-name" className="form-label">Name</label>
