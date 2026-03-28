@@ -1,13 +1,47 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Send, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const ContactSection = () => {
+  const sectionRef = useRef(null);
   const [form, setForm] = useState({ name: "", email: "", message: "" });
-  const [status, setStatus] = useState("idle"); // idle | sending | success | error
+  const [status, setStatus] = useState("idle");
   const [errorMsg, setErrorMsg] = useState("");
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.from(".contact-info > *", {
+        x: -40,
+        opacity: 0,
+        duration: 0.7,
+        stagger: 0.12,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: ".contact-section",
+          start: "top 75%",
+        },
+      });
+
+      gsap.from(".contact-form-card", {
+        x: 40,
+        opacity: 0,
+        duration: 0.8,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: ".contact-section",
+          start: "top 75%",
+        },
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -31,7 +65,7 @@ const ContactSection = () => {
   };
 
   return (
-    <section className="contact-section" id="contact">
+    <section className="contact-section" id="contact" ref={sectionRef}>
       <div className="section-container">
         <div className="contact-grid">
           {/* Left info */}

@@ -1,5 +1,9 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Calendar, Users, Trophy, Globe } from "lucide-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const features = [
   {
@@ -33,8 +37,62 @@ const features = [
 ];
 
 const AboutSection = () => {
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Header animation
+      gsap.from(".about-section .section-tag", {
+        y: 30,
+        opacity: 0,
+        duration: 0.6,
+        scrollTrigger: {
+          trigger: ".about-section",
+          start: "top 80%",
+        },
+      });
+
+      gsap.from(".about-section .section-title", {
+        y: 40,
+        opacity: 0,
+        duration: 0.7,
+        delay: 0.1,
+        scrollTrigger: {
+          trigger: ".about-section",
+          start: "top 80%",
+        },
+      });
+
+      gsap.from(".about-section .section-subtitle", {
+        y: 30,
+        opacity: 0,
+        duration: 0.6,
+        delay: 0.2,
+        scrollTrigger: {
+          trigger: ".about-section",
+          start: "top 80%",
+        },
+      });
+
+      // Cards stagger
+      gsap.from(".about-card", {
+        y: 60,
+        opacity: 0,
+        duration: 0.7,
+        stagger: 0.15,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: ".about-grid",
+          start: "top 85%",
+        },
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section className="about-section" id="about">
+    <section className="about-section" id="about" ref={sectionRef}>
       <div className="section-container">
         <div className="section-header">
           <span className="section-tag">About the Platform</span>
@@ -43,7 +101,7 @@ const AboutSection = () => {
             <span className="title-accent">in one powerful platform</span>
           </h2>
           <p className="section-subtitle">
-            CampusEventHub brings together event management, student networking,
+            Infy Event Hub brings together event management, student networking,
             and gamification to create the ultimate campus experience.
           </p>
         </div>

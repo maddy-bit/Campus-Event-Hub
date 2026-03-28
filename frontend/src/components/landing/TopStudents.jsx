@@ -1,16 +1,53 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Crown, Medal, Award, Star } from "lucide-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const TopStudents = ({ students, loading }) => {
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    if (loading || students.length === 0) return;
+
+    const ctx = gsap.context(() => {
+      gsap.from(".leaderboard-section .section-header > *", {
+        y: 30,
+        opacity: 0,
+        duration: 0.6,
+        stagger: 0.1,
+        scrollTrigger: {
+          trigger: ".leaderboard-section",
+          start: "top 80%",
+        },
+      });
+
+      // Podium cards scale up
+      gsap.from(".podium-card", {
+        y: 80,
+        opacity: 0,
+        scale: 0.85,
+        duration: 0.8,
+        stagger: 0.2,
+        ease: "back.out(1.4)",
+        scrollTrigger: {
+          trigger: ".leaderboard-podium",
+          start: "top 85%",
+        },
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, [loading, students]);
+
   if (loading) {
     return (
-      <section className="leaderboard-section" id="leaderboard">
+      <section className="leaderboard-section" id="leaderboard" ref={sectionRef}>
         <div className="section-container">
           <div className="section-header">
             <span className="section-tag">🏆 Leaderboard</span>
-            <h2 className="section-title">
-              Top Performers
-            </h2>
+            <h2 className="section-title">Top Performers</h2>
           </div>
           <div className="leaderboard-grid">
             {[...Array(3)].map((_, i) => (
@@ -56,7 +93,7 @@ const TopStudents = ({ students, loading }) => {
   };
 
   return (
-    <section className="leaderboard-section" id="leaderboard">
+    <section className="leaderboard-section" id="leaderboard" ref={sectionRef}>
       <div className="section-container">
         <div className="section-header">
           <span className="section-tag">🏆 Leaderboard</span>
@@ -64,7 +101,7 @@ const TopStudents = ({ students, loading }) => {
             Campus <span className="title-accent">Top Performers</span>
           </h2>
           <p className="section-subtitle">
-            The most active students on CampusEventHub — rising through events, earning points, and leading the way.
+            The most active students on Infy Event Hub — rising through events, earning points, and leading the way.
           </p>
         </div>
 

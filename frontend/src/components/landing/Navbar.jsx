@@ -22,13 +22,10 @@ const Navbar = () => {
   ];
 
   return (
-    <nav
-      className={`landing-navbar ${scrolled ? "scrolled" : ""}`}
-    >
+    <nav className={`landing-navbar ${scrolled ? "scrolled" : ""}`}>
       <div className="navbar-inner">
         <a href="#" className="navbar-logo">
-          <span className="logo-icon">🎪</span>
-          <span className="logo-text">CampusEventHub</span>
+          <span className="logo-text">Infy Event Hub</span>
         </a>
 
         {/* Desktop links */}

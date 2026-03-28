@@ -1,18 +1,76 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const HeroSection = () => {
   const navigate = useNavigate();
+  const sectionRef = useRef(null);
+  const contentRef = useRef(null);
+  const visualRef = useRef(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Hero content stagger animation
+      gsap.from(contentRef.current.children, {
+        y: 60,
+        opacity: 0,
+        duration: 0.9,
+        stagger: 0.15,
+        ease: "power3.out",
+        delay: 0.2,
+      });
+
+      // Floating cards entrance from right
+      gsap.from(".hero-float-card", {
+        x: 100,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.2,
+        ease: "back.out(1.7)",
+        delay: 0.6,
+      });
+
+      // Continuous float for cards
+      gsap.to(".hero-float-card-1", {
+        y: -14,
+        duration: 3,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
+      });
+      gsap.to(".hero-float-card-2", {
+        y: -10,
+        duration: 2.5,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
+        delay: 0.5,
+      });
+      gsap.to(".hero-float-card-3", {
+        y: -16,
+        duration: 3.5,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
+        delay: 1,
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
 
   return (
-    <section className="hero-section" id="hero">
+    <section className="hero-section" id="hero" ref={sectionRef}>
       {/* Animated background blobs */}
       <div className="hero-blob hero-blob-1" />
       <div className="hero-blob hero-blob-2" />
       <div className="hero-blob hero-blob-3" />
 
-      <div className="hero-content">
+      <div className="hero-content" ref={contentRef}>
         <div className="hero-badge">
           <Sparkles size={16} />
           <span>The #1 Campus Event Platform</span>
@@ -65,7 +123,7 @@ const HeroSection = () => {
       </div>
 
       {/* Hero illustration / visual */}
-      <div className="hero-visual">
+      <div className="hero-visual" ref={visualRef}>
         <div className="hero-card-stack">
           <div className="hero-float-card hero-float-card-1">
             <div className="float-card-icon">🏆</div>

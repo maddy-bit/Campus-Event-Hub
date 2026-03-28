@@ -1,5 +1,9 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { CalendarDays, MapPin, Users, Tag } from "lucide-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const categoryColors = {
   Competition: { bg: "#fef3c7", text: "#92400e", border: "#f59e0b" },
@@ -12,6 +16,40 @@ const categoryColors = {
 };
 
 const TrendingEvents = ({ events, loading }) => {
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    if (loading) return;
+
+    const ctx = gsap.context(() => {
+      gsap.from(".events-section .section-header > *", {
+        y: 30,
+        opacity: 0,
+        duration: 0.6,
+        stagger: 0.1,
+        scrollTrigger: {
+          trigger: ".events-section",
+          start: "top 80%",
+        },
+      });
+
+      gsap.from(".event-card", {
+        y: 50,
+        opacity: 0,
+        scale: 0.95,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: ".events-grid",
+          start: "top 85%",
+        },
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, [loading]);
+
   const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleDateString("en-IN", {
       day: "numeric",
@@ -21,7 +59,7 @@ const TrendingEvents = ({ events, loading }) => {
   };
 
   return (
-    <section className="events-section" id="events">
+    <section className="events-section" id="events" ref={sectionRef}>
       <div className="section-container">
         <div className="section-header">
           <span className="section-tag">🔥 Trending Now</span>
@@ -54,14 +92,14 @@ const TrendingEvents = ({ events, loading }) => {
             {events.map((event, idx) => {
               const catStyle = categoryColors[event.category] || categoryColors.Other;
               return (
-                <div className="event-card" key={event._id || idx} style={{ animationDelay: `${idx * 0.1}s` }}>
+                <div className="event-card" key={event._id || idx}>
                   {/* Poster */}
                   <div className="event-card-poster">
                     {event.posterUrl ? (
                       <img src={event.posterUrl} alt={event.title} loading="lazy" />
                     ) : (
                       <div className="event-card-poster-placeholder">
-                        <span>🎪</span>
+                        <span>📅</span>
                       </div>
                     )}
                     <div

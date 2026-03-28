@@ -38,8 +38,7 @@ const Footer = () => {
           {/* Brand */}
           <div className="footer-brand">
             <div className="footer-logo">
-              <span className="logo-icon">🎪</span>
-              <span className="logo-text">CampusEventHub</span>
+              <span className="logo-text">Infy Event Hub</span>
             </div>
             <p className="footer-tagline">
               The ultimate platform for campus events, networking, and student engagement.
@@ -70,7 +69,7 @@ const Footer = () => {
 
         <div className="footer-bottom">
           <p className="footer-copyright">
-            © {currentYear} CampusEventHub. All rights reserved.
+            © {currentYear} Infy Event Hub. All rights reserved.
           </p>
           <p className="footer-made-with">
             Made with <Heart size={14} className="heart-icon" /> by Team 1
