@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Bell, Menu, LogOut, Zap } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import "../styles/Header.css";
+import "../styles/header.css";
  
 const Header = ({ onMenuClick, hideMenu, title, variant }) => {
   const navigate = useNavigate();
