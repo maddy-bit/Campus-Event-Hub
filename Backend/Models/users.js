@@ -80,11 +80,26 @@ const userSchema = new mongoose.Schema(
       match: [/^\d{4}$/, "Year of study must be a 4-digit number"],
     },
 
+    promotionRequest: {
+      status: { type: String, enum: ["pending", "approved", "denied"] },
+      reason: String,
+      requestedAt: Date,
+      reviewedAt: Date,
+      reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      denialReason: String,
+    },
+
     stats: {
       eventsCreated: { type: Number, default: 0 },
       totalParticipants: { type: Number, default: 0 },
       activeEvents: { type: Number, default: 0 },
       completedEvents: { type: Number, default: 0 },
+    },
+
+    totalPoints: {
+      type: Number,
+      default: 0,
+      index: true, 
     },
 
     isEmailVerified: {

@@ -361,6 +361,37 @@ const getActiveConnection = async (req, res) => {
   }
 };
 
+// request promotion to organizer
+const requestPromotion = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { reason } = req.body;
+
+    const user = await UserModel.findById(userId);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    if (user.role === "organizer") {
+      return res.status(400).json({ success: false, message: "You are already an organizer." });
+    }
+
+    if (user.promotionRequest?.status === "pending") {
+      return res.status(400).json({ success: false, message: "You already have a pending promotion request." });
+    }
+
+    user.promotionRequest = {
+      status: "pending",
+      reason: reason || "",
+      requestedAt: new Date(),
+    };
+
+    await user.save();
+
+    return res.status(200).json({ success: true, message: "Promotion request submitted successfully" });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Error submitting request", error: error.message });
+  }
+};
+
 module.exports = {
   getActiveConnection,
   getProfile,
@@ -372,4 +403,5 @@ module.exports = {
   deleteClubLogo,
   changePassword,
   getCollegeClubs,
+  requestPromotion,
 };

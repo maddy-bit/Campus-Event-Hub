@@ -3,6 +3,8 @@ const { EventModel } = require("../Models/event");
 const { EventCommentModel } = require("../Models/EventComment");
 const { UserModel } = require("../Models/users");
 const { NotificationModel } = require("../Models/Notification");
+const { PointTransactionModel } = require("../Models/PointTransaction");
+const POINTS = require("../config/points");
 
 // routes for comment posting and getting are here
 
@@ -96,6 +98,19 @@ const registerForEvent = async (req, res) => {
         });
       }
       throw saveErr; // bubble up for generic 500
+    }
+
+    // Give points for registration
+    try {
+      await PointTransactionModel.create({
+        userId,
+        eventId,
+        action: 'registration',
+        points: POINTS.REGISTRATION
+      });
+      await UserModel.findByIdAndUpdate(userId, { $inc: { totalPoints: POINTS.REGISTRATION } });
+    } catch (ptsErr) {
+      if (ptsErr.code !== 11000) console.error("Registration points error:", ptsErr);
     }
 
     // 4. TRIGGER NOTIFICATIONS

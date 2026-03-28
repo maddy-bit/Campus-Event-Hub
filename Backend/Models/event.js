@@ -81,7 +81,7 @@ const eventSchema = new mongoose.Schema(
 
   status: {
     type: String,
-    enum: ['Draft', 'Submitted', 'Approved', 'Rejected'],
+    enum: ['Draft', 'Submitted', 'Approved', 'Rejected', 'Completed'],
     default: 'Submitted'
   },
   moderation: {

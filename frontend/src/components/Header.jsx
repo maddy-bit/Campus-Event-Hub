@@ -63,7 +63,7 @@ const Header = ({ onMenuClick, hideMenu, title, variant }) => {
     >
  
       {/* LEFT */}
-      <div className="neo-header-left">
+      <div className={`neo-header-left ${isNewLayout && user?.role === "organizer" ? "ml-14 md:ml-0" : ""}`}>
         {/* Menu button: only for admin/superadmin (old sidebar) */}
         {!hideMenu && !isNewLayout && (
           <button className="neo-menu-btn" onClick={onMenuClick}>

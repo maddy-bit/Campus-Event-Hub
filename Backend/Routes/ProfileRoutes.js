@@ -11,6 +11,7 @@ const {
   deleteClubLogo,
   changePassword,
   getCollegeClubs,
+  requestPromotion,
 } = require('../Controllers/ProfileController');
 const { verifyToken } = require('../Middleware/AuthMiddleware');
 const { checkOrganizerRole, checkProfileOwnership } = require('../Middleware/RoleMiddleware');
@@ -25,6 +26,8 @@ router.post('/upload/club-logo', verifyToken, checkOrganizerRole, upload.single(
 router.delete('/profile-picture', verifyToken, deleteProfilePicture);
 router.delete('/club-logo', verifyToken, checkOrganizerRole, deleteClubLogo);
 router.put('/change-password', verifyToken, changePassword);
+
+router.post('/promotion-request', verifyToken, requestPromotion);
 
 router.get('/active-connection', verifyToken, getActiveConnection);
 

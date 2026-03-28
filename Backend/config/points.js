@@ -1,0 +1,7 @@
+module.exports = {
+  REGISTRATION: 10,
+  WINNER_1ST: 50,
+  WINNER_2ND: 30,
+  WINNER_3RD: 20,
+  RATING_GIVEN: 5,
+};
