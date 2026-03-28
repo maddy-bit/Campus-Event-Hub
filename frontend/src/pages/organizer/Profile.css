@@ -663,6 +663,9 @@ textarea:-webkit-autofill:active {
 }
 
 @media (max-width: 600px) {
+    .profile-container {
+        padding: 20px 15px 80px 15px;
+    }
 
     .nb-form-grid,
     .requirements-grid {
@@ -676,11 +679,54 @@ textarea:-webkit-autofill:active {
     .nb-action-bar {
         flex-direction: column;
         gap: 20px;
+        align-items: stretch;
+    }
+
+    .action-status {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .action-btns {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .nb-btn-secondary,
+    .nb-btn-primary {
+        width: 100%;
+        justify-content: center;
     }
 
     .danger-content {
         flex-direction: column;
         gap: 20px;
         text-align: center;
+    }
+
+    .nb-upload-area {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .nb-round-upload-btn {
+        margin: 10px auto 0 auto;
+    }
+
+    .header-info h1 {
+        font-size: 28px;
+    }
+
+    .avatar-wrapper {
+        width: 90px;
+        height: 90px;
+    }
+
+    .avatar-init {
+        width: 90px;
+        height: 90px;
+        font-size: 30px;
     }
 }
