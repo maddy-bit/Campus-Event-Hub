@@ -1,30 +1,57 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import HeroSection from "./landing/HeroSection";
+import AboutSection from "./landing/AboutSection";
+import TrendingEvents from "./landing/TrendingEvents";
+import TopStudents from "./landing/TopStudents";
+import CollegeMarquee from "./landing/CollegeMarquee";
+import ContactSection from "./landing/ContactSection";
+import Footer from "./landing/Footer";
+import Navbar from "./landing/Navbar";
+
+const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const [events, setEvents] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [colleges, setColleges] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const actions = [
-    { label: "Login", path: "/login" },
-    { label: "Register", path: "/register" },
-    { label: "Verify Email", path: "/verify-email" },
-    { label: "Forgot Password", path: "/forgot-password" },
-    { label: "Verify OTP", path: "/verify-otp" },
-    { label: "Reset Password", path: "/reset-password" },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [eventsRes, studentsRes, collegesRes] = await Promise.allSettled([
+          axios.get(`${API}/public/events/trending`),
+          axios.get(`${API}/public/students/top`),
+          axios.get(`${API}/public/colleges`),
+        ]);
+
+        if (eventsRes.status === "fulfilled") setEvents(eventsRes.value.data.events || []);
+        if (studentsRes.status === "fulfilled") setStudents(studentsRes.value.data.students || []);
+        if (collegesRes.status === "fulfilled") setColleges(collegesRes.value.data.colleges || []);
+      } catch (err) {
+        console.error("Failed to fetch landing page data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   return (
-    <div className="flex gap-7 flex-col items-center justify-center h-screen ">
-      Landing page  Will be created at the end of the project
-      {actions.map((action) => (
-        <button
-          className="bg-red-400 block rounded-lg text-white py-6"
-          key={action.path}
-          onClick={() => navigate(action.path)}
-        >
-          {action.label}
-        </button>
-      ))}
+    <div className="landing-root">
+      <Navbar />
+      <main>
+        <HeroSection />
+        <AboutSection />
+        <TrendingEvents events={events} loading={loading} />
+        <TopStudents students={students} loading={loading} />
+        <CollegeMarquee colleges={colleges} />
+        <ContactSection />
+      </main>
+      <Footer />
     </div>
   );
 };
