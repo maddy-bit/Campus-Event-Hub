@@ -10,7 +10,7 @@ import ContactSection from "./landing/ContactSection";
 import Footer from "./landing/Footer";
 import Navbar from "./landing/Navbar";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 const LandingPage = () => {
   const navigate = useNavigate();
