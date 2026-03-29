@@ -94,7 +94,10 @@ const Navbar = () => {
           onClick={() => navigate("/")}
         >
           <span className="text-xl font-black tracking-tighter text-zinc-900 uppercase">
-            Infy<span className="text-indigo-600">Hub</span>
+            Infy
+             <span className="bg-gradient-to-r from-pink-500 to-indigo-600 bg-clip-text text-transparent">
+    EventHub
+  </span>
           </span>
         </motion.div>
 

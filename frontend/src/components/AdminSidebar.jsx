@@ -11,7 +11,7 @@ const LogoBlock = () => (
         <AppWindow size={20} color="white" strokeWidth={2.5} />
       </div>
       <span className="font-extrabold text-xl tracking-tight text-black leading-none mt-1">
-        INFYevnthub
+        INFYeventhub
       </span>
     </Link>
   </div>
