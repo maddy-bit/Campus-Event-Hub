@@ -210,7 +210,7 @@ const OrganizerNotification = () => {
               <p className="text-[10px] font-bold text-gray-400 mb-1 flex items-center gap-1.5">
                 <Sparkles size={10} /> ORGANIZER // NOTIFICATIONS
               </p>
-              <h1 className="text-4xl md:text-5xl font-black tracking-tighter leading-none">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tighter leading-tight">
                 INBOX_FEED
               </h1>
             </div>
