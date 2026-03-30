@@ -256,7 +256,7 @@ const OrganizerNotification = () => {
             <button
               onClick={handleMarkAllRead}
               disabled={markingAll || unreadCount === 0}
-              className="flex items-center gap-1.5 border-2 border-black px-4 py-1.5 text-[9px] font-black bg-white hover:bg-black hover:text-white shadow-[2px_2px_0px_#000] transition-all disabled:opacity-30 disabled:cursor-not-allowed active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+              className="flex items-center gap-1.5 border-2 border-black px-2 sm:px-4 py-1 sm:py-1.5 text-[8px] sm:text-[9px] font-black bg-white hover:bg-black hover:text-white shadow-[2px_2px_0px_#000] transition-all disabled:opacity-30 disabled:cursor-not-allowed active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
             >
               {markingAll ? <Loader2 size={11} className="animate-spin" /> : <CheckCircle size={11} />}
               Mark All Read
