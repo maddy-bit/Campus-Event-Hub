@@ -201,8 +201,8 @@ const OrganizerNotification = () => {
   const filters = ["All", "Unread", "Submission_Update", "Announcement", "Alert", "Update", "Reminder"];
 
   return (
-    <div className="min-h-screen font-mono text-black uppercase">
-      <div className="max-w-3xl mx-auto">
+    <div className="min-h-screen px-3 sm:px-5 md:px-8 font-mono text-black uppercase">
+      <div className="max-w-3xl md:max-w-4xl lg:max-w-5xl mx-auto">
 
         <header className="mb-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-5">
