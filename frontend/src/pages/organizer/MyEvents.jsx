@@ -228,12 +228,12 @@ const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
       </div>
 
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+      <div className="flex flex-col md:flex-row justify-between md:items-end gap-6 mb-8">
         <div>
-          <h1 className="text-6xl font-black tracking-tighter mb-2">
+          <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-2">
             MY_EVENTS
           </h1>
-          <div className="bg-black text-[#B6FF60] px-3 py-1 inline-flex items-center gap-2 text-[10px] font-bold uppercase border-2 border-black">
+          <div className="bg-black text-[#B6FF60] px-3 py-1 inline-flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase border-2 border-black">
             <span className="flex items-center gap-1">
               <Circle size={8} fill="#B6FF60" /> {stats.total} Total Events
             </span>
@@ -251,7 +251,7 @@ const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
       </div>
 
       {/* Stats Section */}
-      <div className="flex flex-wrap gap-4 mb-8">
+      <div className="grid grid-cols-2 md:flex md:flex-wrap gap-4 mb-8">
         <div onClick={() => setStatusFilter("ALL")}>
           <StatCard
             label="All Events"
@@ -287,8 +287,8 @@ const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
       </div>
 
       {/* Filters Section */}
-      <div className="flex flex-wrap items-center gap-4 mb-6">
-        <div className="relative flex-1 min-w-[300px]">
+      <div className="flex flex-col md:flex-row flex-wrap md:items-center gap-4 mb-6">
+        <div className="relative w-full md:flex-1 md:min-w-[300px]">
           <Search
             className="absolute left-4 top-1/2 -translate-y-1/2 text-black"
             size={18}
@@ -302,13 +302,13 @@ const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
           />
         </div>
 
-        <BrutalistBox className="flex items-center justify-between px-4 py-3 min-w-[160px] text-xs font-bold uppercase relative group">
+        <BrutalistBox className="flex items-center justify-between px-4 py-3 w-full md:w-auto md:min-w-[160px] text-xs font-bold uppercase relative group">
           Status: {statusFilter}
           <ChevronDown size={16} />
         </BrutalistBox>
 
         {/* pending implementation of export functionality */}
-        <BrutalistBox className="flex items-center gap-2 px-4 py-3 text-xs font-bold uppercase">
+        <BrutalistBox className="flex items-center justify-center md:justify-start gap-2 px-4 py-3 w-full md:w-auto text-xs font-bold uppercase">
           <Menu size={16} />
           Export CSV
         </BrutalistBox>
@@ -425,8 +425,8 @@ const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
                           {isEditModalOpen && (
                             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
                               <div className="bg-[#F5F5F0] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                                <div className="bg-black text-white p-4 flex justify-between items-center sticky top-0 z-10">
-                                  <h2 className="font-black uppercase tracking-tighter">
+                                <div className="bg-black text-white p-4 flex justify-between items-center sticky top-0 z-10 w-full">
+                                  <h2 className="font-black uppercase tracking-tighter text-sm md:text-base truncate mr-2">
                                     Edit_Event: {selectedEvent?.title}
                                   </h2>
                                   <button
@@ -469,7 +469,7 @@ const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
                                           }
                                         />
                                       </div>
-                                      <div className="grid grid-cols-2 gap-4">
+                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                           <label className="block text-[10px] font-black uppercase mb-1">
                                             Category{" "}
@@ -594,17 +594,17 @@ const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
                                     </div>
                                   </section>
 
-                                  <div className="flex gap-4 pt-4">
+                                  <div className="flex flex-col sm:flex-row gap-4 pt-4">
                                     <button
                                       type="submit"
-                                      className="flex-1 bg-[#B6FF60] border-2 border-black p-3 font-black uppercase text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
+                                      className="flex-1 bg-[#B6FF60] border-2 border-black p-3 font-black uppercase text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all w-full"
                                     >
                                       Save Changes
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() => setIsEditModalOpen(false)}
-                                      className="flex-1 bg-white  border-2 border-black p-3 font-black uppercase text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
+                                      className="flex-1 bg-white border-2 border-black p-3 font-black uppercase text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all w-full"
                                     >
                                       Cancel
                                     </button>
@@ -694,8 +694,8 @@ const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
           <div className="bg-[#F5F5F0] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="bg-black text-[#B6FF60] p-4 flex justify-between items-center sticky top-0 z-10 transition-colors">
-              <h2 className="font-black uppercase tracking-tighter flex items-center gap-2">
-                <Award size={20} /> Assign_Winners
+              <h2 className="font-black uppercase tracking-tighter flex items-center gap-2 text-sm md:text-base">
+                                <Award size={20} className="shrink-0" /> Assign_Winners
               </h2>
               <button onClick={() => setIsResultsModalOpen(false)} className="hover:text-red-400">
                 <X size={24} />
@@ -732,11 +732,11 @@ const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
                 </div>
               ))}
 
-              <div className="flex gap-4 pt-4 mt-6">
-                <button type="submit" className="flex-1 bg-black text-[#B6FF60] border-2 border-black p-3 font-black uppercase text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
+              <div className="flex flex-col sm:flex-row gap-4 pt-4 mt-6">
+                <button type="submit" className="flex-1 bg-black text-[#B6FF60] border-2 border-black p-3 font-black uppercase text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all w-full">
                   Confirm & Complete
                 </button>
-                <button type="button" onClick={() => setIsResultsModalOpen(false)} className="flex-1 bg-white border-2 border-black p-3 font-black uppercase text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
+                <button type="button" onClick={() => setIsResultsModalOpen(false)} className="flex-1 bg-white border-2 border-black p-3 font-black uppercase text-sm shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all w-full">
                   Cancel
                 </button>
               </div>
@@ -763,16 +763,16 @@ const totalPages = Math.ceil(filteredEvents.length / itemsPerPage);
               this action cannot be undone. proceed?
             </p>
 
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
               <button 
                 onClick={() => handleDelete(deleteTarget._id)}
-                className="flex-1 bg-red-500 text-white border-2 border-black p-3 font-black uppercase text-xs shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
+                className="flex-1 bg-red-500 text-white border-2 border-black p-3 font-black uppercase text-xs shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all w-full"
               >
                 Confirm_Delete
               </button>
               <button 
                 onClick={() => setDeleteTarget(null)}
-                className="flex-1 bg-white border-2 border-black p-3 font-black uppercase text-xs shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-100 transition-all"
+                className="flex-1 bg-white border-2 border-black p-3 font-black uppercase text-xs shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-100 transition-all w-full"
               >
                 Cancel
               </button>
