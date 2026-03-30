@@ -290,11 +290,22 @@
    =========================== */
 .bottom-section {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  grid-template-columns: 1fr;
+  gap: 16px;
   margin-bottom: 32px;
 }
 
+@media (min-width: 768px) {
+  .bottom-section {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .bottom-section {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
 .panel {
   border: 3px solid #000;
   box-shadow: 6px 6px 0px #000;
