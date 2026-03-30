@@ -254,7 +254,7 @@ const SendNotification = () => {
       <div className="border-4 border-black inline-flex bg-white shadow-[4px_4px_0px_#000] mb-6">
         <button
           onClick={() => setActiveTab("in-app")}
-          className={`px-6 py-3 flex items-center gap-2 border-r-4 border-black text-xs font-bold transition-all ${
+          className={`px-3 sm:px-6 py-2 sm:py-3 text-[10px] sm:text-xsflex items-center gap-2 border-r-4 border-black text-xs font-bold transition-all ${
             activeTab === "in-app" ? "bg-[#B6FF60]" : "hover:bg-gray-100"
           }`}
         >
@@ -262,7 +262,7 @@ const SendNotification = () => {
         </button>
         <button
           onClick={() => setActiveTab("email")}
-          className={`px-6 py-3 flex items-center gap-2 text-xs font-bold transition-all ${
+          className={`px-3 sm:px-6 py-2 sm:py-3 text-[10px] sm:text-xs flex items-center gap-2 text-xs font-bold transition-all ${
             activeTab === "email" ? "bg-black text-[#B6FF60]" : "hover:bg-gray-100"
           }`}
         >
