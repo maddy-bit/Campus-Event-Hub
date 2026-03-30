@@ -114,7 +114,7 @@ const NotifCard = ({ n, onMarkRead, markingId }) => {
             <button
               onClick={() => onMarkRead(n._id)}
               disabled={markingId === n._id}
-              className="flex items-center gap-1.5 border-2 border-black px-3 py-1.5 text-[9px] font-black uppercase bg-white hover:bg-black hover:text-white shadow-[2px_2px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
+              className="flex items-center gap-1.5 border-2 border-black px-2 sm:px-3 py-1 sm:py-1.5 text-[8px] sm:text-[9px] font-black uppercase bg-white hover:bg-black hover:text-white shadow-[2px_2px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
             >
               {markingId === n._id ? (
                 <Loader2 size={11} className="animate-spin" />
