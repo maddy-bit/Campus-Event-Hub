@@ -4,11 +4,23 @@
 
 /* Main Container */
 .dashboard-container {
-  padding: 30px 40px;
+  padding: 16px;
   background-color: #e9e9e9;
   min-height: 100vh;
   font-family: "Arial Black", Arial, sans-serif;
   position: relative;
+}
+
+@media (min-width: 640px) {
+  .dashboard-container {
+    padding: 20px;
+  }
+}
+
+@media (min-width: 768px) {
+  .dashboard-container {
+    padding: 24px;
+  }
 }
 
 /* Subtle grid pattern overlay on the page */
@@ -71,11 +83,19 @@
    =========================== */
 .db-header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  flex-direction: column;
+  gap: 12px;
   margin-bottom: 32px;
   padding-bottom: 20px;
   border-bottom: 3px solid #000;
+}
+
+@media (min-width: 640px) {
+  .db-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
 }
 
 .db-header-tag {
@@ -153,13 +173,19 @@
    =========================== */
 .stats-row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
   margin-bottom: 32px;
 }
 
+@media (min-width: 768px) {
+  .stats-row {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
 .card {
-  padding: 0;
+  padding: 12px;
   border: 3px solid #000;
   box-shadow: 6px 6px 0px #000;
   background-color: #fff;
@@ -264,11 +290,22 @@
    =========================== */
 .bottom-section {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  grid-template-columns: 1fr;
+  gap: 16px;
   margin-bottom: 32px;
 }
 
+@media (min-width: 768px) {
+  .bottom-section {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .bottom-section {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
 .panel {
   border: 3px solid #000;
   box-shadow: 6px 6px 0px #000;
@@ -594,8 +631,20 @@
 
 .db-recent-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .db-recent-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .db-recent-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .db-recent-card {
@@ -730,7 +779,7 @@
 
 @media (max-width: 600px) {
   .dashboard-container {
-    padding: 20px;
+    padding: 16px;
   }
 
   .stats-row {
@@ -742,6 +791,6 @@
   }
 
   .db-title {
-    font-size: 28px;
+    font-size: 24px;
   }
 }

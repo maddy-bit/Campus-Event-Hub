@@ -97,7 +97,7 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="dashboard-container">
+      <div className="dashboard-container px-3 sm:px-5 md:px-8">
         <div className="db-loading-state">
           <div className="db-loading-spinner"></div>
           <p>SYNCING_DASHBOARD...</p>
@@ -107,7 +107,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-container px-3 sm:px-5 md:px-8">
       {/* ── HEADER ── */}
       <div className="db-header">
         <div className="db-header-left">

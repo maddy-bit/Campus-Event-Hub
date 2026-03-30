@@ -6,9 +6,9 @@ import { toast } from "sonner";
 // --- Sub-Components ---
 
 const Stat = ({ label, value, sub, color }) => (
-  <div className={`${color} p-6 border-r-[3px] border-black last:border-r-0`}>
+  <div className={`${color} p-3 sm:p-4 md:p-6 border-r-[3px] border-black last:border-r-0`}>
     <p className="text-[10px] font-black mb-1 opacity-80">{label}</p>
-    <h2 className="text-5xl font-black tracking-tighter">{value}</h2>
+    <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter">{value}</h2>
     <p className="text-[9px] font-bold mt-1 opacity-50">{sub}</p>
   </div>
 );
@@ -144,7 +144,7 @@ const ViewParticipants = () => {
 
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div className="bg-white border-[4px] border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] w-full max-w-lg overflow-hidden animate-in zoom-in duration-200">
+        <div className="bg-white border-[4px] border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] w-full max-w-[95%] sm:max-w-lg overflow-hidden animate-in zoom-in duration-200">
           <div className="bg-black text-white p-4 flex justify-between items-center">
             <span className="font-black">{modalType === 'email' ? 'SEND EMAIL' : 'PARTICIPANT DETAILS'}</span>
             <button onClick={closeModals} className="hover:text-red-400"><X size={20} /></button>
@@ -200,7 +200,7 @@ const ViewParticipants = () => {
   };
 
   return (
-    <div className="bg-[#F3F3F3] min-h-screen p-6 font-mono text-[11px] uppercase tracking-wider relative">
+    <div className="bg-[#F3F3F3] min-h-screen p-3 sm:p-4 md:p-6 font-mono text-[10px] sm:text-[11px] uppercase tracking-wider relative">
       
       {/* LOADING STATE */}
       {eventsLoading ? (
@@ -233,7 +233,7 @@ const ViewParticipants = () => {
         <>
           {/* EVENT SELECTOR */}
           <div className="mb-8">
-            <div className="relative w-full max-w-md mb-4">
+            <div className="relative w-full max-w-full sm:max-w-md mb-4">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input 
                 type="text" 
@@ -243,7 +243,7 @@ const ViewParticipants = () => {
                 className="pl-10 pr-4 py-3 border-[3px] border-black w-full focus:outline-none bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" 
               />
             </div>
-            <div className="flex gap-3 flex-wrap">
+            <div className="flex gap-2 sm:gap-3 flex-wrap">
               {displayedEvents.map((event) => (
                 <button 
                   key={event._id} 
@@ -263,14 +263,14 @@ const ViewParticipants = () => {
           {/* DASHBOARD CONTENT */}
           {selectedEvent && (
             <div className="border-[3px] border-black bg-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
-              <div className="p-8 border-b-[3px] border-black bg-black text-white flex justify-between items-end">
+              <div className="p-4 sm:p-6 md:p-8 border-b-[3px] border-black bg-black text-white flex flex-col sm:flex-row gap-2 sm:gap-0 justify-between items-start sm:items-end">
                 <div>
                   <p className="text-[#B4F481] text-[10px] mb-1 font-bold">ADMIN PANEL</p>
-                  <h1 className="text-4xl font-black tracking-tighter">{selectedEvent.title}</h1>
+                  <h1 className="text-xl sm:text-2xl md:text-4xl font-black tracking-tighter break-words">{selectedEvent.title}</h1>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 border-b-[3px] border-black">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 border-b-[3px] border-black">
                 <Stat label="REGISTRATIONS" value={stats.total} sub={`of ${selectedEvent.maxSeats}`} color="bg-[#B4F481]" />
                 <Stat label="SEATS LEFT" value={stats.remaining} sub="capacity" color="bg-white" />
                 {selectedEvent?.isPaidEvent ? (
@@ -324,8 +324,8 @@ const ViewParticipants = () => {
                   </p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse text-left">
+                <div className="overflow-x-auto w-full">
+                  <table className="w-full border-collapse text-left text-[10px] sm:text-[11px]">
                     <thead>
                       <tr className="bg-white border-b-[3px] border-black">
                         <th className="p-4 border-r-[2px] border-black w-12">#</th>
@@ -363,7 +363,7 @@ const ViewParticipants = () => {
                             <td className="p-4 border-r-[2px] border-black">{p.userId?.phoneNumber || "NOT PROVIDED"}</td>
                           )}
                           <td className="p-4">
-                            <div className="flex gap-2">
+                            <div className="flex gap-1 sm:gap-2">
                               <button 
                                 onClick={() => { setActiveParticipant(p); setModalType('email'); }} 
                                 className="p-1.5 border-2 border-black hover:bg-black hover:text-white transition-colors"

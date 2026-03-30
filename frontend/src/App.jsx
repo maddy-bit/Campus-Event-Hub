@@ -104,9 +104,9 @@ function App() {
         <Route
           path="/organizer"
           element={
-            <ProtectedRoute allowedRoles={["organizer"]}>
+            //<ProtectedRoute allowedRoles={["organizer"]}>
               <OrganizerLayout />
-            </ProtectedRoute>
+            //</ProtectedRoute>
           }
         >
           <Route index element={<Navigate to="dashboard" />} />

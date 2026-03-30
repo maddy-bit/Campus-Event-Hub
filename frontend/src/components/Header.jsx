@@ -58,7 +58,7 @@ const Header = ({ onMenuClick, hideMenu, title, variant }) => {
  
   return (
     <div
-      className="neo-header"
+      className="neo-header px-3 sm:px-5 py-2 sm:py-3 flex items-center justify-between"
       style={isNewLayout ? { background: "#faf9f4", borderBottom: "3px solid rgba(0,0,0,0.1)" } : undefined}
     >
  

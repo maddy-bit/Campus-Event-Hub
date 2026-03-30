@@ -64,7 +64,7 @@ const DeleteDialog = ({ isOpen, onClose, onConfirm, title, deleting }) => {
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
-        className="relative bg-white border-4 border-black shadow-[8px_8px_0px_#000] w-full max-w-sm p-6"
+        className="relative bg-white border-4 border-black shadow-[8px_8px_0px_#000] w-full max-w-[90%] sm:max-w-sm p-4 sm:p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 mb-4">
@@ -214,7 +214,7 @@ const SendNotification = () => {
   const totalReach = sentHistory.reduce((sum, n) => sum + (n.reachCount || 0), 0);
 
   return (
-    <div className="min-h-screen font-mono text-black uppercase">
+    <div className="min-h-screen px-3 sm:px-5 md:px-8 font-mono text-black uppercase">
       {/* Delete Dialog */}
       <DeleteDialog
         isOpen={deleteDialog.open}
@@ -227,11 +227,11 @@ const SendNotification = () => {
       {/* ── Page Header ── */}
       <div className="mb-6">
         <p className="text-[10px] text-gray-500 font-bold mb-1">ORGANIZER // NOTIFICATIONS</p>
-        <h1 className="text-3xl md:text-5xl font-black tracking-tighter leading-none">SEND_NOTIFICATION</h1>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tighter leading-tight">SEND_NOTIFICATION</h1>
       </div>
 
       {/* ── Stats Row ── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-6">
         <div className="bg-white border-3 border-black p-4 shadow-[4px_4px_0px_#000]">
           <p className="text-2xl font-black">{String(totalSent).padStart(2, "0")}</p>
           <p className="text-[9px] font-bold text-gray-500">TOTAL SENT</p>
@@ -254,7 +254,7 @@ const SendNotification = () => {
       <div className="border-4 border-black inline-flex bg-white shadow-[4px_4px_0px_#000] mb-6">
         <button
           onClick={() => setActiveTab("in-app")}
-          className={`px-6 py-3 flex items-center gap-2 border-r-4 border-black text-xs font-bold transition-all ${
+          className={`px-3 sm:px-6 py-2 sm:py-3 text-[10px] sm:text-xs flex items-center gap-2 border-r-4 border-black text-xs font-bold transition-all ${
             activeTab === "in-app" ? "bg-[#B6FF60]" : "hover:bg-gray-100"
           }`}
         >
@@ -262,7 +262,7 @@ const SendNotification = () => {
         </button>
         <button
           onClick={() => setActiveTab("email")}
-          className={`px-6 py-3 flex items-center gap-2 text-xs font-bold transition-all ${
+          className={`px-3 sm:px-6 py-2 sm:py-3 text-[10px] sm:text-xs flex items-center gap-2 text-xs font-bold transition-all ${
             activeTab === "email" ? "bg-black text-[#B6FF60]" : "hover:bg-gray-100"
           }`}
         >
@@ -271,12 +271,12 @@ const SendNotification = () => {
       </div>
 
       {/* ── Main Grid ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
 
         {/* ── LEFT: Compose Form ── */}
-        <div className="lg:col-span-2">
+        <div className="md:col-span-2 lg:col-span-2">
           <div className="bg-white border-4 border-black shadow-[6px_6px_0px_#000] overflow-hidden">
-            <div className="bg-black text-white px-5 py-3 flex items-center justify-between">
+            <div className="bg-black text-white px-3 sm:px-5 py-2 sm:py-3 flex items-center justify-between">
               <span className="font-black text-sm flex items-center gap-2">
                 {activeTab === "email" ? <Mail size={16} /> : <Bell size={16} />}
                 COMPOSE_{activeTab === "email" ? "EMAIL" : "MESSAGE"}
@@ -286,7 +286,7 @@ const SendNotification = () => {
               </span>
             </div>
 
-            <div className="p-5 space-y-5">
+            <div className="p-3 sm:p-5 space-y-4 sm:space-y-5">
 
               {/* Event Selector */}
               <div>
@@ -360,7 +360,7 @@ const SendNotification = () => {
                   value={form.title}
                   onChange={handleChange}
                   placeholder="e.g. Venue Change — Main Hall"
-                  className="w-full border-3 border-black p-3 font-bold text-sm focus:outline-none"
+                  className="w-full border-3 border-black p-2 sm:p-3 font-bold text-xs sm:text-sm resize-none focus:outline-none"
                   maxLength={100}
                 />
               </div>
@@ -376,14 +376,14 @@ const SendNotification = () => {
                   onChange={handleChange}
                   rows={5}
                   placeholder="Write your message. Be clear and concise..."
-                  className="w-full border-3 border-black p-3 font-bold text-sm resize-none focus:outline-none normal-case"
+                  className="w-full border-3 border-black p-2 sm:p-3 font-bold text-xs sm:text-sm resize-none resize-none focus:outline-none normal-case"
                   maxLength={1000}
                 />
                 <p className="text-[9px] font-bold text-gray-400 mt-1">{form.message.length}/1000</p>
               </div>
 
               {/* Actions */}
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-3">
                 <button
                   onClick={handleSend}
                   disabled={sending}
@@ -403,7 +403,7 @@ const SendNotification = () => {
 
             {/* Preview */}
             {form.title && (
-              <div className="border-t-4 border-black p-5 bg-gray-50">
+              <div className="border-t-4 border-black p-3 sm:p-5 bg-gray-50">
                 <p className="text-[9px] font-black text-gray-400 mb-3 flex items-center gap-2">
                   <Info size={10} /> LIVE PREVIEW — {activeTab === "email" ? "EMAIL" : "IN-APP NOTIFICATION"}
                 </p>
@@ -428,16 +428,16 @@ const SendNotification = () => {
         </div>
 
         {/* ── RIGHT: Sent History ── */}
-        <div className="lg:col-span-3">
+        <div className="md:col-span-2 lg:col-span-3">
           <div className="bg-white border-4 border-black shadow-[6px_6px_0px_#000] overflow-hidden">
-            <div className="bg-black text-white px-5 py-3 flex items-center justify-between">
+            <div className="bg-black text-white px-3 sm:px-5 py-2 sm:py-3 flex items-center justify-between">
               <span className="font-black text-sm">SENT_HISTORY</span>
               <span className="text-[8px] font-bold text-gray-400">
                 {filteredHistory.length} {activeTab === "email" ? "EMAILS" : "NOTIFICATIONS"}
               </span>
             </div>
 
-            <div className="divide-y-2 divide-black max-h-[650px] overflow-y-auto">
+            <div className="divide-y-2 divide-black max-h-[400px] sm:max-h-[500px] md:max-h-[650px] overflow-y-auto">
               {loading ? (
                 <div className="flex items-center justify-center py-16">
                   <Loader2 size={30} className="animate-spin text-gray-400" />
@@ -450,7 +450,7 @@ const SendNotification = () => {
                 </div>
               ) : (
                 filteredHistory.map((n) => (
-                  <div key={n._id} className="p-5 hover:bg-gray-50 transition-all group/item">
+                  <div key={n._id} className="p-4 sm:p-5 hover:bg-gray-50 transition-all group/item">
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex items-center gap-2 min-w-0">
                         <span className={`px-2 py-0.5 border-2 border-black text-[8px] font-black shrink-0 ${TAG_COLORS[n.type] || "bg-gray-100"}`}>

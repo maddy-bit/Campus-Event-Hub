@@ -56,10 +56,10 @@ const NotifCard = ({ n, onMarkRead, markingId }) => {
     >
       <div className={`h-1.5 ${config.color}`} />
 
-      <div className="p-5">
+      <div className="p-3 sm:p-4 md:p-5">
         <div className="flex justify-between items-start gap-3 mb-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className={`w-9 h-9 ${config.color} border-2 border-black flex items-center justify-center shrink-0 shadow-[2px_2px_0px_#000]`}>
+            <div className={`w-8 h-8 sm:w-9 sm:h-9 ${config.color} border-2 border-black flex items-center justify-center shrink-0 shadow-[2px_2px_0px_#000]`}>
               <Icon size={16} />
             </div>
             <div className="min-w-0">
@@ -90,7 +90,7 @@ const NotifCard = ({ n, onMarkRead, markingId }) => {
           {n.title}
         </h4>
 
-        <p className="text-[12px] font-bold text-gray-500 leading-relaxed normal-case mb-4">
+        <p className="text-[11px] sm:text-[12px] font-bold text-gray-500 leading-relaxed normal-case mb-4">
           {n.message}
         </p>
 
@@ -114,7 +114,7 @@ const NotifCard = ({ n, onMarkRead, markingId }) => {
             <button
               onClick={() => onMarkRead(n._id)}
               disabled={markingId === n._id}
-              className="flex items-center gap-1.5 border-2 border-black px-3 py-1.5 text-[9px] font-black uppercase bg-white hover:bg-black hover:text-white shadow-[2px_2px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
+              className="flex items-center gap-1.5 border-2 border-black px-2 sm:px-3 py-1 sm:py-1.5 text-[8px] sm:text-[9px] font-black uppercase bg-white hover:bg-black hover:text-white shadow-[2px_2px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
             >
               {markingId === n._id ? (
                 <Loader2 size={11} className="animate-spin" />
@@ -201,8 +201,8 @@ const OrganizerNotification = () => {
   const filters = ["All", "Unread", "Submission_Update", "Announcement", "Alert", "Update", "Reminder"];
 
   return (
-    <div className="min-h-screen font-mono text-black uppercase">
-      <div className="max-w-3xl mx-auto">
+    <div className="min-h-screen px-3 sm:px-5 md:px-8 font-mono text-black uppercase">
+      <div className="max-w-3xl md:max-w-4xl lg:max-w-5xl mx-auto">
 
         <header className="mb-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-5">
@@ -210,7 +210,7 @@ const OrganizerNotification = () => {
               <p className="text-[10px] font-bold text-gray-400 mb-1 flex items-center gap-1.5">
                 <Sparkles size={10} /> ORGANIZER // NOTIFICATIONS
               </p>
-              <h1 className="text-4xl md:text-5xl font-black tracking-tighter leading-none">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tighter leading-tight">
                 INBOX_FEED
               </h1>
             </div>
@@ -234,12 +234,12 @@ const OrganizerNotification = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b-4 border-black pb-4">
-            <div className="flex gap-1.5 flex-wrap">
+            <div className="flex gap-1 sm:gap-1.5 flex-wrap">
               {filters.map((f) => (
                 <button
                   key={f}
                   onClick={() => setFilter(f)}
-                  className={`px-3 py-1.5 font-black text-[9px] border-2 border-black transition-all ${
+                  className={`px-2 sm:px-3 py-1 sm:py-1.5 font-black text-[8px] sm:text-[9px] border-2 border-black transition-all ${
                     filter === f
                       ? "bg-black text-[#B6FF60]"
                       : "bg-white shadow-[2px_2px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px]"
@@ -256,7 +256,7 @@ const OrganizerNotification = () => {
             <button
               onClick={handleMarkAllRead}
               disabled={markingAll || unreadCount === 0}
-              className="flex items-center gap-1.5 border-2 border-black px-4 py-1.5 text-[9px] font-black bg-white hover:bg-black hover:text-white shadow-[2px_2px_0px_#000] transition-all disabled:opacity-30 disabled:cursor-not-allowed active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+              className="flex items-center gap-1.5 border-2 border-black px-2 sm:px-4 py-1 sm:py-1.5 text-[8px] sm:text-[9px] font-black bg-white hover:bg-black hover:text-white shadow-[2px_2px_0px_#000] transition-all disabled:opacity-30 disabled:cursor-not-allowed active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
             >
               {markingAll ? <Loader2 size={11} className="animate-spin" /> : <CheckCircle size={11} />}
               Mark All Read
@@ -270,7 +270,7 @@ const OrganizerNotification = () => {
             <p className="text-sm font-bold text-gray-400">LOADING NOTIFICATIONS...</p>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="border-4 border-dashed border-black bg-white p-16 text-center shadow-[4px_4px_0px_rgba(0,0,0,0.05)]">
+          <div className="border-4 border-dashed border-black bg-white p-6 sm:p-10 md:p-16 text-center shadow-[4px_4px_0px_rgba(0,0,0,0.05)]">
             <Frown className="mx-auto mb-4 text-gray-300" size={52} />
             <p className="text-base font-black text-gray-500 mb-1">
               {filter === "All" ? "NO NOTIFICATIONS YET" : `NO ${filter.replace("_", " ").toUpperCase()} NOTIFICATIONS`}
@@ -316,7 +316,7 @@ const OrganizerNotification = () => {
           </>
         )}
 
-        <footer className="bg-black py-3 px-5 text-center mt-10">
+        <footer className="bg-black py-3 px-3 sm:px-5 text-center mt-10">
           <p className="text-[9px] text-gray-500 font-bold">
             FEED_ACTIVE // {notifications.length} RECORDS // {unreadCount} UNREAD // AUTO-CLEAR: 24H AFTER READ
           </p>
