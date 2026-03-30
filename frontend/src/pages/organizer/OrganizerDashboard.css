@@ -779,7 +779,7 @@
 
 @media (max-width: 600px) {
   .dashboard-container {
-    padding: 20px;
+    padding: 16px;
   }
 
   .stats-row {
@@ -791,6 +791,6 @@
   }
 
   .db-title {
-    font-size: 28px;
+    font-size: 24px;
   }
 }
