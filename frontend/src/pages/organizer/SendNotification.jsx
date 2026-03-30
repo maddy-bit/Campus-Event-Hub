@@ -403,7 +403,7 @@ const SendNotification = () => {
 
             {/* Preview */}
             {form.title && (
-              <div className="border-t-4 border-black p-5 bg-gray-50">
+              <div className="border-t-4 border-black p-3 sm:p-5 bg-gray-50">
                 <p className="text-[9px] font-black text-gray-400 mb-3 flex items-center gap-2">
                   <Info size={10} /> LIVE PREVIEW — {activeTab === "email" ? "EMAIL" : "IN-APP NOTIFICATION"}
                 </p>
@@ -437,7 +437,7 @@ const SendNotification = () => {
               </span>
             </div>
 
-            <div className="divide-y-2 divide-black max-h-[650px] overflow-y-auto">
+            <div className="divide-y-2 divide-black max-h-[400px] sm:max-h-[500px] md:max-h-[650px] overflow-y-auto">
               {loading ? (
                 <div className="flex items-center justify-center py-16">
                   <Loader2 size={30} className="animate-spin text-gray-400" />
@@ -450,7 +450,7 @@ const SendNotification = () => {
                 </div>
               ) : (
                 filteredHistory.map((n) => (
-                  <div key={n._id} className="p-5 hover:bg-gray-50 transition-all group/item">
+                  <div key={n._id} className="p-4 sm:p-5 hover:bg-gray-50 transition-all group/item">
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex items-center gap-2 min-w-0">
                         <span className={`px-2 py-0.5 border-2 border-black text-[8px] font-black shrink-0 ${TAG_COLORS[n.type] || "bg-gray-100"}`}>
