@@ -144,7 +144,7 @@ const ViewParticipants = () => {
 
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div className="bg-white border-[4px] border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] w-full max-w-lg overflow-hidden animate-in zoom-in duration-200">
+        <div className="bg-white border-[4px] border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] w-full max-w-[95%] sm:max-w-lg overflow-hidden animate-in zoom-in duration-200">
           <div className="bg-black text-white p-4 flex justify-between items-center">
             <span className="font-black">{modalType === 'email' ? 'SEND EMAIL' : 'PARTICIPANT DETAILS'}</span>
             <button onClick={closeModals} className="hover:text-red-400"><X size={20} /></button>
