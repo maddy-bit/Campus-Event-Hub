@@ -276,7 +276,7 @@ const SendNotification = () => {
         {/* ── LEFT: Compose Form ── */}
         <div className="md:col-span-2 lg:col-span-2">
           <div className="bg-white border-4 border-black shadow-[6px_6px_0px_#000] overflow-hidden">
-            <div className="bg-black text-white px-5 py-3 flex items-center justify-between">
+            <div className="bg-black text-white px-3 sm:px-5 py-2 sm:py-3 flex items-center justify-between">
               <span className="font-black text-sm flex items-center gap-2">
                 {activeTab === "email" ? <Mail size={16} /> : <Bell size={16} />}
                 COMPOSE_{activeTab === "email" ? "EMAIL" : "MESSAGE"}
@@ -430,7 +430,7 @@ const SendNotification = () => {
         {/* ── RIGHT: Sent History ── */}
         <div className="md:col-span-2 lg:col-span-3">
           <div className="bg-white border-4 border-black shadow-[6px_6px_0px_#000] overflow-hidden">
-            <div className="bg-black text-white px-5 py-3 flex items-center justify-between">
+            <div className="bg-black text-white px-3 sm:px-5 py-2 sm:py-3 flex items-center justify-between">
               <span className="font-black text-sm">SENT_HISTORY</span>
               <span className="text-[8px] font-bold text-gray-400">
                 {filteredHistory.length} {activeTab === "email" ? "EMAILS" : "NOTIFICATIONS"}
