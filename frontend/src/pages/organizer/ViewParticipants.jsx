@@ -243,7 +243,7 @@ const ViewParticipants = () => {
                 className="pl-10 pr-4 py-3 border-[3px] border-black w-full focus:outline-none bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]" 
               />
             </div>
-            <div className="flex gap-3 flex-wrap">
+            <div className="flex gap-2 sm:gap-3 flex-wrap">
               {displayedEvents.map((event) => (
                 <button 
                   key={event._id} 
