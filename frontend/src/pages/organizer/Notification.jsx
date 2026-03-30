@@ -90,7 +90,7 @@ const NotifCard = ({ n, onMarkRead, markingId }) => {
           {n.title}
         </h4>
 
-        <p className="text-[12px] font-bold text-gray-500 leading-relaxed normal-case mb-4">
+        <p className="text-[11px] sm:text-[12px] font-bold text-gray-500 leading-relaxed normal-case mb-4">
           {n.message}
         </p>
 
