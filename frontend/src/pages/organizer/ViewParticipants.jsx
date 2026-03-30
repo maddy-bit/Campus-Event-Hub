@@ -325,7 +325,7 @@ const ViewParticipants = () => {
                 </div>
               ) : (
                 <div className="overflow-x-auto w-full">
-                  <table className="w-full border-collapse text-left">
+                  <table className="w-full border-collapse text-left text-[10px] sm:text-[11px]">
                     <thead>
                       <tr className="bg-white border-b-[3px] border-black">
                         <th className="p-4 border-r-[2px] border-black w-12">#</th>
