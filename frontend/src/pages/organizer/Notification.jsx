@@ -239,7 +239,7 @@ const OrganizerNotification = () => {
                 <button
                   key={f}
                   onClick={() => setFilter(f)}
-                  className={`px-3 py-1.5 font-black text-[9px] border-2 border-black transition-all ${
+                  className={`px-2 sm:px-3 py-1 sm:py-1.5 font-black text-[8px] sm:text-[9px] border-2 border-black transition-all ${
                     filter === f
                       ? "bg-black text-[#B6FF60]"
                       : "bg-white shadow-[2px_2px_0px_#000] hover:translate-x-[-1px] hover:translate-y-[-1px]"
