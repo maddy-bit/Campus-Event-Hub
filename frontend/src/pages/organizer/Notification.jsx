@@ -56,7 +56,7 @@ const NotifCard = ({ n, onMarkRead, markingId }) => {
     >
       <div className={`h-1.5 ${config.color}`} />
 
-      <div className="p-5">
+      <div className="p-3 sm:p-4 md:p-5">
         <div className="flex justify-between items-start gap-3 mb-3">
           <div className="flex items-center gap-3 min-w-0">
             <div className={`w-9 h-9 ${config.color} border-2 border-black flex items-center justify-center shrink-0 shadow-[2px_2px_0px_#000]`}>
