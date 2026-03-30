@@ -214,7 +214,7 @@ const SendNotification = () => {
   const totalReach = sentHistory.reduce((sum, n) => sum + (n.reachCount || 0), 0);
 
   return (
-    <div className="min-h-screen font-mono text-black uppercase">
+    <div className="min-h-screen px-3 sm:px-5 md:px-8 font-mono text-black uppercase">
       {/* Delete Dialog */}
       <DeleteDialog
         isOpen={deleteDialog.open}
@@ -227,11 +227,11 @@ const SendNotification = () => {
       {/* ── Page Header ── */}
       <div className="mb-6">
         <p className="text-[10px] text-gray-500 font-bold mb-1">ORGANIZER // NOTIFICATIONS</p>
-        <h1 className="text-3xl md:text-5xl font-black tracking-tighter leading-none">SEND_NOTIFICATION</h1>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tighter leading-tight">SEND_NOTIFICATION</h1>
       </div>
 
       {/* ── Stats Row ── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-6">
         <div className="bg-white border-3 border-black p-4 shadow-[4px_4px_0px_#000]">
           <p className="text-2xl font-black">{String(totalSent).padStart(2, "0")}</p>
           <p className="text-[9px] font-bold text-gray-500">TOTAL SENT</p>
@@ -271,10 +271,10 @@ const SendNotification = () => {
       </div>
 
       {/* ── Main Grid ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
 
         {/* ── LEFT: Compose Form ── */}
-        <div className="lg:col-span-2">
+        <div className="md:col-span-2 lg:col-span-2">
           <div className="bg-white border-4 border-black shadow-[6px_6px_0px_#000] overflow-hidden">
             <div className="bg-black text-white px-5 py-3 flex items-center justify-between">
               <span className="font-black text-sm flex items-center gap-2">
@@ -286,7 +286,7 @@ const SendNotification = () => {
               </span>
             </div>
 
-            <div className="p-5 space-y-5">
+            <div className="p-3 sm:p-5 space-y-4 sm:space-y-5">
 
               {/* Event Selector */}
               <div>
@@ -428,7 +428,7 @@ const SendNotification = () => {
         </div>
 
         {/* ── RIGHT: Sent History ── */}
-        <div className="lg:col-span-3">
+        <div className="md:col-span-2 lg:col-span-3">
           <div className="bg-white border-4 border-black shadow-[6px_6px_0px_#000] overflow-hidden">
             <div className="bg-black text-white px-5 py-3 flex items-center justify-between">
               <span className="font-black text-sm">SENT_HISTORY</span>
