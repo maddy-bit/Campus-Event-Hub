@@ -233,7 +233,7 @@ const ViewParticipants = () => {
         <>
           {/* EVENT SELECTOR */}
           <div className="mb-8">
-            <div className="relative w-full max-w-md mb-4">
+            <div className="relative w-full max-w-full sm:max-w-md mb-4">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input 
                 type="text" 
