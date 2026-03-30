@@ -360,7 +360,7 @@ const SendNotification = () => {
                   value={form.title}
                   onChange={handleChange}
                   placeholder="e.g. Venue Change — Main Hall"
-                  className="w-full border-3 border-black p-3 font-bold text-sm focus:outline-none"
+                  className="w-full border-3 border-black p-2 sm:p-3 font-bold text-xs sm:text-sm resize-none focus:outline-none"
                   maxLength={100}
                 />
               </div>
@@ -376,7 +376,7 @@ const SendNotification = () => {
                   onChange={handleChange}
                   rows={5}
                   placeholder="Write your message. Be clear and concise..."
-                  className="w-full border-3 border-black p-3 font-bold text-sm resize-none focus:outline-none normal-case"
+                  className="w-full border-3 border-black p-2 sm:p-3 font-bold text-xs sm:text-sm resize-none resize-none focus:outline-none normal-case"
                   maxLength={1000}
                 />
                 <p className="text-[9px] font-bold text-gray-400 mt-1">{form.message.length}/1000</p>
