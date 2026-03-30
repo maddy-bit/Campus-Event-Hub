@@ -631,8 +631,20 @@
 
 .db-recent-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 640px) {
+  .db-recent-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .db-recent-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .db-recent-card {
