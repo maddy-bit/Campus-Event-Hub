@@ -363,7 +363,7 @@ const ViewParticipants = () => {
                             <td className="p-4 border-r-[2px] border-black">{p.userId?.phoneNumber || "NOT PROVIDED"}</td>
                           )}
                           <td className="p-4">
-                            <div className="flex gap-2">
+                            <div className="flex gap-1 sm:gap-2">
                               <button 
                                 onClick={() => { setActiveParticipant(p); setModalType('email'); }} 
                                 className="p-1.5 border-2 border-black hover:bg-black hover:text-white transition-colors"
