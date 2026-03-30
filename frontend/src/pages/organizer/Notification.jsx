@@ -270,7 +270,7 @@ const OrganizerNotification = () => {
             <p className="text-sm font-bold text-gray-400">LOADING NOTIFICATIONS...</p>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="border-4 border-dashed border-black bg-white p-16 text-center shadow-[4px_4px_0px_rgba(0,0,0,0.05)]">
+          <div className="border-4 border-dashed border-black bg-white p-6 sm:p-10 md:p-16 text-center shadow-[4px_4px_0px_rgba(0,0,0,0.05)]">
             <Frown className="mx-auto mb-4 text-gray-300" size={52} />
             <p className="text-base font-black text-gray-500 mb-1">
               {filter === "All" ? "NO NOTIFICATIONS YET" : `NO ${filter.replace("_", " ").toUpperCase()} NOTIFICATIONS`}
@@ -316,7 +316,7 @@ const OrganizerNotification = () => {
           </>
         )}
 
-        <footer className="bg-black py-3 px-5 text-center mt-10">
+        <footer className="bg-black py-3 px-3 sm:px-5 text-center mt-10">
           <p className="text-[9px] text-gray-500 font-bold">
             FEED_ACTIVE // {notifications.length} RECORDS // {unreadCount} UNREAD // AUTO-CLEAR: 24H AFTER READ
           </p>
