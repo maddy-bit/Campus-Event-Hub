@@ -234,7 +234,7 @@ const OrganizerNotification = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b-4 border-black pb-4">
-            <div className="flex gap-1.5 flex-wrap">
+            <div className="flex gap-1 sm:gap-1.5 flex-wrap">
               {filters.map((f) => (
                 <button
                   key={f}
