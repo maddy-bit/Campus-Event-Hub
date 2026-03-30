@@ -64,7 +64,7 @@ const DeleteDialog = ({ isOpen, onClose, onConfirm, title, deleting }) => {
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
-        className="relative bg-white border-4 border-black shadow-[8px_8px_0px_#000] w-full max-w-sm p-6"
+        className="relative bg-white border-4 border-black shadow-[8px_8px_0px_#000] w-full max-w-[90%] sm:max-w-sm p-4 sm:p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-3 mb-4">
