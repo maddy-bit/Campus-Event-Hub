@@ -6,9 +6,9 @@ import { toast } from "sonner";
 // --- Sub-Components ---
 
 const Stat = ({ label, value, sub, color }) => (
-  <div className={`${color} p-6 border-r-[3px] border-black last:border-r-0`}>
+  <div className={`${color} p-3 sm:p-4 md:p-6 border-r-[3px] border-black last:border-r-0`}>
     <p className="text-[10px] font-black mb-1 opacity-80">{label}</p>
-    <h2 className="text-5xl font-black tracking-tighter">{value}</h2>
+    <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tighter">{value}</h2>
     <p className="text-[9px] font-bold mt-1 opacity-50">{sub}</p>
   </div>
 );
@@ -200,7 +200,7 @@ const ViewParticipants = () => {
   };
 
   return (
-    <div className="bg-[#F3F3F3] min-h-screen p-6 font-mono text-[11px] uppercase tracking-wider relative">
+    <div className="bg-[#F3F3F3] min-h-screen p-3 sm:p-4 md:p-6 font-mono text-[10px] sm:text-[11px] uppercase tracking-wider relative">
       
       {/* LOADING STATE */}
       {eventsLoading ? (
@@ -263,14 +263,14 @@ const ViewParticipants = () => {
           {/* DASHBOARD CONTENT */}
           {selectedEvent && (
             <div className="border-[3px] border-black bg-white shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]">
-              <div className="p-8 border-b-[3px] border-black bg-black text-white flex justify-between items-end">
+              <div className="p-4 sm:p-6 md:p-8 border-b-[3px] border-black bg-black text-white flex flex-col sm:flex-row gap-2 sm:gap-0 justify-between items-start sm:items-end">
                 <div>
                   <p className="text-[#B4F481] text-[10px] mb-1 font-bold">ADMIN PANEL</p>
-                  <h1 className="text-4xl font-black tracking-tighter">{selectedEvent.title}</h1>
+                  <h1 className="text-xl sm:text-2xl md:text-4xl font-black tracking-tighter break-words">{selectedEvent.title}</h1>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 border-b-[3px] border-black">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 border-b-[3px] border-black">
                 <Stat label="REGISTRATIONS" value={stats.total} sub={`of ${selectedEvent.maxSeats}`} color="bg-[#B4F481]" />
                 <Stat label="SEATS LEFT" value={stats.remaining} sub="capacity" color="bg-white" />
                 {selectedEvent?.isPaidEvent ? (
